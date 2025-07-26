@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %} Basic | Home {% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        .active {
+            font-weight: bold;
+        }
+        *{
+          margin: 0px;
+          padding: 0px
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;900&display=swap');
+        
+        body {
+            font-family: "Rubik", sans-serif; /* Changed to sans-serif for Rubik */
+            font-optical-sizing: auto;
+            font-weight: 400; /* Corrected to a valid weight (300-900) */
+            font-style: normal;
+        }
+       
+          
+      </style>
+    
+</head>
+
+  
+  <body>
+    <nav class="navbar navbar-expand-sm  fixed-top text-center " style="background-color: black;">
+
+        <div class="container-fluid ">
+          <!-- Links -->
+          <a class="navbar-brand " href="{% url 'home1'%}" >
+            <img src="/images/ah.jpg" alt="Avatar Logo" style="width:120px; height: 40px;" class="rounded-pill">
+            <!-- <p style="color: white;">AH Season</p> -->
+             <!-- <img src="" alt="" width="50" height="50"> -->
+          </a>
+          <ul class="navbar-nav mx-auto mt-2">
+            
+            <li class="nav-item">
+              <a class="nav-link text-light{% if request.path == '/'%} active {% endif %} " href="{% url 'home1' %}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-light{% if request.path == '/shopping'%} active {% endif %} " href="{% url 'home' %}">Shopping</a>
+            </li>
+           
+            <li class="nav-item">
+              <a class="nav-link text-light {% if request.path == '/cart'%} active {% endif %} " href="{% url 'cart'%}">Cart
+                <span class="">{{request.session.cart.keys|length}}</span>
+              </a>
+            </li>
+            {% if request.session.customer_id %}
+           
+          
+            <li class="nav-item">
+              <a class="nav-link text-light {% if request.path == '/signout/'%} active {% endif %} " href="{% url 'signout'%}">logout</a>
+            </li>
+           
+            <li class="nav-item">
+              <a class="nav-link text-light {% if request.path == 'order'%} active {% endif %} " href="{% url 'order'%}">Order</a>
+            </li>
+           
+            {% else %}
+            
+            <li class="nav-item">
+              <a class="nav-link text-light {% if request.path == '/signup'%} active {% endif %} " href="{% url 'signup'%}">Signup</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-light {% if request.path == '/login'%} active {% endif %} " href="{% url 'login'%}">login</a>
+            </li>
+{% endif %}
+          </ul>
+        </div>
+         
+        <!-- <div class="dropdown" style="position: absolute; right: 40px; top: 10px;">
+          <button class="btn btn-dark dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Admin
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              {% if user.is_authenticated %}
+                  <li>
+                      <a class="dropdown-item{% if request.path == 'signout' %} active {% endif %}" href="{% url 'signout' %}">Logout</a>
+                  </li>
+                  <li>
+                      <hr class="dropdown-divider">
+                  </li> -->
+                  <!-- <li>
+                      <a class="dropdown-item" href="{% url 'home' %}">Shopping</a>
+                      <a class="dropdown-item" href="{% url 'addcat' %}">Add Category</a>
+                      <a class="dropdown-item" href="{% url 'listcat' %}">List of Category</a>
+                      <a class="dropdown-item" href="{% url 'addpro' %}">Add Product</a>
+                      <a class="dropdown-item" href="{% url 'listpro' %}">List of Product</a>
+                  </li>
+              {% else %}
+                  <li>
+                      <a class="dropdown-item" href="{% url 'login1' %}">Login</a>
+                  </li>
+              {% endif %}
+          </ul>
+      </div> -->
+      
+      </nav>
+
+
+{% block content%}
+
+{% endblock %}
+
+      
+    
+    
+<div class="container-fluid" style="background-color: black;">
+  <footer class="py-3 my-4 position-relative">
+      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 px-4">
+          <!-- Empty div to push center content -->
+          <div></div>  
+
+          <!-- Centered Navigation Links -->
+          <ul class="nav " style="margin-left: 90px;">
+              <li class="nav-item"><a href="#" class="nav-link px-2 text-light">Features</a></li>
+              <li class="nav-item"><a href="#" class="nav-link px-2 text-light">Pricing</a></li>
+              <li class="nav-item"><a href="#" class="nav-link px-2 text-light">FAQs</a></li>
+              <li class="nav-item"><a href="#" class="nav-link px-2 text-light">About</a></li>
+          </ul>
+
+          <!-- Admin Dropup on the Right -->
+          <div class="dropup">
+              <button class="btn btn-dark dropdown-toggle" type="button" id="dropupMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                  Admin
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropupMenuButton">
+                  {% if user.is_authenticated %}
+                      <li>
+                          <a class="dropdown-item{% if request.path == 'signout' %} active {% endif %}" href="{% url 'signout' %}">Logout</a>
+                      </li>
+                      <li>
+                          <hr class="dropdown-divider">
+                      </li>
+                      <li>
+                          <a class="dropdown-item" href="{% url 'home' %}">Shopping</a>
+                          <a class="dropdown-item" href="{% url 'addcat' %}">Add Category</a>
+                          <a class="dropdown-item" href="{% url 'listcat' %}">List of Category</a>
+                          <a class="dropdown-item" href="{% url 'addpro' %}">Add Product</a>
+                          <a class="dropdown-item" href="{% url 'listpro' %}">List of Product</a>
+                          <a class="dropdown-item" href="{% url 'finalorder' %}">List of Orders</a>
+                      </li>
+                  {% else %}
+                      <li>
+                          <a class="dropdown-item" href="{% url 'login1' %}">Login</a>
+                      </li>
+                  {% endif %}
+              </ul>
+          </div>
+      </div>
+
+      <p class="text-center text-light">© 2024 Company, Inc</p>
+  </footer>
+</div>
+
+  
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    </body>
+  </html>

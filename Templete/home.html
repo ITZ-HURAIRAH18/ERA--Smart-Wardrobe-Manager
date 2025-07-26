@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}
+Shopping page
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-image: url('/images/Af.jpg'); /* Update with the correct path */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+</style>
+
+{% load cart %}
+
+
+<h1 class="bg- text-light text-center">H</h1>
+<!-- <h1 class="bg-secondary text-light text-center">Shopping Here</h1> -->
+
+<div class="container mt-4 text-center">
+    <button class="btn  mb-2" style="max-width: 200px; background-color: black;">
+        <a href="/shopping" class="text-light d-block p-2 rounded" style="text-decoration: none;">
+            <strong>All Product</strong>
+        </a>
+    </button>
+    
+    {% for cat in categories %}
+    <button class="btn btn-dark mb-2" style="max-width: 200px; background-color: black;">
+        <a href="/shopping?category={{ cat.id }}" class="text-light d-block p-2 rounded" style="text-decoration: none;">
+            <strong >{{ cat.name }}</strong> 
+        </a>
+    </button>
+    {% endfor %}
+</div>
+
+<di class="container mt-4 text-center">
+    
+        <div class="container ">
+            <div class="row justify-content-center">
+                {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card shadow-sm mb- h-100 " id="{{ product.id }}">
+                        <!-- Product Image -->
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top rounded-top" style="height: 200px; object-fit: cover;">
+        
+                        <!-- Product Details -->
+                        <div class="card-body ">
+                            <h5 class="card-title text-center text-secondary" style="font-style: italic; font-weight:bold;">{{ product.name }}</h5>
+                            <p class="card-text text-center text-dark mb-1"><strong>Category:</strong> {{ product.category.name }}</p>
+                            <p class="card-text text-center mb-1"><strong>Price:</strong> ${{ product.price }}</p>
+                            <p class="card-text text-dark  text-center text-truncate:100">{{ product.description }}</p>
+                        </div>
+        
+                        <!-- Add to Cart Section -->
+                        <div class="card-footer bg-light">
+                            {% if product|is_in_cart:request.session.cart %}
+                            <div class="row align-items-center">
+                                <!-- Decrease Quantity -->
+                                <form action="/shopping#{{ product.id }}" class="col-2" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product" value="{{ product.id }}">
+                                    <input type="hidden" name="remove" value="true">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm">-</button>
+                                </form>
+        
+                                <!-- Quantity Display -->
+                                <p class="col-8 text-center my-auto">{{ product|cart_quantity:request.session.cart }} in Cart</p>
+        
+                                <!-- Increase Quantity -->
+                                <form action="/shopping#{{ product.id }}" class="col-2" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product" value="{{ product.id }}">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm">+</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <form action="/shopping#{{ product.id }}" method="POST" class="d-flex justify-content-center">
+                                {% csrf_token %}
+                                <input type="hidden" name="product" value="{{ product.id }}">
+                                <button type="submit" class="btn  btn-block w-100" style="background-color: black; color:white">Add to Cart</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        
+        
+
+</div>
+
+{% endblock %}

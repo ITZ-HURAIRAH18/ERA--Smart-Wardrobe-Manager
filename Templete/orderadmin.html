@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}
+All Order
+{% endblock %}
+
+{% block content %}
+
+{% load cart %}
+
+<div class="container mt-4">
+    <h1>Your Orders</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price</th>
+                <th scope="col">Total Price</th>
+                <th scope="col">Address</th>
+                <th scope="col">Phone No</th>
+                <th scope="col">Date</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.product.name }}</td> <!-- Assuming the Std model has a name field -->
+                    <td>{{ order.quantity }}</td>
+                    <td>${{ order.price }}</td>
+                    <td>${{ order.Price }}</td>
+                    <td>{{ order.address }}</td>
+                    <td>{{ order.Phone_no }}</td>
+                    <td>{{ order.date }}</td>
+                    <td>
+                        {% if order.status %}
+                            <span class="badge bg-success">Completed</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No orders found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Product List
+{% endblock %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h1 class="text-center" style="margin-top: 70px;">Product List</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Category</th>  <!-- Added an Image column -->
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ product.name }}</td>
+                <td >
+                    <!-- Display product image -->
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" width="50" height="50">
+                </td>
+                <td>{{ product.price }}</td>
+                <td>{{ product.category.name }}</td>
+                <td>
+                    <div class="d-flex ">
+                        <!-- Edit Button -->
+                        <a href="{% url 'editpro' product.id %}" class="btn btn-secondary btn-sm mx-1">Edit</a>
+                        <a href="{% url 'deletepro' product.id %}" class="btn btn-dark btn-sm mx-1">Delete</a>
+                        
+                        <!-- Delete Button -->
+                        <!-- <form action="{% url 'deletepro' product.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm mx-1">Delete</button>
+                        </form> -->
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+{% endblock %}

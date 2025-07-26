@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Order List
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Order List</h1>
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Customer</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Address</th>
+                <th>Phone No</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.product }}</td>
+                <td>{{ order.customer }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>${{ order.Price }}</td>
+                <td>{{ order.address }}</td>
+                <td>{{ order.Phone_no }}</td>
+                <td>{{ order.date }}</td>
+                <td>
+                    <span class="badge {% if order.status %}bg-success{% else %}bg-danger{% endif %} bg-dark text-white">
+                        {{ order.status|yesno:"Completed,Pending" }}
+                    </span>
+                </td>
+                
+                <td>
+                    <a href="{% url 'edit_order' order.id %}" class="btn btn-dark btn-sm">Edit</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center text-danger">No orders available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
