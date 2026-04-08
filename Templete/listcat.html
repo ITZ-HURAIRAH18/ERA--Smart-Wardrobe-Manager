@@ -1,45 +1,124 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-    Categories List
-{% endblock %}
+{% block title %}ERA - Manage Categories{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 style="margin-top: 70px;">Categories</h1>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th class="text-end">Actions</th> <!-- Right-align the "Actions" column header -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for category in categories %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ category.name }}</td>
-                <td>
-                    <div class="d-flex justify-content-end">
-                        <!-- Edit Button -->
-                        <a href="{% url 'editcat' category.id %}" class="btn btn-secondary btn-sm mx-1">Edit</a>
-                        
-                        <!-- Delete Button -->
-                        <form action="{% url 'deletecat' category.id %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-dark btn-sm mx-1">Delete</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No categories found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
+<style>
+    .admin-page { padding-top: 120px; min-height: 80vh; }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .admin-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    .admin-header h2 span { color: var(--era-gold); }
+
+    .admin-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        overflow: hidden;
+    }
+
+    .admin-table { width: 100%; }
+    .admin-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--era-muted);
+        border-bottom: 2px solid var(--era-border);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        background: var(--era-cream);
+    }
+    .admin-table tbody td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--era-border);
+        font-size: 0.9rem;
+    }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+    .admin-table tbody tr:hover { background: var(--era-cream); }
+
+    .action-btns { display: flex; gap: 0.5rem; }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid var(--era-border);
+        background: var(--era-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--duration-hover) var(--ease-out);
+        color: var(--era-text);
+        text-decoration: none;
+    }
+    .action-btn:hover { border-color: var(--era-gold); color: var(--era-gold); background: var(--era-cream); }
+    .action-btn.delete:hover { border-color: var(--era-danger); color: var(--era-danger); background: rgba(155,35,53,0.05); }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; }
+    .empty-state i { font-size: 4rem; color: var(--era-border); margin-bottom: 1rem; }
+</style>
+
+<div class="admin-page">
+    <div class="container">
+        <div class="admin-header">
+            <h2>Manage <span>Categories</span></h2>
+            <a href="{% url 'addcat' %}" class="btn-era">
+                <i class="bi bi-plus-circle me-1"></i> Add Category
+            </a>
+        </div>
+
+        <div class="admin-card">
+            {% if categories %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Name</th>
+                        <th>ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td class="fw-semibold">{{ cat.name }}</td>
+                        <td class="text-muted-era">{{ cat.id }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="{% url 'editcat' cat.id %}" class="action-btn" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'deletecat' cat.id %}" class="action-btn delete" title="Delete" onclick="return confirm('Delete \'{{ cat.name }}\'? Products in this category will need reassignment.');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-tags d-block"></i>
+                <h4>No categories yet</h4>
+                <p class="text-muted-era mb-4">Create your first category to organize products.</p>
+                <a href="{% url 'addcat' %}" class="btn-era">Add First Category</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
 {% endblock %}

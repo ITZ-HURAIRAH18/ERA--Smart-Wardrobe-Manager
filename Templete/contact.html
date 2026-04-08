@@ -5,280 +5,264 @@
 
 {% block content %}
 <style>
+    .contact-page { padding-top: 120px; min-height: 80vh; }
+
     .contact-hero {
-        background: linear-gradient(135deg, var(--primary) 0%, #2a2a4e 100%);
-        color: white;
+        background: linear-gradient(135deg, var(--era-navy) 0%, var(--era-black) 100%);
         padding: 4rem 0;
         text-align: center;
     }
     .contact-hero h1 {
-        font-size: clamp(2rem, 5vw, 3rem);
-        margin-bottom: 0.75rem;
+        font-family: var(--font-heading);
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        color: var(--era-white);
+        font-weight: 300;
+        margin-bottom: 0.5rem;
     }
-    .contact-hero p {
-        color: rgba(255,255,255,0.8);
-        font-size: 1.1rem;
-    }
+    .contact-hero h1 span { color: var(--era-gold); font-weight: 600; }
+    .contact-hero p { color: rgba(255,255,255,0.7); font-size: 1.1rem; }
 
-    .contact-info-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    .contact-card {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        transition: all var(--duration-hover) var(--ease-out);
         height: 100%;
     }
-    .contact-info-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1.25rem 0;
-        border-bottom: 1px solid #eee;
+    .contact-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        border-color: var(--era-gold);
     }
-    .contact-info-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
+    .contact-card i {
+        font-size: 2rem;
+        color: var(--era-gold);
+        margin-bottom: 1rem;
     }
-    .contact-info-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        background: var(--surface);
+    .contact-card h6 {
+        font-family: var(--font-heading);
+        margin-bottom: 0.5rem;
+    }
+    .contact-card p { color: var(--era-muted); font-size: 0.9rem; margin-bottom: 0; }
+    .contact-card a { color: var(--era-gold); }
+
+    /* Contact Form */
+    .contact-form-section {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+    }
+    .contact-form-section h4 {
+        font-family: var(--font-heading);
+        margin-bottom: 1.5rem;
+    }
+
+    .map-container {
+        border-radius: var(--radius-card);
+        overflow: hidden;
+        height: 100%;
+        min-height: 350px;
+        background: var(--era-stone);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--accent);
-        font-size: 1.25rem;
-        flex-shrink: 0;
+        border: 1px solid var(--era-border);
     }
-
-    .contact-form-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.08);
-    }
-    .form-label-era {
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-        color: var(--text-primary);
-    }
-    .form-control-era {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
+    .map-container iframe {
         width: 100%;
-    }
-    .form-control-era:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
-        outline: none;
-    }
-    textarea.form-control-era {
-        min-height: 140px;
-        resize: vertical;
+        height: 100%;
+        min-height: 350px;
+        border: none;
     }
 
+    /* FAQ */
     .faq-item {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        transition: all 0.3s ease;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+        transition: all var(--duration-hover) var(--ease-out);
     }
-    .faq-item:hover {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
+    .faq-item:hover { border-color: var(--era-gold); }
     .faq-question {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 500;
+        background: var(--era-white);
+        transition: background var(--duration-hover) var(--ease-out);
     }
+    .faq-question:hover { background: var(--era-cream); }
     .faq-answer {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        line-height: 1.6;
+        padding: 0 1.25rem;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s var(--ease-out);
+        color: var(--era-muted);
+        line-height: 1.7;
     }
+    .faq-item.active .faq-answer {
+        padding: 0 1.25rem 1rem;
+        max-height: 200px;
+    }
+    .faq-item.active .faq-question { background: var(--era-cream); }
+    .faq-item.active .faq-question i { transform: rotate(180deg); }
 </style>
 
-<!-- Page Hero -->
-<section class="contact-hero">
-    <div class="container">
-        <h1>Get in <span style="color: var(--accent);">Touch</span></h1>
-        <p>We'd love to hear from you. Reach out with any questions or feedback.</p>
+<div class="contact-page">
+    <!-- Hero -->
+    <div class="contact-hero">
+        <div class="container">
+            <h1>Get in <span>Touch</span></h1>
+            <p>We'd love to hear from you. Reach out with any questions or feedback.</p>
+        </div>
     </div>
-</section>
 
-<!-- Contact Form & Info -->
-<section class="section-era" style="background: var(--surface);">
-    <div class="container">
-        <div class="row g-4">
-            <!-- Contact Information -->
-            <div class="col-lg-4">
-                <div class="contact-info-card">
-                    <h4 class="mb-4" style="font-family: 'Playfair Display', serif;">Contact <span style="color: var(--accent);">Info</span></h4>
-
-                    <div class="contact-info-item">
-                        <div class="contact-info-icon">
-                            <i class="bi bi-geo-alt"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">Visit Us</h6>
-                            <p class="text-muted small mb-0">123 Fashion Avenue, New York, NY 10001</p>
-                        </div>
+    <!-- Contact Cards -->
+    <section class="section-era">
+        <div class="container">
+            <div class="row g-4 mb-5">
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="contact-card">
+                        <i class="bi bi-envelope d-block"></i>
+                        <h6>Email Us</h6>
+                        <p><a href="mailto:support@era.com">support@era.com</a></p>
                     </div>
-
-                    <div class="contact-info-item">
-                        <div class="contact-info-icon">
-                            <i class="bi bi-envelope"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">Email Us</h6>
-                            <p class="text-muted small mb-0">support@erafashion.com</p>
-                        </div>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="contact-card">
+                        <i class="bi bi-telephone d-block"></i>
+                        <h6>Call Us</h6>
+                        <p><a href="tel:+15551234567">+1 (555) 123-4567</a></p>
                     </div>
-
-                    <div class="contact-info-item">
-                        <div class="contact-info-icon">
-                            <i class="bi bi-telephone"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">Call Us</h6>
-                            <p class="text-muted small mb-0">+1 (555) 123-4567</p>
-                        </div>
-                    </div>
-
-                    <div class="contact-info-item">
-                        <div class="contact-info-icon">
-                            <i class="bi bi-clock"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-1">Working Hours</h6>
-                            <p class="text-muted small mb-0">Mon - Fri: 9AM - 6PM EST</p>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h6 class="mb-3">Follow Us</h6>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-facebook"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-instagram"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-twitter"></i>
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-pinterest"></i>
-                        </a>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="contact-card">
+                        <i class="bi bi-geo-alt d-block"></i>
+                        <h6>Visit Us</h6>
+                        <p>123 Fashion Avenue, New York, NY 10001</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Contact Form -->
-            <div class="col-lg-8">
-                <div class="contact-form-card">
-                    <h4 class="mb-4" style="font-family: 'Playfair Display', serif;">Send Us a <span style="color: var(--accent);">Message</span></h4>
+            <!-- Form + Map -->
+            <div class="row g-5">
+                <div class="col-lg-7 animate-on-scroll">
+                    <div class="contact-form-section">
+                        <h4>Send us a <span class="text-gold">Message</span></h4>
+                        <form method="POST" action="{% url 'contact' %}">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-era-label">Your Name</label>
+                                    <input type="text" name="name" class="form-era" placeholder="John Doe" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-era-label">Email Address</label>
+                                    <input type="email" name="email" class="form-era" placeholder="you@example.com" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-era-label">Subject</label>
+                                    <input type="text" name="subject" class="form-era" placeholder="How can we help?" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-era-label">Message</label>
+                                    <textarea name="message" class="form-era" rows="5" placeholder="Tell us more..." required></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn-era btn-era-lg w-100">
+                                        <i class="bi bi-send me-1"></i> Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-5 animate-on-scroll">
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.00425878428698!3d40.74076794379132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c1654f3%3A0xc80f9cfce5383d5d!2sGoogle!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <form method="POST" action="{% url 'contact' %}">
-                        {% csrf_token %}
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label-era">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" id="name" name="name" class="form-control-era" placeholder="John Doe" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label-era">Email Address <span class="text-danger">*</span></label>
-                                <input type="email" id="email" name="email" class="form-control-era" placeholder="john@example.com" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="subject" class="form-label-era">Subject</label>
-                                <input type="text" id="subject" name="subject" class="form-control-era" placeholder="How can we help?">
-                            </div>
-                            <div class="col-12">
-                                <label for="message" class="form-label-era">Message <span class="text-danger">*</span></label>
-                                <textarea id="message" name="message" class="form-control-era" placeholder="Tell us more about your inquiry..." required></textarea>
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-era btn-lg">
-                                    <i class="bi bi-send me-2"></i>Send Message
-                                </button>
-                            </div>
+    <!-- FAQ -->
+    <section class="section-era bg-cream">
+        <div class="container">
+            <div class="text-center mb-5 animate-on-scroll">
+                <h2 class="mb-3">Frequently Asked <span class="text-gold">Questions</span></h2>
+                <p class="text-muted-era">Quick answers to common questions</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="faq-item active">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How long does delivery take?</span>
+                            <i class="bi bi-chevron-down"></i>
                         </div>
-                    </form>
+                        <div class="faq-answer">
+                            Standard delivery takes 5-7 business days. Express delivery (2-3 business days) is available at checkout. Free delivery on orders above $200.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>What is your return policy?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            We offer a 30-day return policy for all unused items in original packaging. Simply initiate a return from your order history and follow the instructions.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How can I track my order?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Once your order is shipped, you'll receive a tracking number via email. You can also find it in your order history under "My Orders".
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Do you ship internationally?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Yes! We ship to over 50 countries worldwide. International shipping rates and delivery times vary by destination. Check checkout for exact rates.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>How do I use a coupon code?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Enter your coupon code in the designated field during checkout and click "Apply". The discount will be reflected in your order total immediately.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
-<!-- FAQ Section -->
-<section class="section-era">
-    <div class="container">
-        <h2 class="text-center mb-2">Frequently Asked <span style="color: var(--accent);">Questions</span></h2>
-        <p class="text-center text-muted mb-5">Quick answers to common questions</p>
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="faq-item">
-                    <div class="faq-question"><i class="bi bi-chevron-right me-2" style="color: var(--accent);"></i>How long does shipping take?</div>
-                    <div class="faq-answer">Standard shipping takes 5-7 business days. Express shipping (2-3 days) is available for an additional fee. International shipping may take 10-14 business days.</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><i class="bi bi-chevron-right me-2" style="color: var(--accent);"></i>What is your return policy?</div>
-                    <div class="faq-answer">We offer a 30-day hassle-free return policy. Items must be unworn, unwashed, and in original packaging with tags attached.</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><i class="bi bi-chevron-right me-2" style="color: var(--accent);"></i>Do you offer free shipping?</div>
-                    <div class="faq-answer">Yes! We offer free standard shipping on all orders over $200. Use code WELCOME10 for 10% off your first order.</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><i class="bi bi-chevron-right me-2" style="color: var(--accent);"></i>How do I track my order?</div>
-                    <div class="faq-answer">Once your order ships, you'll receive a confirmation email with a tracking number. You can also view tracking information in your account under "My Orders."</div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question"><i class="bi bi-chevron-right me-2" style="color: var(--accent);"></i>Can I cancel or modify my order?</div>
-                    <div class="faq-answer">You can cancel or modify your order within 2 hours of placing it, as long as it hasn't shipped yet. Contact our support team immediately for assistance.</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Map Section -->
-<section class="pb-5">
-    <div class="container">
-        <div class="card-era overflow-hidden">
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095343008!2d-74.00425878428698!3d40.74076794379132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259bf5c1654f3%3A0xc80f9cfce5383d5d!2sGoogle!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus"
-                width="100%"
-                height="350"
-                style="border:0;"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                title="ERA Fashion Location">
-            </iframe>
-        </div>
-    </div>
-</section>
+    </section>
+</div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Scroll animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    function toggleFaq(el) {
+        const item = el.parentElement;
+        const wasActive = item.classList.contains('active');
+        // Close all
+        document.querySelectorAll('.faq-item').forEach(faq => faq.classList.remove('active'));
+        // Toggle clicked
+        if (!wasActive) item.classList.add('active');
+    }
 </script>
 {% endblock %}

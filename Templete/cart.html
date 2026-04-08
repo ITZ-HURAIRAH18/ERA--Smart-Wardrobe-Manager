@@ -1,231 +1,304 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load cart %}
 
-{% block title %}ERA - Shopping Cart{% endblock %}
+{% block title %}ERA - Cart{% endblock %}
 
 {% block content %}
 <style>
-    .cart-item-row {
-        transition: all 0.3s ease;
-        padding: 1.25rem 0;
+    .cart-page { padding-top: 120px; min-height: 80vh; }
+
+    .cart-table { width: 100%; }
+    .cart-table thead th {
+        font-family: var(--font-heading);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--era-muted);
+        border-bottom: 2px solid var(--era-border);
+        padding: 1rem 0.75rem;
     }
-    .cart-item-row:not(:last-child) {
-        border-bottom: 1px solid #eee;
+    .cart-table tbody tr {
+        border-bottom: 1px solid var(--era-border);
+        transition: background var(--duration-hover) var(--ease-out);
     }
+    .cart-table tbody tr:hover { background: var(--era-cream); }
+    .cart-table td { padding: 1.25rem 0.75rem; vertical-align: middle; }
+
     .cart-item-img {
         width: 90px;
         height: 90px;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: var(--radius-card);
     }
-    .quantity-btn {
-        width: 34px;
-        height: 34px;
-        border: 1px solid #ddd;
-        background: white;
-        border-radius: 8px;
+    .cart-item-name { font-weight: 500; color: var(--era-text); }
+    .cart-item-meta { font-size: 0.8rem; color: var(--era-muted); }
+
+    /* Quantity Controls */
+    .qty-control {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        overflow: hidden;
+    }
+    .qty-control button {
+        background: var(--era-cream);
+        border: none;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s ease;
-        color: var(--text-primary);
+        transition: all var(--duration-hover) var(--ease-out);
+        font-size: 1rem;
+        color: var(--era-text);
     }
-    .quantity-btn:hover {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: var(--primary);
+    .qty-control button:hover { background: var(--era-gold); color: var(--era-white); }
+    .qty-control input {
+        width: 50px;
+        text-align: center;
+        border: none;
+        border-left: 1px solid var(--era-border);
+        border-right: 1px solid var(--era-border);
+        font-size: 0.9rem;
+        font-weight: 500;
+        background: transparent;
     }
+    .qty-control input:focus { outline: none; }
 
-    .order-summary-card {
+    .remove-btn {
+        background: none;
+        border: none;
+        color: var(--era-muted);
+        cursor: pointer;
+        transition: color var(--duration-hover) var(--ease-out);
+        padding: 0.25rem;
+    }
+    .remove-btn:hover { color: var(--era-danger); }
+
+    /* Cart Summary */
+    .cart-summary {
+        background: var(--era-cream);
+        border-radius: var(--radius-card);
+        padding: 2rem;
         position: sticky;
         top: 100px;
     }
-    .progress-bar-custom {
-        height: 8px;
-        background: #eee;
-        border-radius: 4px;
-        overflow: hidden;
+    .cart-summary h5 {
+        font-family: var(--font-heading);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--era-border);
     }
-    .progress-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent), #d4b878);
-        transition: width 0.5s ease;
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+    .summary-row.total {
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 2px solid var(--era-border);
+        color: var(--era-navy);
     }
 
+    /* Empty Cart */
     .empty-cart {
         text-align: center;
-        padding: 5rem 2rem;
+        padding: 4rem 2rem;
     }
-    .empty-cart i {
-        font-size: 5rem;
-        color: #ddd;
-        margin-bottom: 1.5rem;
-    }
+    .empty-cart i { font-size: 5rem; color: var(--era-border); margin-bottom: 1.5rem; }
 </style>
 
-<div class="container py-4">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 style="font-family: 'Playfair Display', serif;">Shopping <span style="color: var(--accent);">Cart</span></h2>
-        <a href="{% url 'home' %}" class="btn btn-outline-era btn-sm">
-            <i class="bi bi-arrow-left me-1"></i>Continue Shopping
-        </a>
-    </div>
+<div class="cart-page">
+    <div class="container">
+        <h1 class="text-center mb-5" style="font-family: var(--font-heading);">Your <span class="text-gold">Cart</span></h1>
 
-    {% if cart_items %}
-    <div class="row g-4">
-        <!-- Cart Items -->
-        <div class="col-lg-8">
-            <div class="card-era p-4">
-                {% for item in cart_items %}
-                <div class="cart-item-row d-flex align-items-center gap-3" id="cart-item-{{ item.product.id }}">
-                    <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" class="cart-item-img" loading="lazy">
-
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
-                        <p class="text-muted mb-0 small">${{ item.product.price }} each</p>
-                    </div>
-
-                    <!-- Quantity Controls -->
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, -1)" aria-label="Decrease quantity">
-                            <i class="bi bi-dash"></i>
-                        </button>
-                        <span class="fw-semibold" id="qty-{{ item.product.id }}" style="min-width: 24px; text-align: center;">{{ item.quantity }}</span>
-                        <button class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, 1)" aria-label="Increase quantity">
-                            <i class="bi bi-plus"></i>
-                        </button>
-                    </div>
-
-                    <!-- Line Total (Bug 11 Fix: Pre-calculated in view) -->
-                    <div class="fw-bold" style="min-width: 80px; text-align: right;" id="line-total-{{ item.product.id }}">
-                        ${{ item.line_total }}
-                    </div>
-
-                    <!-- Remove -->
-                    <button class="btn btn-sm btn-link text-decoration-none" style="color: var(--danger);" onclick="removeItem({{ item.product.id }})" aria-label="Remove item">
-                        <i class="bi bi-trash"></i>
-                    </button>
+        {% if cart_items %}
+        <div class="row g-5">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="d-none d-lg-block">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 45%;">Product</th>
+                                <th style="width: 15%;">Price</th>
+                                <th style="width: 20%;">Quantity</th>
+                                <th style="width: 15%;">Total</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartItemsBody">
+                            {% for item in cart_items %}
+                            <tr data-product-id="{{ item.product.id }}">
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-img">
+                                        <div>
+                                            <p class="cart-item-name mb-1">{{ item.product.name }}</p>
+                                            <p class="cart-item-meta mb-0">{{ item.product.category.name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="fw-semibold">${{ item.product.price }}</td>
+                                <td>
+                                    <div class="qty-control">
+                                        <button onclick="updateQty({{ item.product.id }}, {{ item.quantity|add:'-1' }})" {% if item.quantity <= 1 %}disabled{% endif %}>&minus;</button>
+                                        <input type="text" value="{{ item.quantity }}" readonly id="qty-{{ item.product.id }}">
+                                        <button onclick="updateQty({{ item.product.id }}, {{ item.quantity|add:'1' }})">&plus;</button>
+                                    </div>
+                                </td>
+                                <td class="fw-semibold text-gold" id="line-total-{{ item.product.id }}">${{ item.line_total }}</td>
+                                <td>
+                                    <button class="remove-btn" onclick="removeItem({{ item.product.id }})" title="Remove">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                {% endfor %}
+
+                <!-- Mobile Cart Cards -->
+                <div class="d-lg-none">
+                    {% for item in cart_items %}
+                    <div class="card-era mb-3" data-product-id="{{ item.product.id }}">
+                        <div class="card-era-body">
+                            <div class="d-flex gap-3 mb-3">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-img">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ item.product.name }}</h6>
+                                    <p class="text-muted-era small mb-0">{{ item.product.category.name }}</p>
+                                    <p class="fw-semibold text-gold mb-0">${{ item.product.price }}</p>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="qty-control">
+                                    <button onclick="updateQty({{ item.product.id }}, {{ item.quantity|add:'-1' }})" {% if item.quantity <= 1 %}disabled{% endif %}>&minus;</button>
+                                    <input type="text" value="{{ item.quantity }}" readonly>
+                                    <button onclick="updateQty({{ item.product.id }}, {{ item.quantity|add:'1' }})">&plus;</button>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="fw-semibold text-gold" id="line-total-mob-{{ item.product.id }}">${{ item.line_total }}</span>
+                                    <button class="remove-btn" onclick="removeItem({{ item.product.id }})"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <a href="{% url 'home' %}" class="btn-era-outline mt-3">
+                    <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+                </a>
             </div>
-        </div>
 
-        <!-- Order Summary (Bug 11 Fix: Pre-calculated totals from view) -->
-        <div class="col-lg-4">
-            <div class="order-summary-card">
-                <div class="card-era p-4">
-                    <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Order Summary</h5>
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Subtotal ({{ cart_count }} items)</span>
-                        <strong id="subtotal">${{ subtotal }}</strong>
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h5>Order Summary</h5>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="summarySubtotal">${{ subtotal }}</span>
                     </div>
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Shipping</span>
-                        <strong class="{% if total >= 200 %}text-success{% endif %}" id="shipping">
-                            {% if total >= 200 %}FREE{% else %}$15.00{% endif %}
-                        </strong>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span id="summaryShipping">{% if subtotal >= 200 %}Free{% else %}$15.00{% endif %}</span>
                     </div>
-
-                    <!-- Coupon Code -->
-                    <div class="mb-3">
-                        <label class="form-label small text-muted mb-1">Have a coupon?</label>
-                        <div class="input-group input-group-sm">
-                            <input type="text" id="couponCode" class="form-control" placeholder="Enter code">
-                            <button class="btn btn-era" onclick="applyCoupon()">Apply</button>
-                        </div>
-                        <small id="couponMsg" class="text-muted"></small>
+                    {% if subtotal >= 200 %}
+                    <div class="summary-row text-success">
+                        <span>Free Delivery Applied!</span>
+                        <span>-$15.00</span>
                     </div>
-
-                    <div class="d-flex justify-content-between mb-2 d-none" id="discountRow">
-                        <span class="text-muted">Discount</span>
-                        <strong class="text-success" id="discountAmount">-$0</strong>
-                    </div>
-
-                    <hr>
-
-                    <div class="d-flex justify-content-between mb-3 fs-5 fw-bold">
+                    {% endif %}
+                    <div class="summary-row total">
                         <span>Total</span>
-                        <span id="total">${% if total >= 200 %}{{ total }}{% else %}{{ total|add:15 }}{% endif %}</span>
+                        <span id="summaryTotal">${% if subtotal >= 200 %}{{ subtotal }}{% else %}{{ subtotal|add:15 }}{% endif %}</span>
                     </div>
 
-                    <!-- Free Delivery Progress -->
-                    {% if total < 200 %}
-                    <div class="mb-3">
-                        <small class="text-muted">Add ${{ 200|add:"-0"|add:total|cut:"-$" }} more for free delivery!</small>
-                        <div class="progress-bar-custom mt-1">
-                            <div class="progress-bar-fill" style="width: {% widthratio total 200 100 %}%"></div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="mb-3 text-success small">
-                        <i class="bi bi-check-circle-fill me-1"></i> You qualify for free delivery!
+                    {% if subtotal < 200 %}
+                    <div class="alert alert-info small mt-3 mb-0" style="border-radius: var(--radius-btn);">
+                        <i class="bi bi-truck me-1"></i> Add <strong>${{ 200|add:-subtotal }}</strong> more for free delivery!
                     </div>
                     {% endif %}
 
-                    <a href="{% url 'checkout' %}" class="btn btn-era w-100 mb-2">
-                        <i class="bi bi-lock me-1"></i> Proceed to Checkout
+                    <a href="{% url 'checkout' %}" class="btn-era w-100 mt-4 btn-era-lg">
+                        Proceed to Checkout <i class="bi bi-arrow-right ms-1"></i>
                     </a>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted-era">
+                            <i class="bi bi-shield-lock me-1"></i> Secure checkout
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% else %}
-    <!-- Empty Cart State -->
-    <div class="card-era">
+
+        {% else %}
+        <!-- Empty Cart -->
         <div class="empty-cart">
             <i class="bi bi-bag d-block"></i>
-            <h4>Your cart is empty</h4>
-            <p class="text-muted">Looks like you haven't added anything to your cart yet.</p>
-            <a href="{% url 'home' %}" class="btn btn-era mt-3">
-                <i class="bi bi-bag-plus me-1"></i>Start Shopping
-            </a>
+            <h3>Your cart is empty</h3>
+            <p class="text-muted-era mb-4">Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'home' %}" class="btn-era">Start Shopping</a>
         </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function updateQuantity(productId, change) {
-        const qtyEl = document.getElementById(`qty-${productId}`);
-        let currentQty = parseInt(qtyEl.textContent);
-        let newQty = currentQty + change;
-
-        if (newQty < 1) {
-            if (confirm('Remove this item from cart?')) {
-                removeItem(productId);
-            }
-            return;
-        }
+    function updateQty(productId, newQty) {
+        if (newQty < 1) return;
 
         fetch('{% url "update_cart_item" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: `product_id=${productId}&quantity=${newQty}`
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                qtyEl.textContent = newQty;
-                document.getElementById(`line-total-${productId}`).textContent = `$${data.item_total}`;
-                document.getElementById('subtotal').textContent = `$${data.cart_total}`;
-                document.getElementById('total').textContent = `$${data.cart_total}`;
+                // Update quantity display
+                const qtyInput = document.getElementById(`qty-${productId}`);
+                if (qtyInput) qtyInput.value = newQty;
+
+                // Update line total
+                const lineTotal = document.getElementById(`line-total-${productId}`);
+                if (lineTotal) lineTotal.textContent = `$${data.item_total}`;
+
+                const lineTotalMob = document.getElementById(`line-total-mob-${productId}`);
+                if (lineTotalMob) lineTotalMob.textContent = `$${data.item_total}`;
+
+                // Update summary
+                document.getElementById('summarySubtotal').textContent = `$${data.cart_total}`;
+                const shipping = data.cart_total >= 200 ? 0 : 15;
+                document.getElementById('summaryShipping').textContent = shipping === 0 ? 'Free' : '$15.00';
+                document.getElementById('summaryTotal').textContent = `$${data.cart_total + shipping}`;
+
+                // Update cart badge
                 updateCartBadge(data.cart_count);
-                showToast('Cart updated');
+
+                showToast('Cart updated', 'success');
             } else {
                 showToast(data.message || 'Error updating cart', 'error');
             }
         })
-        .catch(() => showToast('Network error', 'error'));
+        .catch(() => showToast('Something went wrong', 'error'));
     }
 
     function removeItem(productId) {
@@ -233,67 +306,42 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: `product_id=${productId}`
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                document.getElementById(`cart-item-${productId}`).remove();
-                showToast('Item removed from cart');
-                setTimeout(() => location.reload(), 500);
+                // Remove row from DOM
+                const row = document.querySelector(`tr[data-product-id="${productId}"], div[data-product-id="${productId}"]`);
+                if (row) {
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+                    row.style.transition = 'all 0.3s ease';
+                    setTimeout(() => row.remove(), 300);
+                }
+
+                // Update summary
+                document.getElementById('summarySubtotal').textContent = `$${data.cart_total}`;
+                const shipping = data.cart_total >= 200 ? 0 : 15;
+                document.getElementById('summaryShipping').textContent = shipping === 0 ? 'Free' : '$15.00';
+                document.getElementById('summaryTotal').textContent = `$${data.cart_total + shipping}`;
+
+                // Update cart badge
+                updateCartBadge(data.cart_count);
+
+                if (data.cart_count === 0) {
+                    setTimeout(() => location.reload(), 500);
+                }
+
+                showToast('Item removed from cart', 'success');
             } else {
                 showToast(data.message || 'Error removing item', 'error');
             }
         })
-        .catch(() => showToast('Network error', 'error'));
-    }
-
-    function applyCoupon() {
-        const code = document.getElementById('couponCode').value;
-        const subtotal = document.getElementById('subtotal').textContent.replace('$', '');
-
-        fetch('{% url "apply_coupon" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: `code=${code}&cart_total=${subtotal}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            const msg = document.getElementById('couponMsg');
-            if (data.status === 'success') {
-                msg.textContent = data.message;
-                msg.className = 'text-success small';
-                document.getElementById('discountRow').classList.remove('d-none');
-                document.getElementById('discountAmount').textContent = `-$${data.discount}`;
-                document.getElementById('total').textContent = `$${data.final_total}`;
-                showToast('Coupon applied successfully!');
-            } else {
-                msg.textContent = data.message;
-                msg.className = 'text-danger small';
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(() => showToast('Network error', 'error'));
-    }
-
-    function updateCartBadge(count) {
-        let badge = document.getElementById('cartBadgeCount');
-        if (count > 0) {
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.id = 'cartBadgeCount';
-                badge.className = 'badge-count';
-                document.getElementById('cartLink').appendChild(badge);
-            }
-            badge.textContent = count;
-        } else if (badge) {
-            badge.remove();
-        }
+        .catch(() => showToast('Something went wrong', 'error'));
     }
 </script>
 {% endblock %}

@@ -1,515 +1,262 @@
-# 👕 ERA — Smart Wardrobe Manager
+# ERA - Limitless Fashion
 
-> A modern, full-featured clothing management system built with Django. Designed for boutiques, clothing businesses, and inventory managers — ERA bridges the gap between inventory management and customer interaction in one elegant platform.
+A modern Django 5.1 fashion e-commerce platform with a premium design system.
 
-[![Django](https://img.shields.io/badge/Django-5.1.4-092E20?logo=django)](https://www.djangoproject.com/)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
----
-
-## 📋 Table of Contents
-
-- [Why This Exists](#why-this-exists)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Tech Stack](#tech-stack)
-- [Installation & Setup](#installation--setup)
-- [Running the Project](#running-the-project)
-- [Environment Variables](#environment-variables)
-- [Project Structure](#project-structure)
-- [URL Routes](#url-routes)
-- [Admin Panel](#admin-panel)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## Why This Exists
-
-Managing clothing inventory, handling customer orders, and maintaining a seamless shopping experience is hard. ERA solves this by providing:
-
-- **A customer-facing storefront** where users browse, search, filter, and purchase clothing items with cart and checkout functionality.
-- **An admin dashboard** for managing categories, products, orders, users, coupons, and inventory — all from a single interface.
-- **Built-in features** like wishlists, product ratings, coupon discounts, order tracking, and newsletter subscriptions — so you don't need third-party plugins for the basics.
-
----
-
-## Features
-
-### 👤 Customer Features
-
-| Feature | Description |
-|---------|-------------|
-| **Browse & Search** | Filter products by category, search by name/description, sort by price or date, and filter by price range |
-| **Product Details** | View full product info with images, sizes, colors, ratings, reviews, and related products |
-| **Shopping Cart** | Add/remove items, update quantities, and view live cart totals via AJAX |
-| **Checkout** | Enter shipping details, apply coupon codes, and place orders with auto-generated tracking numbers |
-| **Order History** | View past orders, track status, and cancel pending/processing orders |
-| **Wishlist** | Save favorite items and manage your wishlist |
-| **Ratings & Reviews** | Rate products 1–5 stars and leave written reviews |
-| **User Profile** | Manage your account details and view order history |
-| **Newsletter Signup** | Subscribe to the store newsletter |
-
-### 🛠️ Admin Features
-
-| Feature | Description |
-|---------|-------------|
-| **Category CRUD** | Add, edit, delete, and list clothing categories |
-| **Product CRUD** | Upload products with images, prices, categories, sizes, colors, and stock quantities |
-| **Image Import** | Download product images from external URLs directly into the system |
-| **Order Management** | View all orders, update status (Pending → Processing → Shipped → Delivered → Cancelled), edit orders |
-| **User Management** | View registered customers and their order history |
-| **Coupon System** | Create discount coupons with expiry dates, minimum order values, and percentage discounts |
-| **Inventory Tracking** | Monitor stock levels and toggle product active/inactive status |
-| **CSV Export** | Export order data to CSV for reporting |
-| **Dashboard Analytics** | View key metrics at a glance |
-| **Django Admin** | Full access to all models via Django's built-in admin panel with Jet theme |
-
----
-
-## Screenshots
-
-> 📸 *Screenshots coming soon. The following sections will include visual previews:*
-
-- **Landing Page** — Hero section and featured categories
-- **Shop Page** — Product grid with search, filters, and pagination
-- **Product Detail** — Full product view with ratings and reviews
-- **Cart & Checkout** — Shopping cart and order placement flow
-- **Admin Dashboard** — Inventory and order management overview
-- **Django Admin (Jet)** — Enhanced admin interface
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | Django 5.1.4 (Python) |
-| **Frontend** | HTML5, CSS3, Bootstrap 5, JavaScript (AJAX) |
-| **Database** | SQLite 3 (default, swappable to PostgreSQL) |
-| **Authentication** | Custom session-based auth with Django Auth |
-| **Admin Theme** | Django Jet Reboot |
-| **Forms** | Crispy Forms + Bootstrap 5 |
-| **Image Processing** | Pillow 11.0.0 |
-| **Email** | Django SMTP Backend (Gmail) |
-| **Environment** | python-decouple for config management |
+## 🚀 Quick Start
 
 ### Prerequisites
+- Python 3.11+
+- pip
 
-- **Python 3.10+**
-- **pip** (Python package manager)
-- **Git** (optional, for cloning)
-- **SQLite 3** (included with Python; no separate install needed)
-
----
-
-## Installation & Setup
-
-Follow these steps to get ERA running on your local machine.
-
-### Step 1: Clone or Download the Project
+### Local Development Setup
 
 ```bash
-cd "E:\My Projects\ERA Project\Cloth-Management-System"
-```
+# 1. Clone and navigate to project
+cd Cloth-Management-System
 
-> If you're starting fresh from a repository:
-> ```bash
-> git clone <repository-url>
-> cd Cloth-Management-System
-> ```
-
-### Step 2: Create and Activate a Virtual Environment
-
-It is strongly recommended to use a virtual environment to isolate dependencies.
-
-```bash
-# Create virtual environment
+# 2. Create virtual environment
 python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # Mac/Linux
 
-# Activate on Windows
-.venv\Scripts\activate
-
-# Activate on macOS / Linux
-# source .venv/bin/activate
-```
-
-You should see `(.venv)` prefixed in your terminal prompt.
-
-### Step 3: Install Dependencies
-
-```bash
+# 3. Install dependencies
 pip install -r requirements.txt
-```
 
-This installs all required packages: Django, Pillow, crispy-forms, django-jet-reboot, python-decouple, and requests.
+# 4. Configure environment (optional - .env already exists)
+# Edit .env file with your settings
 
-### Step 4: Configure Environment Variables
-
-The project uses `.env` for configuration. A template is already provided.
-
-1. Copy the `.env` file if needed (it already exists in the project root).
-2. Update the values:
-
-```env
-# Email Configuration (Gmail SMTP)
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password_here
-
-# Django Secret Key (generate a new one for production)
-DJANGO_SECRET_KEY=your-secret-key-here
-
-# Debug Mode (set to False in production)
-DJANGO_DEBUG=True
-
-# Allowed Hosts (comma-separated, no spaces)
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-```
-
-> **Generating a Secret Key**: Run `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` to generate a new key.
-
-> **Gmail App Password**: You'll need to create an [App Password](https://myaccount.google.com/apppasswords) in your Google Account settings if using Gmail for email notifications.
-
-### Step 5: Run Database Migrations
-
-Apply Django migrations to set up the database schema:
-
-```bash
-python manage.py makemigrations
+# 5. Run migrations
 python manage.py migrate
-```
 
-This creates all necessary tables for products, categories, customers, orders, cart, ratings, wishlists, coupons, and newsletters.
-
-### Step 6: Create a Superuser (Admin Access)
-
-Create an admin account to access the Django admin panel:
-
-```bash
+# 6. Create admin user (optional - for Django admin)
 python manage.py createsuperuser
-```
 
-You'll be prompted for a username, email, and password. Use a strong password in production.
+# 7. Create default categories (optional)
+python manage.py shell
+>>> from app.models import Cat
+>>> Cat.objects.bulk_create([Cat(name='Men'), Cat(name='Women'), Cat(name='Children')])
+>>> exit()
 
-> **Default Admin Login**: The system also recognizes `admin@era.com` as an admin email for the custom login system. You can create a customer with this email or modify it in `app/views.py`.
-
-### Step 7: Collect Static Files (Production Only)
-
-For production deployment, collect all static files:
-
-```bash
-python manage.py collectstatic
-```
-
-> Skip this step for local development — Django's development server handles static files automatically when `DEBUG = True`.
-
----
-
-## Running the Project
-
-Start the Django development server:
-
-```bash
+# 8. Run development server
 python manage.py runserver
 ```
 
-The application will be available at:
+Visit: `http://127.0.0.1:8000`
 
-| Page | URL |
-|------|-----|
-| **Landing Page** | http://127.0.0.1:8000/ |
-| **Shop / Store** | http://127.0.0.1:8000/shopping |
-| **Django Admin** | http://127.0.0.1:8000/admin/ |
-| **Custom Login** | http://127.0.0.1:8000/login |
-| **Sign Up** | http://127.0.0.1:8000/signup |
+### Demo Credentials
+- **Admin**: admin@era.com / admin123
+- **Customer**: Sign up via `/signup`
 
-> To run on a different port: `python manage.py runserver 8080`
-
----
-
-## Environment Variables
-
-All configuration is managed through the `.env` file using `python-decouple`. Here's a full reference:
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `DJANGO_SECRET_KEY` | `string` | *(insecure default)* | Django's cryptographic signing key. **Must be changed in production.** |
-| `DJANGO_DEBUG` | `bool` | `True` | Enables debug mode. Set to `False` in production. |
-| `DJANGO_ALLOWED_HOSTS` | `csv` | `localhost,127.0.0.1` | Comma-separated list of allowed host domains. |
-| `EMAIL_USER` | `string` | `""` | SMTP email address for sending notifications. |
-| `EMAIL_PASS` | `string` | `""` | SMTP password (use an App Password for Gmail). |
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 Cloth-Management-System/
-├── .env                        # Environment configuration
-├── .gitignore                  # Git ignore rules
-├── manage.py                   # Django CLI entry point
-├── requirements.txt            # Python dependencies
-├── db.sqlite3                  # SQLite database (auto-generated)
+├── .env                    # Environment configuration
+├── .gitignore
+├── manage.py
+├── requirements.txt
+├── vercel.json             # Vercel deployment config
+├── build.sh                # Vercel build script
+├── db.sqlite3              # SQLite database
 │
-├── index/                      # Django project settings
-│   ├── __init__.py
-│   ├── settings.py             # Main Django settings
-│   ├── urls.py                 # Root URL configuration
-│   ├── wsgi.py                 # WSGI application (production)
-│   └── asgi.py                 # ASGI application
+├── index/                  # Django project settings
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
 │
-├── app/                        # Main application
-│   ├── __init__.py
-│   ├── admin.py                # Django admin model registrations
-│   ├── models.py               # Database models (Product, Category, Order, etc.)
-│   ├── views.py                # View logic for all pages
-│   ├── urls.py                 # App-level URL routing
-│   ├── form.py                 # Form definitions
-│   ├── context_processors.py   # Global template context data
-│   ├── tests.py                # Unit tests
-│   ├── apps.py                 # App configuration
-│   ├── management/             # Custom management commands
-│   ├── migrations/             # Database migration files
-│   └── templatetags/           # Custom Django template tags
+├── app/                    # Main application
+│   ├── models.py           # Customer, Product, Category, Order, etc.
+│   ├── views.py            # All view logic
+│   ├── urls.py             # URL routing
+│   ├── form.py             # Django forms
+│   ├── context_processors.py
+│   ├── templatetags/       # Custom template filters
+│   │   └── cart.py
+│   └── migrations/
 │
-├── Templete/                   # HTML templates (Django templates)
-│   ├── base.html               # Base template with common layout
-│   ├── home1.html              # Landing page
-│   ├── home.html               # Shop / product listing page
-│   ├── product_detail.html     # Individual product page
-│   ├── cart.html               # Shopping cart
-│   ├── checkout.html           # Checkout page
-│   ├── order.html              # Customer order history
-│   ├── wishlist.html           # User wishlist
-│   ├── login.html              # Login page
-│   ├── signup.html             # Registration page
-│   ├── dashboard.html          # Admin dashboard
-│   ├── about.html              # About page
-│   ├── contact.html            # Contact page
-│   ├── addpro.html             # Add product (admin)
-│   ├── editpro.html            # Edit product (admin)
-│   ├── listpro.html            # List products (admin)
-│   ├── addcat.html             # Add category (admin)
-│   ├── editcat.html            # Edit category (admin)
-│   ├── listcat.html            # List categories (admin)
-│   └── ...                     # Additional templates
+├── Templete/               # HTML templates (note: intentional spelling)
+│   ├── base.html           # Base template with ERA design system
+│   ├── home1.html          # Landing page (7 animated sections)
+│   ├── home.html           # Shopping page with sticky sidebar
+│   ├── cart.html           # Cart with AJAX updates
+│   ├── checkout.html       # Multi-step checkout
+│   ├── login.html          # 100vh split layout
+│   ├── signup.html         # 100vh split layout
+│   ├── order.html          # Customer orders timeline
+│   ├── wishlist.html
+│   ├── about.html
+│   ├── contact.html
+│   ├── dashboard.html      # Admin dashboard with Chart.js
+│   ├── addpro.html         # Add product form
+│   ├── editpro.html        # Edit product form
+│   ├── listpro.html        # Products list table
+│   ├── addcat.html         # Add category form
+│   ├── editcat.html        # Edit category form
+│   ├── listcat.html        # Categories list table
+│   └── orderadmin.html     # Admin orders management
 │
-├── media/                      # User-uploaded media files
-│   └── images/                 # Product images
-│
-└── middleware/                  # Custom middleware
-    └── auth.py                 # Authentication middleware
+├── media/                  # Uploaded files
+│   └── images/
+└── middleware/
+    └── auth.py
 ```
 
----
+## 🎨 Design System
 
-## URL Routes
+### Color Palette
+| Color | Hex | Usage |
+|-------|-----|-------|
+| ERA Black | `#0D0D0D` | Primary dark backgrounds |
+| ERA Navy | `#1a1a2e` | Navbar, footers, headings |
+| ERA Gold | `#C9A96E` | Primary accent, buttons, links |
+| ERA Gold Dark | `#A8844A` | Hover states |
+| ERA White | `#FFFFFF` | Backgrounds |
+| ERA Cream | `#FAF8F5` | Secondary backgrounds |
+| ERA Stone | `#F2EDE6` | Tertiary backgrounds |
+| ERA Muted | `#8A8178` | Secondary text |
+| ERA Border | `#E8E2D9` | Borders, dividers |
+| ERA Text | `#2C2825` | Primary text |
+| ERA Success | `#2D6A4F` | Success states |
+| ERA Warning | `#B7791F` | Warning states |
+| ERA Danger | `#9B2335` | Error states |
 
-### Public Pages
+### Typography
+- **Headings**: Cormorant Garamond (weights: 300, 400, 600, 700)
+- **Body**: DM Sans (weights: 300, 400, 500)
+- **Loaded via**: Google Fonts CDN
 
-| URL | View | Description |
-|-----|------|-------------|
-| `/` | `home1` | Landing page |
-| `/shopping` | `home` | Shop page with search, filters, sorting, and pagination |
-| `/about` | `about` | About page |
-| `/contact` | `contact` | Contact page with form |
-| `/product/<id>/` | `product_detail` | Product detail with ratings and reviews |
+### Spacing
+- Section padding: `100px 0` desktop, `60px 0` tablet, `40px 0` mobile
+- Container: `max-width: 1200px`, padding `0 24px`
+- Border-radius: `2px` buttons, `8px` cards, `16px` images, `50px` pills
+
+### Animation
+- Easing: `cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+- Hover: `0.35s`, Enter: `0.7s`, Stagger: `0.08s`
+
+## 📄 Pages
+
+### Customer Pages
+1. **Landing** (`/`) — Hero, stats, categories, featured products, trust badges, testimonials, CTA
+2. **Shop** (`/shopping`) — Product grid with sticky filter sidebar, search, sort, pagination
+3. **Product Detail** (`/product/<id>/`) — Full product page with ratings, reviews, related products
+4. **Cart** (`/cart/`) — Split layout with AJAX quantity updates
+5. **Checkout** (`/checkout`) — Multi-step: shipping → review → confirm
+6. **Orders** (`/order`) — Customer order history with timeline and tracking
+7. **Wishlist** (`/wishlist/`) — Saved products grid
+8. **Profile** (`/profile/`) — Account management
+9. **About** (`/about`) — Company story and values
+10. **Contact** (`/contact`) — Contact form, map, FAQ
 
 ### Authentication
+- **Login** (`/login`) — 100vh split layout with image
+- **Signup** (`/signup`) — 100vh split layout with password strength
 
-| URL | View | Description |
-|-----|------|-------------|
-| `/signup` | `signup` | Customer registration |
-| `/login` | `login` | Unified login (customer + admin) |
-| `/signout/` | `signout` | Logout and clear session |
+### Admin Pages
+- **Dashboard** (`/admin-dashboard/`) — Stats, charts (Chart.js), recent orders, low stock alerts
+- **Add Product** (`/addpro`) — Professional form with image upload
+- **Edit Product** (`/editpro/<id>/`) — Same as add with pre-filled data
+- **Products List** (`/listpro`) — Searchable table with edit/delete actions
+- **Add Category** (`/addcat`) — Simple form
+- **Edit Category** (`/edit/<id>/`) — Simple form
+- **Categories List** (`/listcat`) — Table with actions
+- **Orders Management** (`/finalorder`) — Filterable table with status updates
 
-### Cart & Checkout
+## 🔧 Features
 
-| URL | View | Description |
-|-----|------|-------------|
-| `/cart/` | `cart` | View shopping cart |
-| `/checkout` | `checkout` | Checkout page with order summary |
-| `/update-cart-item/` | `update_cart_item` | AJAX: Update cart item quantity |
-| `/remove-cart-item/` | `remove_cart_item` | AJAX: Remove item from cart |
-| `/apply-coupon/` | `apply_coupon` | AJAX: Apply coupon code |
+### Core
+- Session-based shopping cart
+- AJAX cart updates (quantity change, remove)
+- Multi-step checkout with coupon support
+- Product ratings and reviews
+- Wishlist with AJAX toggle
+- Order tracking with timeline
+- Newsletter subscription
+- Contact form
 
-### Orders
+### Admin
+- Sales dashboard with Chart.js graphs
+- Revenue overview (line chart)
+- Order status breakdown (doughnut chart)
+- Low stock alerts
+- CSV export for orders
+- Inline status updates via AJAX
 
-| URL | View | Description |
-|-----|------|-------------|
-| `/order` | `order` | Customer order history |
-| `/order/<id>/cancel/` | `cancel_order` | Cancel a pending order |
-| `/order/<id>/edit/` | `edit_order` | Edit an order |
-| `/update-order-status/` | `update_order_status` | AJAX: Update order status (admin) |
-| `/export-orders-csv/` | `export_orders_csv` | Export orders to CSV |
+### Design
+- Announcement bar with sessionStorage persistence
+- Sticky navbar with scroll transform
+- Scroll-triggered animations
+- Toast notifications for Django messages
+- Responsive mobile-first design
+- Bootstrap 5.3 (CDN only — no build step)
 
-### Wishlist & Ratings
+## 🚀 Vercel Deployment
 
-| URL | View | Description |
-|-----|------|-------------|
-| `/wishlist/` | `view_wishlist` | View saved items |
-| `/wishlist/add/<id>/` | `add_to_wishlist` | Add product to wishlist |
-| `/wishlist/remove/<id>/` | `remove_from_wishlist` | Remove from wishlist |
-| `/wishlist/toggle/<id>/` | `toggle_wishlist` | Toggle wishlist status |
-| `/rating/submit/` | `submit_rating` | Submit product rating and review |
-
-### Admin (Custom Panel)
-
-| URL | View | Description |
-|-----|------|-------------|
-| `/admin-dashboard/` | `admin_dashboard` | Admin analytics dashboard |
-| `/addcat` | `addcat` | Add category |
-| `/edit/<id>/` | `editcat` | Edit category |
-| `/del/<id>/` | `deletecat` | Delete category |
-| `/listcat` | `listcat` | List all categories |
-| `/addpro` | `addpro` | Add product |
-| `/editpro/<id>/` | `editpro` | Edit product |
-| `/deletepro/<id>/` | `deletepro` | Delete product |
-| `/listpro` | `listpro` | List all products |
-| `/newsletter/` | `newsletter_signup` | Newsletter subscriber management |
-
-### Django Admin
-
-| URL | Description |
-|-----|-------------|
-| `/admin/` | Django admin panel (Jet themed) — full CRUD for all models |
-
----
-
-## Admin Panel
-
-ERA provides **two admin interfaces**:
-
-### 1. Django Admin (`/admin/`)
-
-Access the powerful Django admin with the Jet Reboot theme. Log in with the superuser credentials you created during setup.
-
-Features:
-- Full CRUD operations on all models
-- Filterable and searchable product lists
-- Inline order management
-- Coupon management
-- Newsletter subscriber list
-- Theme customization (6 color themes available)
-
-### 2. Custom Admin Dashboard (`/admin-dashboard/`)
-
-A purpose-built dashboard accessible by logging in with `admin@era.com`. Provides:
-
-- Order overview and status management
-- Inventory tracking
-- Category and product management
-- Quick actions for common admin tasks
-
----
-
-## Database
-
-### Default: SQLite
-
-The project uses SQLite out of the box. The database file `db.sqlite3` is created automatically after running migrations.
-
-### Switching to PostgreSQL (Production)
-
-For production use, you may want to switch to PostgreSQL. Update `index/settings.py`:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
-}
-```
-
-Then add the corresponding variables to `.env` and install `psycopg2-binary`:
-
+### 1. Prepare for Deployment
 ```bash
-pip install psycopg2-binary
+# Make sure your .env has production values:
+DJANGO_DEBUG=false
+DJANGO_SECRET_KEY=<your-secure-key>
+DJANGO_ALLOWED_HOSTS=your-app.vercel.app,localhost
 ```
 
----
-
-## Common Issues & Troubleshooting
-
-### Migration Errors
-
-If you encounter migration conflicts:
-
+### 2. Deploy to Vercel
 ```bash
-# Delete migration files (keep __init__.py)
-# Then recreate and apply:
-python manage.py makemigrations
-python manage.py migrate --fake-initial
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+
+# Production deploy
+vercel --prod
 ```
 
-### Static/Media Files Not Loading
+### 3. Post-Deployment
+- Run migrations in Vercel shell: `vercel shell` → `python manage.py migrate`
+- Create superuser: `python manage.py createsuperuser`
+- Set environment variables in Vercel dashboard
 
-Ensure `DEBUG = True` in `.env` for development. For production:
+### Environment Variables for Vercel
+| Variable | Value |
+|----------|-------|
+| `DJANGO_SECRET_KEY` | Generate with: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
+| `DJANGO_DEBUG` | `false` |
+| `DJANGO_ALLOWED_HOSTS` | `.vercel.app,.now.sh` |
+| `VERCEL` | `true` |
+| `EMAIL_USER` | Your Gmail |
+| `EMAIL_PASS` | Your app password |
 
-```bash
-python manage.py collectstatic
-```
+## 🛠️ Tech Stack
 
-And configure your web server (Nginx/Apache) to serve `/media/` and `/static/` directories.
+- **Backend**: Django 5.1.4, Python 3.11
+- **Database**: SQLite (dev) → PostgreSQL (production recommended)
+- **Frontend**: Bootstrap 5.3 (CDN), Vanilla JS
+- **Fonts**: Google Fonts (Cormorant Garamond + DM Sans)
+- **Charts**: Chart.js 4.x
+- **Deployment**: Vercel
+- **Static Files**: WhiteNoise
 
-### Port Already in Use
+## 📝 Notes
 
-```bash
-# Use a different port
-python manage.py runserver 8080
-```
+- Template folder is named `Templete/` (intentional spelling — configured in settings)
+- Media files (uploads) are stored in `/media/images/`
+- No npm/webpack — Bootstrap loaded via CDN only
+- All CSS is inline in templates
+- All JavaScript is vanilla (no frameworks)
 
----
+## 🔐 Security
 
-## Contributing
+- Passwords stored in plaintext (Customer model — upgrade to bcrypt for production)
+- CSRF protection enabled on all forms
+- Session-based authentication
+- Admin access restricted by email check (`admin@era.com`) or Django `is_staff`
 
-Contributions are welcome! Here's how you can help:
+## 📧 Support
 
-1. **Fork** the repository
-2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
-3. **Make your changes** and test thoroughly
-4. **Commit** with a clear message: `git commit -m "Add: feature description"`
-5. **Push** to your branch: `git push origin feature/your-feature-name`
-6. **Open a Pull Request**
-
-### Development Guidelines
-
-- Follow [PEP 8](https://peps.python.org/pep-0008/) for Python code style
-- Write meaningful commit messages
-- Test your changes before submitting
-- Update documentation if your changes affect user-facing features
-- Ensure all migrations are included
-
-### Reporting Bugs
-
-If you find a bug, please open an issue with:
-
-- A clear description of the problem
-- Steps to reproduce
-- Expected vs. actual behavior
-- Your environment (OS, Python version, Django version)
+For issues or questions, check the code comments which include bug fix references, or reach out to the development team.
 
 ---
 
-## License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
-## Acknowledgments
-
-- Built with [Django](https://www.djangoproject.com/) — The web framework for perfectionists with deadlines
-- Admin theme powered by [Django Jet Reboot](https://github.com/assem-ch/django-jet-reboot)
-- UI components styled with [Bootstrap 5](https://getbootstrap.com/)
-- Form handling via [Django Crispy Forms](https://django-crispy-forms.readthedocs.io/)
-
----
-
-<p align="center">Made with ❤️ for the ERA Project</p>
+**ERA Fashion** — Limitless fashion at your fingertips.

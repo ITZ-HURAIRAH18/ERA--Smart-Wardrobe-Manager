@@ -1,133 +1,277 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-    Edit Product
-{% endblock %}
-
-{% load crispy_forms_tags %}
+{% block title %}ERA - Edit Product{% endblock %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h1>Edit Product</h1>
-    <form method="post" enctype="multipart/form-data" id="productForm">
-      {% csrf_token %}
+<style>
+    .admin-page { padding-top: 120px; min-height: 80vh; }
+    .admin-container { max-width: 800px; margin: 0 auto; }
 
-      <!-- Name, Price, Category, Description fields -->
-      <div class="mb-3">
-          <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
-          {{ form.name }}
-      </div>
-      <div class="mb-3">
-          <label for="{{ form.price.id_for_label }}" class="form-label">Price</label>
-          {{ form.price }}
-      </div>
-      <div class="mb-3">
-          <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
-          {{ form.category }}
-      </div>
-      <div class="mb-3">
-          <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-          {{ form.description }}
-      </div>
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .admin-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    .admin-header h2 span { color: var(--era-gold); }
 
-      <!-- Image Upload Section -->
-      <div class="mb-3">
-          <label class="form-label fw-semibold">Product Image</label>
+    .admin-form-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+    }
 
-          <!-- Current Image Preview -->
-          {% if form.instance.image or form.instance.image_url %}
-          <div class="mb-3">
-              <label class="form-label text-muted small">Current Image:</label><br>
-              <img src="{{ form.instance.get_image_url }}" alt="Current product image"
-                   class="img-thumbnail" style="max-width: 200px; max-height: 200px; object-fit: cover;">
-          </div>
-          {% endif %}
+    .form-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group { flex: 1; margin-bottom: 1.5rem; }
+    .form-row .form-group { margin-bottom: 0; }
 
-          <!-- File Upload -->
-          <div class="card p-3 mb-2">
-              <label for="{{ form.image.id_for_label }}" class="form-label">
-                  <i class="bi bi-upload me-1"></i>Upload New Image
-              </label>
-              {{ form.image }}
-              {% if form.image.help_text %}
-              <small class="form-text text-muted">{{ form.image.help_text }}</small>
-              {% endif %}
-              {% if form.image.errors %}
-              <div class="text-danger small mt-1">{{ form.image.errors }}</div>
-              {% endif %}
-          </div>
+    .form-era-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+        color: var(--era-text);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .form-era-label .required { color: var(--era-danger); }
 
-          <!-- OR Divider -->
-          <div class="text-center my-3">
-              <span class="badge bg-secondary px-3 py-2" style="font-size: 0.9rem;">
-                  — OR —
-              </span>
-          </div>
+    .form-era {
+        width: 100%;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        padding: 0.85rem 1rem;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        color: var(--era-text);
+        background: var(--era-white);
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .form-era:focus {
+        outline: none;
+        border-color: var(--era-gold);
+        box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+    }
+    textarea.form-era { resize: vertical; min-height: 120px; }
+    select.form-era {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238A8178' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
 
-          <!-- URL Input -->
-          <div class="card p-3">
-              <label for="{{ form.image_url.id_for_label }}" class="form-label">
-                  <i class="bi bi-link-45deg me-1"></i>Paste Image URL
-              </label>
-              {{ form.image_url }}
-              {% if form.image_url.help_text %}
-              <small class="form-text text-muted">{{ form.image_url.help_text }}</small>
-              {% endif %}
-              {% if form.image_url.errors %}
-              <div class="text-danger small mt-1">{{ form.image_url.errors }}</div>
-              {% endif %}
-          </div>
+    .form-help {
+        font-size: 0.8rem;
+        color: var(--era-muted);
+        margin-top: 0.35rem;
+    }
+    .form-error {
+        color: var(--era-danger);
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
 
-          <!-- General instructions -->
-          <div class="alert alert-info mt-3 small" role="alert">
-              <i class="bi bi-info-circle me-1"></i>
-              <strong>Tip:</strong> Upload a new image file or paste a new URL to replace the current image. If both are provided, the uploaded file takes priority. Leave blank to keep the current image.
-          </div>
-      </div>
+    /* Image Upload */
+    .image-upload-area {
+        border: 2px dashed var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--duration-hover) var(--ease-out);
+        position: relative;
+    }
+    .image-upload-area:hover {
+        border-color: var(--era-gold);
+        background: var(--era-cream);
+    }
+    .image-upload-area i {
+        font-size: 2.5rem;
+        color: var(--era-muted);
+        margin-bottom: 0.75rem;
+    }
+    .image-upload-area input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .current-image {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: var(--radius-btn);
+        margin-top: 1rem;
+        border: 1px solid var(--era-border);
+    }
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: var(--radius-btn);
+        margin-top: 1rem;
+        display: none;
+    }
 
-      <!-- Additional fields -->
-      <div class="mb-3">
-          <label for="{{ form.available_sizes.id_for_label }}" class="form-label">Available Sizes</label>
-          {{ form.available_sizes }}
-      </div>
-      <div class="mb-3">
-          <label for="{{ form.available_colors.id_for_label }}" class="form-label">Available Colors</label>
-          {{ form.available_colors }}
-      </div>
-      <div class="mb-3">
-          <label for="{{ form.stock_quantity.id_for_label }}" class="form-label">Stock Quantity</label>
-          {{ form.stock_quantity }}
-      </div>
-      <div class="mb-3 form-check">
-          {{ form.is_active }}
-          <label for="{{ form.is_active.id_for_label }}" class="form-check-label">Is Active</label>
-      </div>
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--era-border);
+    }
 
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-      <a href="{% url 'listpro' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
-    </form>
-  </div>
+    @media (max-width: 767px) {
+        .form-row { flex-direction: column; gap: 0; }
+        .admin-form-card { padding: 1.5rem; }
+    }
+</style>
 
+<div class="admin-page">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2>Edit <span>Product</span></h2>
+            <a href="{% url 'listpro' %}" class="btn-era-outline btn-era-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Products
+            </a>
+        </div>
+
+        <div class="admin-form-card">
+            <form method="POST" enctype="multipart/form-data" id="productForm">
+                {% csrf_token %}
+
+                <!-- Product Name & Category -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label">Product Name <span class="required">*</span></label>
+                        <input type="text" name="name" class="form-era" value="{{ form.name.value|default:'' }}" required>
+                        {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label">Category <span class="required">*</span></label>
+                        <select name="category" class="form-era" required>
+                            <option value="">Select category</option>
+                            {% for cat in form.category.field.queryset %}
+                            <option value="{{ cat.id }}" {% if form.category.value == cat.id|stringformat:'d' %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}<div class="form-error">{{ form.category.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Price & Stock -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label">Price ($) <span class="required">*</span></label>
+                        <input type="number" name="price" class="form-era" value="{{ form.price.value|default:'0' }}" min="0" step="0.01" required>
+                        {% if form.price.errors %}<div class="form-error">{{ form.price.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label">Stock Quantity <span class="required">*</span></label>
+                        <input type="number" name="stock_quantity" class="form-era" value="{{ form.stock_quantity.value|default:'0' }}" min="0" required>
+                        {% if form.stock_quantity.errors %}<div class="form-error">{{ form.stock_quantity.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Sizes & Colors -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label">Available Sizes</label>
+                        <input type="text" name="available_sizes" class="form-era" value="{{ form.available_sizes.value|default:'S,M,L,XL' }}">
+                        <p class="form-help">Comma-separated sizes</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label">Available Colors</label>
+                        <input type="text" name="available_colors" class="form-era" value="{{ form.available_colors.value|default:'Red,Blue,Black' }}">
+                        <p class="form-help">Comma-separated colors</p>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label class="form-era-label">Description</label>
+                    <textarea name="description" class="form-era" rows="4">{{ form.description.value|default:'' }}</textarea>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="form-group">
+                    <label class="form-era-label">Product Image</label>
+
+                    {% if form.instance.image %}
+                    <div class="mb-3">
+                        <p class="small text-muted-era mb-2">Current Image:</p>
+                        <img src="{{ form.instance.image.url }}" alt="Current" class="current-image">
+                    </div>
+                    {% endif %}
+
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <i class="bi bi-cloud-arrow-up d-block"></i>
+                        <p class="mb-1 fw-semibold">Click or drag to upload new image</p>
+                        <p class="text-muted-era small mb-0">PNG, JPG up to 5MB — leave empty to keep current</p>
+                        <input type="file" name="image" id="imageInput" accept="image/*">
+                    </div>
+                    <img id="imagePreview" class="image-preview" alt="Preview">
+                </div>
+
+                <!-- Active Toggle -->
+                <div class="form-group">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="checkbox" name="is_active" id="is_active" class="form-check-input" {% if form.is_active.value|default_if_none:True %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--era-gold);">
+                        <label for="is_active" class="mb-0 fw-semibold">Product is active and visible</label>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-era">
+                        <i class="bi bi-check-circle me-1"></i> Save Changes
+                    </button>
+                    <a href="{% url 'listpro' %}" class="btn-era-outline">Cancel</a>
+                    {% if form.instance.id %}
+                    <a href="{% url 'deletepro' form.instance.id %}" class="btn-era-outline ms-auto" style="color: var(--era-danger); border-color: var(--era-danger);" onclick="return confirm('Delete this product permanently?');">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    // Auto-clear file input when URL is entered, and vice versa
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('{{ form.image.id_for_label }}');
-        const urlInput = document.getElementById('{{ form.image_url.id_for_label }}');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadArea = document.getElementById('imageUploadArea');
 
-        if (urlInput) {
-            urlInput.addEventListener('input', function() {
-                if (this.value.trim() && fileInput) {
-                    fileInput.value = '';
-                }
-            });
-        }
-        if (fileInput) {
-            fileInput.addEventListener('change', function() {
-                if (this.files.length > 0 && urlInput) {
-                    urlInput.value = '';
-                }
-            });
-        }
-    });
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    uploadArea.querySelector('i').style.display = 'none';
+                    uploadArea.querySelector('p').textContent = file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 </script>
 {% endblock %}

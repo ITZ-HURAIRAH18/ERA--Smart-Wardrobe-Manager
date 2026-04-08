@@ -1,365 +1,512 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load cart %}
 
 {% block title %}ERA - Limitless Fashion{% endblock %}
 
 {% block content %}
 <style>
-    /* Bug 2 Fix: Hero section with real fashion image background */
+    /* Section 1: Hero */
     .hero-section {
         min-height: 100vh;
-        background: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&q=80') center/cover no-repeat fixed;
+        background: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&q=80') center/cover no-repeat;
         display: flex;
         align-items: center;
         position: relative;
+        overflow: hidden;
     }
-    /* Bug 2 Fix: Dark overlay using before pseudo-element */
     .hero-section::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: rgba(10,10,20,0.55);
+        background: linear-gradient(135deg, rgba(13,13,13,0.65) 0%, rgba(26,26,46,0.55) 100%);
         z-index: 1;
     }
-    .hero-content {
-        position: relative;
-        z-index: 2;
-    }
+    .hero-content { position: relative; z-index: 2; }
     .hero-title {
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(2.5rem, 6vw, 4.5rem);
-        color: white;
-        line-height: 1.15;
-        font-weight: 700;
+        font-family: var(--font-heading);
+        font-size: clamp(3rem, 7vw, 5.5rem);
+        color: var(--era-white);
+        line-height: 1.1;
+        font-weight: 300;
+        letter-spacing: -1px;
     }
+    .hero-title span { color: var(--era-gold); font-weight: 600; }
     .hero-subtitle {
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font-body);
         font-size: clamp(1rem, 2vw, 1.25rem);
-        color: rgba(255,255,255,0.85);
+        color: rgba(255,255,255,0.8);
         font-weight: 300;
         letter-spacing: 0.5px;
     }
-    .typing-text::after {
-        content: '|';
-        animation: blink 0.7s infinite;
-        color: var(--accent);
+    .hero-scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        animation: bounce 2s infinite;
     }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+        40% { transform: translateX(-50%) translateY(-10px); }
+        60% { transform: translateX(-50%) translateY(-5px); }
+    }
 
-    /* Bug 3 Fix: Stat cards with clamp font sizes and equal heights */
-    .counter-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem 1.5rem;
+    /* Section 2: Stats */
+    .stat-card {
+        background: var(--era-white);
+        border-radius: var(--radius-card);
+        padding: 2.5rem 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid var(--era-border);
+        transition: all var(--duration-hover) var(--ease-out);
         height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
     }
-    .counter-card:hover {
+    .stat-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        border-color: var(--era-gold);
     }
-    .counter-number {
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(1.4rem, 3vw, 2.2rem);
-        font-weight: 700;
-        color: var(--accent);
-        line-height: 1.2;
+    .stat-number {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 600;
+        color: var(--era-gold);
+        line-height: 1;
     }
 
-    /* Bug 4 Fix: Category cards with real Unsplash images */
+    /* Section 3: Categories */
     .category-card {
         position: relative;
         overflow: hidden;
-        border-radius: 16px;
-        height: 420px;
+        border-radius: var(--radius-img);
+        height: 480px;
         cursor: pointer;
     }
     .category-card img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: transform 0.7s var(--ease-out);
     }
-    .category-card:hover img {
-        transform: scale(1.08);
-    }
+    .category-card:hover img { transform: scale(1.08); }
     .category-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(26,26,46,0.85) 0%, rgba(26,26,46,0.2) 50%, transparent 100%);
+        background: linear-gradient(to top, rgba(13,13,13,0.85) 0%, rgba(13,13,13,0.1) 60%, transparent 100%);
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
-        padding: 2rem;
-        transition: all 0.3s ease;
+        padding: 2.5rem;
+        transition: all var(--duration-hover) var(--ease-out);
     }
-    .category-card:hover .category-overlay {
-        background: rgba(26,26,46,0.65);
+    .category-card:hover .category-overlay { background: rgba(13,13,13,0.6); }
+    .category-overlay h3 {
+        font-family: var(--font-heading);
+        color: var(--era-white);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
     }
     .shop-now-btn {
         opacity: 0;
-        transform: translateY(15px);
-        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(20px);
+        transition: all 0.4s var(--ease-out);
+        display: inline-block;
+        margin-top: 1rem;
     }
     .category-card:hover .shop-now-btn {
         opacity: 1;
         transform: translateY(0);
     }
 
-    .trust-badge {
-        text-align: center;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
+    /* Section 4: Featured Products */
+    .product-card-landing {
+        position: relative;
+        border-radius: var(--radius-card);
+        overflow: hidden;
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        transition: all var(--duration-hover) var(--ease-out);
     }
-    .trust-badge:hover { transform: translateY(-5px); }
-    .trust-badge i { font-size: 2.5rem; color: var(--accent); }
-
-    .testimonial-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
+    .product-card-landing:hover {
+        box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+        transform: translateY(-4px);
+    }
+    .product-card-landing .img-wrap {
+        position: relative;
+        overflow: hidden;
+        height: 320px;
+    }
+    .product-card-landing .img-wrap img {
+        width: 100%;
         height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s var(--ease-out);
+    }
+    .product-card-landing:hover .img-wrap img { transform: scale(1.05); }
+    .product-card-landing .card-body { padding: 1.25rem; }
+
+    /* Section 5: Trust Badges */
+    .trust-item {
+        text-align: center;
+        padding: 2rem 1rem;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .trust-item:hover { transform: translateY(-5px); }
+    .trust-item i {
+        font-size: 2.5rem;
+        color: var(--era-gold);
+        margin-bottom: 1rem;
+    }
+
+    /* Section 6: Testimonials */
+    .testimonial-card {
+        background: var(--era-white);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        border: 1px solid var(--era-border);
+        height: 100%;
+        transition: all var(--duration-hover) var(--ease-out);
     }
     .testimonial-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        transform: translateY(-4px);
+    }
+    .testimonial-quote {
+        font-style: italic;
+        color: var(--era-text);
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+    }
+    .testimonial-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
     }
 
-    .offer-banner {
-        background: linear-gradient(135deg, var(--accent) 0%, #d4b878 100%);
-        padding: 3.5rem;
-        border-radius: 20px;
+    /* Section 7: CTA Banner */
+    .cta-banner {
+        background: linear-gradient(135deg, var(--era-navy) 0%, var(--era-black) 100%);
+        padding: 5rem 2rem;
         text-align: center;
         position: relative;
         overflow: hidden;
     }
-    .offer-banner::before {
+    .cta-banner::before {
         content: '';
         position: absolute;
         top: -50%;
-        right: -20%;
-        width: 300px;
-        height: 300px;
-        background: rgba(255,255,255,0.1);
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(201,169,110,0.08);
         border-radius: 50%;
     }
-    .countdown-timer {
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(2rem, 4vw, 3rem);
-        color: var(--primary);
-        font-weight: 700;
+    .cta-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 300px;
+        height: 300px;
+        background: rgba(201,169,110,0.05);
+        border-radius: 50%;
     }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
+    .cta-content { position: relative; z-index: 1; }
+    .cta-banner h2 {
+        font-family: var(--font-heading);
+        color: var(--era-white);
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-weight: 300;
+        margin-bottom: 1rem;
     }
+    .cta-banner h2 span { color: var(--era-gold); font-weight: 600; }
 
     @media (max-width: 768px) {
-        .category-card { height: 320px; }
-        .offer-banner { padding: 2rem 1.5rem; }
+        .category-card { height: 350px; }
+        .cta-banner { padding: 3rem 1.5rem; }
     }
 </style>
 
-<!-- Bug 2 Fix: Hero Section with real fashion image background -->
+<!-- Section 1: Hero -->
 <section class="hero-section">
     <div class="container hero-content text-center">
-        <h1 class="hero-title mb-4">
-            <span class="d-block" style="animation: fadeInUp 0.8s ease 0.2s both;">Limitless</span>
-            <span class="d-block" style="animation: fadeInUp 0.8s ease 0.4s both;">Fashion at Your <span style="color: var(--accent);">Fingertips</span></span>
+        <h1 class="hero-title mb-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+            Limitless<br><span>Fashion</span>
         </h1>
-        <p class="hero-subtitle mb-4">Discover 5K+ Products & 10M+ Happy Customers</p>
-        <div class="d-flex gap-3 justify-content-center flex-wrap" style="animation: fadeInUp 0.8s ease 0.6s both;">
-            <a href="{% url 'home' %}" class="btn btn-era btn-lg px-5">Shop Now</a>
-            <a href="{% url 'login' %}" class="btn btn-outline-era btn-lg px-5">Login & Signup</a>
+        <p class="hero-subtitle mb-5 animate-fade-in-up" style="animation-delay: 0.4s;">
+            Discover 5000+ curated styles for every occasion
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap animate-fade-in-up" style="animation-delay: 0.6s;">
+            <a href="{% url 'home' %}" class="btn-era btn-era-lg">Shop Collection</a>
+            {% if not request.session.customer_id %}
+            <a href="{% url 'signup' %}" class="btn-era-outline btn-era-lg">Create Account</a>
+            {% else %}
+            <a href="{% url 'home' %}" class="btn-era-outline btn-era-lg">Browse Shop</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-scroll-indicator text-white-50">
+        <i class="bi bi-chevron-down fs-4"></i>
+    </div>
+</section>
+
+<!-- Section 2: Stats Counter -->
+<section class="section-era bg-cream">
+    <div class="container">
+        <div class="text-center mb-5 animate-on-scroll">
+            <h2 class="mb-3">Why <span class="text-gold">ERA</span>?</h2>
+            <p class="text-muted-era">Trusted by millions worldwide for quality and style</p>
+        </div>
+        <div class="row g-4 stagger-children">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <i class="bi bi-bag-check fs-1 mb-3 text-gold"></i>
+                    <div class="stat-number" data-target="5000" data-suffix="+">0</div>
+                    <p class="text-muted-era mb-0 mt-2">Products</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <i class="bi bi-people fs-1 mb-3 text-gold"></i>
+                    <div class="stat-number" data-target="10" data-suffix="M+" data-display="10M+">0</div>
+                    <p class="text-muted-era mb-0 mt-2">Happy Customers</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <i class="bi bi-star-fill fs-1 mb-3 text-gold"></i>
+                    <div class="stat-number" data-target="4.9" data-suffix="" data-decimal="true">0</div>
+                    <p class="text-muted-era mb-0 mt-2">Average Rating</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <i class="bi bi-headset fs-1 mb-3 text-gold"></i>
+                    <div class="stat-number" data-target="24" data-suffix="/7">0</div>
+                    <p class="text-muted-era mb-0 mt-2">Support</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Why ERA? Counter Section -->
-<section class="py-5" style="background: var(--surface);">
+<!-- Section 3: Featured Categories -->
+<section class="section-era">
     <div class="container">
-        <h2 class="text-center mb-2">Why <span style="color: var(--accent);">ERA</span>?</h2>
-        <p class="text-center text-muted mb-5">Trusted by millions worldwide</p>
+        <div class="text-center mb-5 animate-on-scroll">
+            <h2 class="mb-3">Shop by <span class="text-gold">Category</span></h2>
+            <p class="text-muted-era">Explore our curated collections</p>
+        </div>
         <div class="row g-4">
-            <!-- Bug 3 Fix: Equal height cards with clamp font sizes -->
-            <div class="col-lg-3 col-md-6 animate-on-scroll">
-                <div class="counter-card">
-                    <i class="bi bi-bag-check fs-1 mb-3" style="color: var(--accent);"></i>
-                    <div class="counter-number" data-target="5000" data-suffix="+">0</div>
-                    <p class="text-muted mb-0">Products</p>
+            {% if categories_all %}
+                {% for cat in categories_all|slice:":3" %}
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="category-card">
+                        {% if forloop.counter == 1 %}
+                        <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&q=80" alt="{{ cat.name }}" loading="lazy">
+                        {% elif forloop.counter == 2 %}
+                        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80" alt="{{ cat.name }}" loading="lazy">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=600&q=80" alt="{{ cat.name }}" loading="lazy">
+                        {% endif %}
+                        <div class="category-overlay">
+                            <h3>{{ cat.name }}</h3>
+                            <p class="text-white-50 mb-0">Discover the latest trends</p>
+                            <a href="{% url 'home' %}?category={{ cat.id }}" class="btn-era btn-era-sm shop-now-btn">Shop Now</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 animate-on-scroll">
-                <div class="counter-card">
-                    <i class="bi bi-people fs-1 mb-3" style="color: var(--accent);"></i>
-                    <!-- Bug 3 Fix: Show "10M+" instead of "10,000,000+" -->
-                    <div class="counter-number" data-target="10" data-suffix="M+" data-display="10M+">0</div>
-                    <p class="text-muted mb-0">Customers</p>
+                {% endfor %}
+            {% else %}
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="category-card">
+                        <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&q=80" alt="Men" loading="lazy">
+                        <div class="category-overlay">
+                            <h3>Men</h3>
+                            <p class="text-white-50 mb-0">Sharp styles for the modern gentleman</p>
+                            <a href="{% url 'home' %}" class="btn-era btn-era-sm shop-now-btn">Shop Now</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 animate-on-scroll">
-                <div class="counter-card">
-                    <i class="bi bi-star-fill fs-1 mb-3" style="color: var(--accent);"></i>
-                    <div class="counter-number" data-target="4.9" data-suffix="" data-decimal="true">0</div>
-                    <p class="text-muted mb-0">Star Rating</p>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="category-card">
+                        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80" alt="Women" loading="lazy">
+                        <div class="category-overlay">
+                            <h3>Women</h3>
+                            <p class="text-white-50 mb-0">Elegant pieces for every occasion</p>
+                            <a href="{% url 'home' %}" class="btn-era btn-era-sm shop-now-btn">Shop Now</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 animate-on-scroll">
-                <div class="counter-card">
-                    <i class="bi bi-headset fs-1 mb-3" style="color: var(--accent);"></i>
-                    <div class="counter-number" data-target="24" data-suffix="/7">0</div>
-                    <p class="text-muted mb-0">Support</p>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="category-card">
+                        <img src="https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=600&q=80" alt="Children" loading="lazy">
+                        <div class="category-overlay">
+                            <h3>Children</h3>
+                            <p class="text-white-50 mb-0">Adorable outfits for little ones</p>
+                            <a href="{% url 'home' %}" class="btn-era btn-era-sm shop-now-btn">Shop Now</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </section>
 
-<!-- Bug 4 Fix: Featured Categories with real Unsplash images -->
-<section class="py-5">
+<!-- Section 4: Featured Products (New Arrivals) -->
+<section class="section-era bg-stone">
     <div class="container">
-        <h2 class="text-center mb-2">Featured <span style="color: var(--accent);">Categories</span></h2>
-        <p class="text-center text-muted mb-5">Explore our curated collections</p>
+        <div class="d-flex justify-content-between align-items-end mb-5 animate-on-scroll">
+            <div>
+                <h2 class="mb-2">New <span class="text-gold">Arrivals</span></h2>
+                <p class="text-muted-era mb-0">Fresh styles just dropped</p>
+            </div>
+            <a href="{% url 'home' %}" class="btn-era-outline btn-era-sm d-none d-md-inline-block">View All</a>
+        </div>
         <div class="row g-4">
-            <!-- Men Category -->
-            <div class="col-md-4 animate-on-scroll">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&q=80" alt="Men's Fashion" loading="lazy">
-                    <div class="category-overlay">
-                        <h3 class="text-white mb-2">Men</h3>
-                        <p class="text-white-50 mb-3">Sharp styles for the modern gentleman</p>
-                        <a href="{% url 'home' %}?category={{ categories_all.0.id }}" class="btn btn-era shop-now-btn">Shop Now</a>
+            {% if products_featured %}
+                {% for product in products_featured|slice:":4" %}
+                <div class="col-lg-3 col-md-6 animate-on-scroll">
+                    <div class="product-card-landing">
+                        <div class="img-wrap">
+                            {% if product.is_new %}
+                            <span class="badge-era badge-era-new" style="position:absolute;top:12px;left:12px;z-index:5;">NEW</span>
+                            {% endif %}
+                            <a href="{% url 'product_detail' product.id %}">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <span class="text-muted-era small text-uppercase">{{ product.category.name }}</span>
+                            <h6 class="mt-1 mb-2">
+                                <a href="{% url 'product_detail' product.id %}" class="text-dark text-decoration-none">{{ product.name }}</a>
+                            </h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-gold">${{ product.price }}</span>
+                                <form action="{% url 'home' %}" method="POST" class="mb-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product" value="{{ product.id }}">
+                                    <button type="submit" class="btn-era btn-era-sm py-1 px-3">Add</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- Women Category -->
-            <div class="col-md-4 animate-on-scroll">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80" alt="Women's Fashion" loading="lazy">
-                    <div class="category-overlay">
-                        <h3 class="text-white mb-2">Women</h3>
-                        <p class="text-white-50 mb-3">Elegant pieces for every occasion</p>
-                        <a href="{% url 'home' %}?category={{ categories_all.1.id }}" class="btn btn-era shop-now-btn">Shop Now</a>
-                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center animate-on-scroll">
+                    <p class="text-muted-era">New arrivals coming soon. <a href="{% url 'home' %}" class="text-gold">Browse our shop</a></p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-4 d-md-none">
+            <a href="{% url 'home' %}" class="btn-era-outline">View All Products</a>
+        </div>
+    </div>
+</section>
+
+<!-- Section 5: Trust Badges -->
+<section class="section-era">
+    <div class="container">
+        <div class="row g-4 stagger-children">
+            <div class="col-lg col-md-4 col-6 animate-on-scroll">
+                <div class="trust-item">
+                    <i class="bi bi-truck d-block"></i>
+                    <h6 class="mb-1">Free Delivery</h6>
+                    <p class="text-muted-era small mb-0">Orders above $200</p>
                 </div>
             </div>
-            <!-- Children Category -->
-            <div class="col-md-4 animate-on-scroll">
-                <div class="category-card">
-                    <img src="https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=600&q=80" alt="Children's Fashion" loading="lazy">
-                    <div class="category-overlay">
-                        <h3 class="text-white mb-2">Children</h3>
-                        <p class="text-white-50 mb-3">Adorable outfits for little ones</p>
-                        <a href="{% url 'home' %}?category={{ categories_all.2.id }}" class="btn btn-era shop-now-btn">Shop Now</a>
-                    </div>
+            <div class="col-lg col-md-4 col-6 animate-on-scroll">
+                <div class="trust-item">
+                    <i class="bi bi-arrow-return-left d-block"></i>
+                    <h6 class="mb-1">Easy Returns</h6>
+                    <p class="text-muted-era small mb-0">30-day return policy</p>
+                </div>
+            </div>
+            <div class="col-lg col-md-4 col-6 animate-on-scroll">
+                <div class="trust-item">
+                    <i class="bi bi-shield-lock d-block"></i>
+                    <h6 class="mb-1">Secure Payment</h6>
+                    <p class="text-muted-era small mb-0">100% secure checkout</p>
+                </div>
+            </div>
+            <div class="col-lg col-md-4 col-6 animate-on-scroll">
+                <div class="trust-item">
+                    <i class="bi bi-headset d-block"></i>
+                    <h6 class="mb-1">24/7 Support</h6>
+                    <p class="text-muted-era small mb-0">Always here to help</p>
+                </div>
+            </div>
+            <div class="col-lg col-md-4 col-6 animate-on-scroll">
+                <div class="trust-item">
+                    <i class="bi bi-patch-check d-block"></i>
+                    <h6 class="mb-1">Authentic</h6>
+                    <p class="text-muted-era small mb-0">Guaranteed original</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Trust Badges -->
-<section class="py-5" style="background: var(--surface);">
+<!-- Section 6: Testimonials -->
+<section class="section-era bg-cream">
     <div class="container">
-        <div class="row text-center g-4">
-            <div class="col-lg col-md-4 col-6 trust-badge animate-on-scroll">
-                <i class="bi bi-truck d-block mb-2"></i>
-                <p class="fw-semibold mb-0">Free Delivery</p>
-            </div>
-            <div class="col-lg col-md-4 col-6 trust-badge animate-on-scroll">
-                <i class="bi bi-arrow-return-left d-block mb-2"></i>
-                <p class="fw-semibold mb-0">Easy Returns</p>
-            </div>
-            <div class="col-lg col-md-4 col-6 trust-badge animate-on-scroll">
-                <i class="bi bi-shield-lock d-block mb-2"></i>
-                <p class="fw-semibold mb-0">Secure Payment</p>
-            </div>
-            <div class="col-lg col-md-4 col-6 trust-badge animate-on-scroll">
-                <i class="bi bi-headset d-block mb-2"></i>
-                <p class="fw-semibold mb-0">24/7 Support</p>
-            </div>
-            <div class="col-lg col-md-4 col-6 trust-badge animate-on-scroll">
-                <i class="bi bi-patch-check d-block mb-2"></i>
-                <p class="fw-semibold mb-0">Authentic Products</p>
-            </div>
+        <div class="text-center mb-5 animate-on-scroll">
+            <h2 class="mb-3">What Our <span class="text-gold">Customers</span> Say</h2>
+            <p class="text-muted-era">Real reviews from real people</p>
         </div>
-    </div>
-</section>
-
-<!-- Testimonials -->
-<section class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-2">What Our <span style="color: var(--accent);">Customers</span> Say</h2>
-        <p class="text-center text-muted mb-5">Real reviews from real people</p>
         <div class="row g-4">
             <div class="col-md-4 animate-on-scroll">
                 <div class="testimonial-card">
-                    <div class="d-flex mb-3">
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
+                    <div class="star-rating mb-3">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                     </div>
-                    <p class="text-muted mb-3">"Absolutely love the quality! Every piece I've ordered has exceeded my expectations. ERA is my go-to for fashion now."</p>
+                    <p class="testimonial-quote">"Absolutely love the quality! Every piece I've ordered has exceeded my expectations. ERA is my go-to for fashion now."</p>
                     <div class="d-flex align-items-center">
-                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-                            <i class="bi bi-person" style="color: var(--accent);"></i>
+                        <div class="bg-stone rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-person" style="color: var(--era-gold);"></i>
                         </div>
                         <div class="ms-3">
                             <p class="mb-0 fw-semibold small">Sarah M.</p>
-                            <p class="mb-0 text-muted small">Verified Buyer</p>
+                            <p class="mb-0 text-muted-era small">Verified Buyer</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4 animate-on-scroll">
                 <div class="testimonial-card">
-                    <div class="d-flex mb-3">
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
+                    <div class="star-rating mb-3">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                     </div>
-                    <p class="text-muted mb-3">"Fast delivery and the packaging was beautiful. The clothes fit perfectly and the quality is outstanding."</p>
+                    <p class="testimonial-quote">"Fast delivery and beautiful packaging. The clothes fit perfectly and the quality is outstanding. Highly recommended!"</p>
                     <div class="d-flex align-items-center">
-                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-                            <i class="bi bi-person" style="color: var(--accent);"></i>
+                        <div class="bg-stone rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-person" style="color: var(--era-gold);"></i>
                         </div>
                         <div class="ms-3">
                             <p class="mb-0 fw-semibold small">James K.</p>
-                            <p class="mb-0 text-muted small">Verified Buyer</p>
+                            <p class="mb-0 text-muted-era small">Verified Buyer</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4 animate-on-scroll">
                 <div class="testimonial-card">
-                    <div class="d-flex mb-3">
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                        <i class="bi bi-star-half text-warning"></i>
+                    <div class="star-rating mb-3">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
                     </div>
-                    <p class="text-muted mb-3">"The kids collection is adorable! My children love their new outfits. Great quality at reasonable prices."</p>
+                    <p class="testimonial-quote">"The kids collection is adorable! My children love their new outfits. Great quality at reasonable prices."</p>
                     <div class="d-flex align-items-center">
-                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-                            <i class="bi bi-person" style="color: var(--accent);"></i>
+                        <div class="bg-stone rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                            <i class="bi bi-person" style="color: var(--era-gold);"></i>
                         </div>
                         <div class="ms-3">
                             <p class="mb-0 fw-semibold small">Emily R.</p>
-                            <p class="mb-0 text-muted small">Verified Buyer</p>
+                            <p class="mb-0 text-muted-era small">Verified Buyer</p>
                         </div>
                     </div>
                 </div>
@@ -368,16 +515,16 @@
     </div>
 </section>
 
-<!-- Limited Time Offer -->
-<section class="py-5">
-    <div class="container">
-        <div class="offer-banner animate-on-scroll">
-            <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Limited Time Offer!</h2>
-            <p class="fs-5 mb-4">Use code <strong>WELCOME10</strong> for 10% off your first order</p>
-            <div class="countdown-timer mb-4" id="countdownTimer">
-                <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
-            </div>
-            <a href="{% url 'home' %}" class="btn btn-lg px-5" style="background: var(--primary); color: var(--accent);">Shop the Sale</a>
+<!-- Section 7: CTA Banner -->
+<section class="cta-banner">
+    <div class="container cta-content animate-on-scroll">
+        <h2 class="mb-3">Get <span>10% Off</span> Your First Order</h2>
+        <p class="text-white-50 fs-5 mb-4">Use code <strong class="text-gold">WELCOME10</strong> at checkout</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'home' %}" class="btn-era btn-era-lg">Shop Now</a>
+            {% if not request.session.customer_id %}
+            <a href="{% url 'signup' %}" class="btn-era-outline btn-era-lg" style="border-color: var(--era-gold); color: var(--era-gold);">Sign Up Free</a>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -386,9 +533,9 @@
 
 {% block extra_js %}
 <script>
-    // Counter animation
+    // Counter Animation
     function animateCounters() {
-        document.querySelectorAll('.counter-number').forEach(counter => {
+        document.querySelectorAll('.stat-number').forEach(counter => {
             const target = parseFloat(counter.dataset.target);
             const suffix = counter.dataset.suffix || '';
             const isDecimal = counter.dataset.decimal === 'true';
@@ -405,7 +552,6 @@
                     current = target;
                     clearInterval(timer);
                 }
-                // Bug 3 Fix: Use display value if provided (e.g., "10M+")
                 if (displayValue && current >= target) {
                     counter.textContent = displayValue;
                 } else {
@@ -418,33 +564,13 @@
     // Trigger counters when visible
     const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting && entry.target.classList.contains('counter-number')) {
+            if (entry.isIntersecting) {
                 animateCounters();
                 counterObserver.unobserve(entry.target);
             }
         });
     }, { threshold: 0.5 });
 
-    document.querySelectorAll('.counter-number').forEach(el => counterObserver.observe(el));
-
-    // Countdown timer (24 hours from now)
-    function updateCountdown() {
-        const now = new Date();
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-        const diff = endOfDay - now;
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        const hoursEl = document.getElementById('hours');
-        const minutesEl = document.getElementById('minutes');
-        const secondsEl = document.getElementById('seconds');
-        if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
-        if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
-        if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+    document.querySelectorAll('.stat-number').forEach(el => counterObserver.observe(el));
 </script>
 {% endblock %}

@@ -6,392 +6,495 @@
 
 {% block content %}
 <style>
-    .dashboard-header {
-        background: linear-gradient(135deg, var(--primary) 0%, #2a2a4e 100%);
-        color: white;
-        padding: 2rem 0;
+    .admin-page { padding-top: 120px; }
+
+    .admin-header {
+        background: linear-gradient(135deg, var(--era-navy) 0%, var(--era-black) 100%);
+        padding: 3rem 0;
         margin-bottom: 2rem;
     }
-    .stat-card {
-        background: white;
-        border-radius: 16px;
+    .admin-header h1 {
+        font-family: var(--font-heading);
+        color: var(--era-white);
+        font-weight: 300;
+        font-size: 2.5rem;
+    }
+    .admin-header h1 span { color: var(--era-gold); font-weight: 600; }
+    .admin-header p { color: rgba(255,255,255,0.6); }
+
+    /* Stat Cards */
+    .admin-stat-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
         padding: 1.5rem;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: all var(--duration-hover) var(--ease-out);
         height: 100%;
     }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    .admin-stat-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        transform: translateY(-2px);
     }
-    .stat-icon {
+    .admin-stat-icon {
         width: 56px;
         height: 56px;
-        border-radius: 14px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        margin-bottom: 1rem;
+        flex-shrink: 0;
     }
-    .stat-value {
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(1.5rem, 3vw, 2rem);
-        font-weight: 700;
-        color: var(--text-primary);
-        line-height: 1.2;
+    .admin-stat-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .admin-stat-icon.gold { background: rgba(201,169,110,0.15); color: var(--era-gold); }
+    .admin-stat-icon.green { background: rgba(45,106,79,0.1); color: var(--era-success); }
+    .admin-stat-icon.orange { background: rgba(183,121,31,0.1); color: var(--era-warning); }
+    .admin-stat-value {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--era-navy);
+        line-height: 1;
     }
-    .stat-label {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-    .stat-change {
+    .admin-stat-label {
         font-size: 0.8rem;
-        font-weight: 600;
-    }
-
-    .table-era thead th {
-        border-bottom: 2px solid var(--surface);
-        color: var(--text-secondary);
-        font-weight: 600;
-        font-size: 0.85rem;
+        color: var(--era-muted);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
-    .table-era tbody td {
-        vertical-align: middle;
-        padding: 1rem 0.75rem;
+        margin-top: 0.25rem;
     }
 
-    .alert-item {
+    /* Admin Sections */
+    .admin-section {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .admin-section h5 {
+        font-family: var(--font-heading);
+        font-size: 1.15rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--era-border);
+    }
+
+    /* Quick Links */
+    .admin-quick-link {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.75rem;
         padding: 1rem;
-        border-radius: 10px;
-        background: var(--surface);
-        margin-bottom: 0.75rem;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        text-decoration: none;
+        color: var(--era-text);
+        transition: all var(--duration-hover) var(--ease-out);
+        height: 100%;
     }
-    .alert-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: rgba(239,159,39,0.15);
-        color: var(--warning);
+    .admin-quick-link:hover {
+        border-color: var(--era-gold);
+        background: var(--era-cream);
+        color: var(--era-text);
+        transform: translateY(-2px);
+    }
+    .admin-quick-link i {
+        font-size: 1.5rem;
+        color: var(--era-gold);
+    }
+    .admin-quick-link-text h6 {
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+    .admin-quick-link-text p {
+        font-size: 0.8rem;
+        color: var(--era-muted);
+        margin: 0;
+    }
+
+    /* Table */
+    .admin-table { width: 100%; }
+    .admin-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--era-muted);
+        border-bottom: 2px solid var(--era-border);
+        padding: 0.75rem;
+        font-weight: 600;
+    }
+    .admin-table tbody td {
+        padding: 0.85rem 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--era-border);
+        font-size: 0.9rem;
+    }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+    .admin-table tbody tr:hover { background: var(--era-cream); }
+
+    .customer-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .customer-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--era-stone);
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--era-muted);
+    }
+
+    /* Low Stock Alert */
+    .low-stock-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--era-border);
+    }
+    .low-stock-item:last-child { border-bottom: none; }
+    .stock-bar {
+        width: 60px;
+        height: 4px;
+        background: var(--era-border);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    .stock-bar-fill {
+        height: 100%;
+        background: var(--era-warning);
+        border-radius: 2px;
+    }
+    .stock-bar-fill.critical { background: var(--era-danger); }
+
+    @media (max-width: 767px) {
+        .admin-table { display: block; overflow-x: auto; }
     }
 </style>
 
-<!-- Dashboard Header -->
-<section class="dashboard-header">
+<div class="admin-page">
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <div class="container">
+            <h1>Admin <span>Dashboard</span></h1>
+            <p>Welcome back! Here's what's happening with your store today.</p>
+        </div>
+    </div>
+
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h2 class="mb-1" style="font-family: 'Playfair Display', serif;">Admin <span style="color: var(--accent);">Dashboard</span></h2>
-                <p class="mb-0 text-white-50">Welcome back! Here's what's happening with your store today.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{% url 'export_orders_csv' %}" class="btn btn-outline-era btn-sm">
-                    <i class="bi bi-download me-1"></i>Export CSV
-                </a>
-                <a href="{% url 'home' %}" class="btn btn-era btn-sm">
-                    <i class="bi bi-eye me-1"></i>View Store
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="container pb-5">
-    <!-- Stat Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(201,169,110,0.15); color: var(--accent);">
-                    <i class="bi bi-bag-check"></i>
-                </div>
-                <div class="stat-value">{{ today_orders }}</div>
-                <div class="stat-label">Total Orders</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(29,158,117,0.15); color: var(--success);">
-                    <i class="bi bi-currency-dollar"></i>
-                </div>
-                <div class="stat-value">${{ today_revenue|default:"0" }}</div>
-                <div class="stat-label">Total Revenue</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(52,152,219,0.15); color: #3498db;">
-                    <i class="bi bi-tags"></i>
-                </div>
-                <div class="stat-value">{{ total_products }}</div>
-                <div class="stat-label">Total Products</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(239,159,39,0.15); color: var(--warning);">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="stat-value">{{ total_customers }}</div>
-                <div class="stat-label">Total Customers</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Order Status Overview -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="stat-card text-center">
-                <div class="stat-value text-warning">{{ pending_orders }}</div>
-                <div class="stat-label">Pending Orders</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card text-center">
-                <div class="stat-value" style="color: #3498db;">{{ processing_orders }}</div>
-                <div class="stat-label">Processing</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card text-center">
-                <div class="stat-value" style="color: #e67e22;">{{ shipped_orders }}</div>
-                <div class="stat-label">Shipped</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card text-center">
-                <div class="stat-value text-success">{{ delivered_orders }}</div>
-                <div class="stat-label">Delivered</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-4">
-        <!-- Revenue Chart -->
-        <div class="col-lg-8">
-            <div class="card-era p-4 h-100">
-                <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Revenue <span style="color: var(--accent);">Trend</span></h5>
-                <canvas id="revenueChart" height="120"></canvas>
-            </div>
-        </div>
-
-        <!-- Top Products -->
-        <div class="col-lg-4">
-            <div class="card-era p-4 h-100">
-                <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Top <span style="color: var(--accent);">Products</span></h5>
-                <div class="list-group list-group-flush">
-                    {% for product in top_products %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge rounded-pill" style="background: var(--accent); color: var(--primary);">#{{ forloop.counter }}</span>
-                            <span class="small">{{ product.product__name }}</span>
-                        </div>
-                        <span class="small fw-semibold">{{ product.total_sold }} sold</span>
+        <!-- Stats Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon blue"><i class="bi bi-receipt"></i></div>
+                    <div>
+                        <div class="admin-stat-value">{{ today_orders }}</div>
+                        <div class="admin-stat-label">Total Orders</div>
                     </div>
-                    {% empty %}
-                    <p class="text-muted small">No sales data yet</p>
-                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon gold"><i class="bi bi-currency-dollar"></i></div>
+                    <div>
+                        <div class="admin-stat-value">${{ today_revenue }}</div>
+                        <div class="admin-stat-label">Total Revenue</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon green"><i class="bi bi-box-seam"></i></div>
+                    <div>
+                        <div class="admin-stat-value">{{ total_products }}</div>
+                        <div class="admin-stat-label">Products</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon orange"><i class="bi bi-people"></i></div>
+                    <div>
+                        <div class="admin-stat-value">{{ total_customers }}</div>
+                        <div class="admin-stat-label">Customers</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row g-4 mb-4">
-        <!-- Recent Orders -->
-        <div class="col-lg-7">
-            <div class="card-era p-4 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0" style="font-family: 'Playfair Display', serif;">Recent <span style="color: var(--accent);">Orders</span></h5>
-                    <a href="{% url 'finalorder' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+        <!-- Quick Links -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <a href="{% url 'addpro' %}" class="admin-quick-link">
+                    <i class="bi bi-plus-circle"></i>
+                    <div class="admin-quick-link-text">
+                        <h6>Add Product</h6>
+                        <p>Create new product</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'listpro' %}" class="admin-quick-link">
+                    <i class="bi bi-box"></i>
+                    <div class="admin-quick-link-text">
+                        <h6>Products</h6>
+                        <p>Manage inventory</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'finalorder' %}" class="admin-quick-link">
+                    <i class="bi bi-clipboard-data"></i>
+                    <div class="admin-quick-link-text">
+                        <h6>Orders</h6>
+                        <p>View all orders</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'listcat' %}" class="admin-quick-link">
+                    <i class="bi bi-tags"></i>
+                    <div class="admin-quick-link-text">
+                        <h6>Categories</h6>
+                        <p>Manage categories</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Charts + Recent Orders -->
+        <div class="row g-4">
+            <!-- Chart -->
+            <div class="col-lg-8">
+                <div class="admin-section">
+                    <h5>Revenue Overview</h5>
+                    {% if chart_labels %}
+                    <canvas id="revenueChart" height="100"></canvas>
+                    {% else %}
+                    <div class="text-center py-5 text-muted-era">
+                        <i class="bi bi-bar-chart d-block fs-1 mb-2"></i>
+                        <p>No revenue data yet. Orders will appear here.</p>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-era table-hover">
+
+                <!-- Order Status Chart -->
+                {% if orders_by_status %}
+                <div class="admin-section">
+                    <h5>Orders by Status</h5>
+                    <div style="max-width: 400px; margin: 0 auto;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Recent Orders -->
+                <div class="admin-section">
+                    <h5>Recent Orders</h5>
+                    {% if recent_orders %}
+                    <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Customer</th>
-                                <th>Product</th>
-                                <th>Total</th>
+                                <th>Amount</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for order in recent_orders %}
+                            {% for order in recent_orders|slice:":8" %}
                             <tr>
-                                <td><a href="#" class="text-decoration-none">#{{ order.id }}</a></td>
-                                <td>{{ order.customer.fname }} {{ order.customer.lname }}</td>
-                                <td class="small text-truncate" style="max-width: 120px;">{{ order.product.name }}</td>
-                                <td class="fw-semibold">${{ order.price|multiply:order.quantity }}</td>
                                 <td>
-                                    <span class="badge badge-status-{{ order.status|lower }}">{{ order.status }}</span>
+                                    <div class="customer-cell">
+                                        <div class="customer-avatar">{{ order.customer.fname|first }}</div>
+                                        <span>{{ order.customer.fname }} {{ order.customer.lname|first }}.</span>
+                                    </div>
                                 </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No orders yet</td>
+                                <td class="fw-semibold">${{ order.total_price }}</td>
+                                <td><span class="badge-status-{{ order.status|lower|cut:' ' }} badge-era">{{ order.status }}</span></td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% else %}
+                    <p class="text-muted-era text-center py-3">No orders yet.</p>
+                    {% endif %}
                 </div>
-            </div>
-        </div>
 
-        <!-- Low Stock Alerts -->
-        <div class="col-lg-5">
-            <div class="card-era p-4 h-100">
-                <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Low Stock <span style="color: var(--warning);">Alerts</span></h5>
+                <!-- Low Stock Alert -->
                 {% if low_stock_products %}
+                <div class="admin-section">
+                    <h5><i class="bi bi-exclamation-triangle text-gold me-1"></i> Low Stock Alert</h5>
                     {% for product in low_stock_products %}
-                    <div class="alert-item">
-                        <div class="alert-icon">
-                            <i class="bi bi-exclamation-triangle"></i>
-                        </div>
-                        <div class="flex-grow-1">
+                    <div class="low-stock-item">
+                        <div>
                             <p class="mb-0 fw-semibold small">{{ product.name }}</p>
-                            <p class="mb-0 text-muted small">{{ product.stock_quantity }} units remaining</p>
+                            <p class="mb-0 text-muted-era small">Stock: {{ product.stock_quantity }}</p>
                         </div>
-                        <a href="{% url 'editpro' product.id %}" class="btn btn-sm btn-era">Restock</a>
+                        <div class="stock-bar">
+                            <div class="stock-bar-fill {% if product.stock_quantity <= 3 %}critical{% endif %}" style="width: {% widthratio product.stock_quantity 10 100 %}%"></div>
+                        </div>
                     </div>
                     {% endfor %}
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
-                        <p class="text-muted mt-2 mb-0">All products are well stocked!</p>
-                    </div>
+                </div>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Category Breakdown -->
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card-era p-4">
-                <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Category <span style="color: var(--accent);">Sales</span></h5>
-                <div class="table-responsive">
-                    <table class="table table-era table-hover">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>Products</th>
-                                <th>Orders</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cat in category_sales %}
-                            <tr>
-                                <td class="fw-semibold">{{ cat.name }}</td>
-                                <td>{{ cat.product_count }}</td>
-                                <td>{{ cat.order_count }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-4">No category data yet</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="col-lg-6">
-            <div class="card-era p-4">
-                <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Quick <span style="color: var(--accent);">Actions</span></h5>
-                <div class="row g-3">
-                    <div class="col-6">
-                        <a href="{% url 'addpro' %}" class="btn btn-era w-100">
-                            <i class="bi bi-plus-lg d-block mb-1"></i>Add Product
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{% url 'addcat' %}" class="btn btn-outline-era w-100">
-                            <i class="bi bi-tag d-block mb-1"></i>Add Category
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{% url 'listpro' %}" class="btn btn-outline-era w-100">
-                            <i class="bi bi-list-ul d-block mb-1"></i>View Products
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{% url 'finalorder' %}" class="btn btn-outline-era w-100">
-                            <i class="bi bi-receipt d-block mb-1"></i>View Orders
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Admin Footer -->
+<footer class="footer-era" style="margin-top: 4rem;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-0 small">&copy; {% now "Y" %} ERA Admin Panel. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-0 small">
+                    <a href="{% url 'home1' %}" class="me-3">View Site</a>
+                    <a href="{% url 'signout' %}">Logout</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if chart_labels or orders_by_status %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-    // Revenue Chart
-    const labels = {{ chart_labels|safe }};
-    const data = {{ chart_data|safe }};
+    const chartColors = {
+        gold: '#C9A96E',
+        goldLight: 'rgba(201,169,110,0.1)',
+        navy: '#1a1a2e',
+        stone: '#F2EDE6',
+        muted: '#8A8178',
+        success: '#2D6A4F',
+        warning: '#B7791F',
+        danger: '#9B2335',
+        blue: '#3b82f6',
+    };
 
-    const ctx = document.getElementById('revenueChart');
-    if (ctx && labels.length > 0) {
-        new Chart(ctx.getContext('2d'), {
+    // Revenue Chart
+    {% if chart_labels %}
+    const revenueCtx = document.getElementById('revenueChart');
+    if (revenueCtx && typeof Chart !== 'undefined') {
+        new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: {{ chart_labels|safe }},
                 datasets: [{
                     label: 'Revenue ($)',
-                    data: data,
-                    backgroundColor: 'rgba(201, 169, 110, 0.1)',
-                    borderColor: '#c9a96e',
-                    borderWidth: 2,
+                    data: {{ chart_data|safe }},
+                    borderColor: chartColors.gold,
+                    backgroundColor: chartColors.goldLight,
                     fill: true,
                     tension: 0.4,
-                    pointBackgroundColor: '#c9a96e',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: chartColors.gold,
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.05)' }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                },
+                maintainAspectRatio: true,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1a1a2e',
-                        titleFont: { family: 'Inter' },
-                        bodyFont: { family: 'Inter' },
+                        backgroundColor: chartColors.navy,
+                        titleFont: { family: "'DM Sans', sans-serif" },
+                        bodyFont: { family: "'DM Sans', sans-serif" },
+                        cornerRadius: 8,
                         padding: 12,
-                        cornerRadius: 8
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: $' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: {
+                            font: { family: "'DM Sans', sans-serif", size: 11 },
+                            callback: function(value) { return '$' + value; }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { family: "'DM Sans', sans-serif", size: 11 },
+                            maxRotation: 45,
+                        }
                     }
                 }
             }
         });
-    } else if (ctx) {
-        // Show no data message
-        ctx.parentElement.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100"><p class="text-muted">No revenue data available yet</p></div>';
     }
+    {% endif %}
+
+    // Status Chart
+    {% if orders_by_status %}
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx && typeof Chart !== 'undefined') {
+        const statusColors = {
+            'Pending': chartColors.warning,
+            'Processing': chartColors.blue,
+            'Shipped': '#f59e0b',
+            'Delivered': chartColors.success,
+            'Cancelled': chartColors.danger,
+        };
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for item in orders_by_status %}'{{ item.status }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for item in orders_by_status %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: [{% for item in orders_by_status %}${ statusColors['{{ item.status }}'] || chartColors.muted }{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: "'DM Sans', sans-serif", size: 12 },
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyleWidth: 10,
+                        }
+                    }
+                },
+                cutout: '65%',
+            }
+        });
+    }
+    {% endif %}
 </script>
+{% endif %}
 {% endblock %}

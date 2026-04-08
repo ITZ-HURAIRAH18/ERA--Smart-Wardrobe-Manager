@@ -1,11 +1,4 @@
 import datetime
-import uuid
-from urllib.parse import urlparse
-
-import requests
-from django.conf import settings
-from django.core.files.base import ContentFile
-from django.core.validators import URLValidator
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -29,7 +22,6 @@ class Std(models.Model):
     category = models.ForeignKey(Cat, on_delete=models.CASCADE, default=1)
     description = models.CharField(max_length=255, default="")
     image = models.ImageField(upload_to="images/", default="images/default.jpg")
-    image_url = models.URLField(blank=True, null=True, help_text="External image URL (optional)")
 
     # New fields for inventory and variants
     available_sizes = models.CharField(max_length=50, default="S,M,L,XL", help_text="Comma-separated sizes e.g. S,M,L,XL")
@@ -68,87 +60,6 @@ class Std(models.Model):
         if ratings.exists():
             return round(sum(r.stars for r in ratings) / ratings.count(), 1)
         return 0
-
-    def get_image_url(self):
-        """Return the appropriate image URL.
-
-        Priority:
-        1. Uploaded image (image field)
-        2. External URL (image_url field)
-        3. Default image path
-        """
-        if self.image and hasattr(self.image, 'url') and self.image.url:
-            return self.image.url
-        if self.image_url:
-            return self.image_url
-        # Return the default image path
-        return settings.MEDIA_URL + 'images/default.jpg' if settings.MEDIA_URL else '/media/images/default.jpg'
-
-    def download_image_from_url(self, timeout=10):
-        """Download an image from the image_url field and save it to the image field.
-
-        Returns:
-            tuple: (success: bool, message: str)
-        """
-        if not self.image_url:
-            return False, "No URL provided."
-
-        # Validate URL format
-        url_validator = URLValidator()
-        try:
-            url_validator(self.image_url)
-        except Exception:
-            return False, "Invalid URL format."
-
-        # Parse URL to check file extension
-        parsed_url = urlparse(self.image_url)
-        path = parsed_url.path.lower()
-        valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg']
-
-        # Download the image
-        try:
-            response = requests.get(self.image_url, timeout=timeout, stream=True)
-            response.raise_for_status()
-        except requests.exceptions.Timeout:
-            return False, "Download timed out. The server took too long to respond."
-        except requests.exceptions.ConnectionError:
-            return False, "Connection error. Could not reach the URL."
-        except requests.exceptions.RequestException as e:
-            return False, f"Download failed: {str(e)}"
-
-        # Check content-type
-        content_type = response.headers.get('content-type', '')
-        if not content_type.startswith('image/'):
-            return False, "URL does not point to an image. Content-type: {}".format(content_type)
-
-        # Determine file extension from content-type or URL path
-        ext_map = {
-            'image/jpeg': '.jpg',
-            'image/png': '.png',
-            'image/gif': '.gif',
-            'image/webp': '.webp',
-            'image/bmp': '.bmp',
-            'image/svg+xml': '.svg',
-        }
-        ext = ext_map.get(content_type.split(';')[0].strip())
-
-        # Fallback: try to get extension from URL path
-        if not ext:
-            for valid_ext in valid_extensions:
-                if path.endswith(valid_ext):
-                    ext = valid_ext
-                    break
-        if not ext:
-            ext = '.jpg'  # Default extension
-
-        # Generate a unique filename
-        filename = f"product_{uuid.uuid4().hex}{ext}"
-
-        # Save to the image field
-        content = ContentFile(response.content)
-        self.image.save(filename, content, save=False)
-
-        return True, "Image downloaded and saved successfully."
 
 
 class Customer(models.Model):

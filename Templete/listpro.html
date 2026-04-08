@@ -1,50 +1,230 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-    Product List
-{% endblock %}
+{% block title %}ERA - Manage Products{% endblock %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h1 class="text-center" style="margin-top: 70px;">Product List</h1>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th>Image</th>
-                <th>Price</th>
-                <th>Category</th>  <!-- Added an Image column -->
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ product.name }}</td>
-                <td >
-                    <!-- Display product image -->
-                    <img src="{{ product.get_image_url }}" alt="{{ product.name }}" width="50" height="50">
-                </td>
-                <td>{{ product.price }}</td>
-                <td>{{ product.category.name }}</td>
-                <td>
-                    <div class="d-flex ">
-                        <!-- Edit Button -->
-                        <a href="{% url 'editpro' product.id %}" class="btn btn-secondary btn-sm mx-1">Edit</a>
-                        <a href="{% url 'deletepro' product.id %}" class="btn btn-dark btn-sm mx-1">Delete</a>
-                        
-                        <!-- Delete Button -->
-                        <!-- <form action="{% url 'deletepro' product.id %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm mx-1">Delete</button>
-                        </form> -->
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-  </div>
+<style>
+    .admin-page { padding-top: 120px; min-height: 80vh; }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .admin-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    .admin-header h2 span { color: var(--era-gold); }
+
+    .admin-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        overflow: hidden;
+    }
+
+    .admin-toolbar {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--era-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .admin-toolbar .search-input {
+        max-width: 300px;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        transition: border-color var(--duration-hover) var(--ease-out);
+    }
+    .admin-toolbar .search-input:focus {
+        outline: none;
+        border-color: var(--era-gold);
+    }
+
+    .admin-table { width: 100%; }
+    .admin-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--era-muted);
+        border-bottom: 2px solid var(--era-border);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        background: var(--era-cream);
+    }
+    .admin-table tbody td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--era-border);
+        font-size: 0.9rem;
+    }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+    .admin-table tbody tr:hover { background: var(--era-cream); }
+    .admin-table tbody tr.inactive { opacity: 0.5; }
+
+    .product-thumb {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: var(--radius-btn);
+    }
+    .product-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .product-name-cell .name { font-weight: 500; }
+    .product-name-cell .category { font-size: 0.8rem; color: var(--era-muted); }
+
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid var(--era-border);
+        background: var(--era-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--duration-hover) var(--ease-out);
+        color: var(--era-text);
+        text-decoration: none;
+    }
+    .action-btn:hover {
+        border-color: var(--era-gold);
+        color: var(--era-gold);
+        background: var(--era-cream);
+    }
+    .action-btn.delete:hover {
+        border-color: var(--era-danger);
+        color: var(--era-danger);
+        background: rgba(155,35,53,0.05);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    .empty-state i { font-size: 4rem; color: var(--era-border); margin-bottom: 1rem; }
+
+    @media (max-width: 767px) {
+        .admin-table { display: block; overflow-x: auto; }
+    }
+</style>
+
+<div class="admin-page">
+    <div class="container">
+        <div class="admin-header">
+            <h2>Manage <span>Products</span></h2>
+            <a href="{% url 'addpro' %}" class="btn-era">
+                <i class="bi bi-plus-circle me-1"></i> Add Product
+            </a>
+        </div>
+
+        <div class="admin-card">
+            <!-- Toolbar -->
+            <div class="admin-toolbar">
+                <p class="mb-0 text-muted-era small">{{ products|length }} product{{ products|length|pluralize }}</p>
+                <input type="text" id="productSearch" class="search-input" placeholder="Search products..." onkeyup="filterProducts()">
+            </div>
+
+            <!-- Table -->
+            {% if products %}
+            <table class="admin-table" id="productTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Product</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr class="{% if not product.is_active %}inactive{% endif %}">
+                        <td>
+                            <div class="product-name-cell">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-thumb">
+                                <div>
+                                    <p class="name mb-0">{{ product.name }}</p>
+                                    <p class="category mb-0">{{ product.category.name }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="fw-semibold">${{ product.price }}</td>
+                        <td>
+                            {% if product.stock_quantity == 0 %}
+                            <span class="text-danger small">Out of stock</span>
+                            {% elif product.stock_quantity < 10 %}
+                            <span class="text-warning small">{{ product.stock_quantity }} left</span>
+                            {% else %}
+                            <span>{{ product.stock_quantity }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.is_active %}
+                            <span class="badge-era" style="background: var(--era-success); color: white;">Active</span>
+                            {% else %}
+                            <span class="badge-era" style="background: var(--era-muted); color: white;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="{% url 'editpro' product.id %}" class="action-btn" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'deletepro' product.id %}" class="action-btn delete" title="Delete" onclick="return confirm('Delete \'{{ product.name }}\' permanently?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-box-seam d-block"></i>
+                <h4>No products yet</h4>
+                <p class="text-muted-era mb-4">Start building your inventory by adding your first product.</p>
+                <a href="{% url 'addpro' %}" class="btn-era">Add First Product</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterProducts() {
+        const query = document.getElementById('productSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#productTable tbody tr');
+        rows.forEach(row => {
+            const name = row.querySelector('.name')?.textContent.toLowerCase() || '';
+            const category = row.querySelector('.category')?.textContent.toLowerCase() || '';
+            if (name.includes(query) || category.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
 {% endblock %}

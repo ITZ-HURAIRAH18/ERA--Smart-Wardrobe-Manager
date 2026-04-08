@@ -1,295 +1,268 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}ERA - Checkout{% endblock %}
+{% block title %}ERA - Admin Orders{% endblock %}
 
 {% block content %}
 <style>
-    .checkout-steps {
+    .admin-orders-page { padding-top: 120px; min-height: 80vh; }
+
+    .admin-orders-header {
         display: flex;
-        justify-content: center;
-        gap: 2rem;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    .checkout-step {
-        text-align: center;
-        position: relative;
+    .admin-orders-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0;
     }
-    .checkout-step::after {
-        content: '';
-        position: absolute;
-        top: 20px;
-        right: -2rem;
-        width: 2rem;
-        height: 2px;
-        background: #ddd;
-    }
-    .checkout-step:last-child::after { display: none; }
-    .step-number {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #eee;
+    .admin-orders-header h2 span { color: var(--era-gold); }
+
+    .admin-orders-toolbar {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        margin: 0 auto 0.5rem;
-        font-weight: 700;
-        transition: all 0.3s ease;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    .checkout-step.active .step-number { background: var(--accent); color: var(--primary); }
-    .checkout-step.completed .step-number { background: var(--success); color: white; }
-    .step-label { font-size: 0.85rem; color: var(--text-secondary); }
+    .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .filter-pill {
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.85rem;
+        border: 1px solid var(--era-border);
+        background: var(--era-white);
+        color: var(--era-text);
+        text-decoration: none;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .filter-pill:hover, .filter-pill.active {
+        background: var(--era-navy);
+        border-color: var(--era-navy);
+        color: var(--era-white);
+    }
 
-    .checkout-content {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    .checkout-panel {
-        display: none;
-        animation: slideIn 0.4s ease;
-    }
-    .checkout-panel.active { display: block; }
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(20px); }
-        to { opacity: 1; transform: translateX(0); }
+    .admin-orders-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        overflow: hidden;
     }
 
-    .delivery-toggle {
-        border: 2px solid #ddd;
-        border-radius: 8px;
+    .admin-order-table { width: 100%; }
+    .admin-order-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--era-muted);
+        border-bottom: 2px solid var(--era-border);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        background: var(--era-cream);
+    }
+    .admin-order-table tbody td {
         padding: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--era-border);
+        font-size: 0.9rem;
     }
-    .delivery-toggle.active {
-        border-color: var(--accent);
-        background: rgba(201, 169, 110, 0.1);
+    .admin-order-table tbody tr:last-child td { border-bottom: none; }
+    .admin-order-table tbody tr:hover { background: var(--era-cream); }
+
+    .order-customer {
+        font-weight: 500;
+    }
+    .order-customer small {
+        display: block;
+        color: var(--era-muted);
+        font-weight: 400;
     }
 
-    .success-animation {
-        text-align: center;
-        padding: 3rem;
+    .status-select {
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8rem;
+        background: var(--era-white);
+        cursor: pointer;
+        transition: border-color var(--duration-hover) var(--ease-out);
     }
-    .checkmark-circle {
-        width: 100px;
-        height: 100px;
+    .status-select:focus {
+        outline: none;
+        border-color: var(--era-gold);
+    }
+
+    .action-btns { display: flex; gap: 0.5rem; }
+    .action-btn {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background: var(--success);
+        border: 1px solid var(--era-border);
+        background: var(--era-white);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 2rem;
-        animation: scaleIn 0.5s ease;
+        cursor: pointer;
+        transition: all var(--duration-hover) var(--ease-out);
+        color: var(--era-text);
+        text-decoration: none;
     }
-    @keyframes scaleIn {
-        from { transform: scale(0); }
-        to { transform: scale(1); }
+    .action-btn:hover { border-color: var(--era-gold); color: var(--era-gold); }
+    .action-btn.delete:hover { border-color: var(--era-danger); color: var(--era-danger); }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; }
+    .empty-state i { font-size: 4rem; color: var(--era-border); margin-bottom: 1rem; }
+
+    @media (max-width: 991px) {
+        .admin-order-table thead { display: none; }
+        .admin-order-table, .admin-order-table tbody, .admin-order-table tr, .admin-order-table td {
+            display: block;
+            width: 100%;
+        }
+        .admin-order-table tr {
+            padding: 1rem;
+            border-bottom: 1px solid var(--era-border);
+            position: relative;
+        }
+        .admin-order-table td {
+            padding: 0.5rem 0;
+            text-align: right;
+            border: none;
+        }
+        .admin-order-table td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--era-muted);
+            text-transform: uppercase;
+        }
     }
-    .checkmark-circle i { font-size: 3rem; color: white; }
 </style>
 
-<div class="container mt-5 pt-4">
-    <h2 class="text-center mb-4">Checkout</h2>
-    
-    <!-- Steps Indicator -->
-    <div class="checkout-steps">
-        <div class="checkout-step active" id="step1Indicator">
-            <div class="step-number">1</div>
-            <div class="step-label">Delivery Info</div>
+<div class="admin-orders-page">
+    <div class="container">
+        <div class="admin-orders-header">
+            <h2>Manage <span>Orders</span></h2>
+            <a href="{% url 'export_orders_csv' %}" class="btn-era-outline btn-era-sm">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </a>
         </div>
-        <div class="checkout-step" id="step2Indicator">
-            <div class="step-number">2</div>
-            <div class="step-label">Review Order</div>
-        </div>
-        <div class="checkout-step" id="step3Indicator">
-            <div class="step-number">3</div>
-            <div class="step-label">Confirmation</div>
-        </div>
-    </div>
 
-    <div class="checkout-content">
-        <!-- Step 1: Delivery Info -->
-        <div class="checkout-panel active" id="step1">
-            <div class="card-era p-4">
-                <h5 class="mb-4">Delivery Information</h5>
-                <form id="deliveryForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Full Name</label>
-                            <input type="text" id="fullName" class="form-control" value="{{ customer_fname }} {{ customer_lname }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Phone Number</label>
-                            <input type="tel" id="phone" class="form-control" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Delivery Address</label>
-                            <textarea id="address" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">City</label>
-                            <input type="text" id="city" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="form-label fw-semibold">Delivery Method</label>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="delivery-toggle active" onclick="selectDelivery(this, 'home')" id="homeDelivery">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-truck fs-4 me-3" style="color: var(--accent);"></i>
-                                        <div>
-                                            <strong>Home Delivery</strong>
-                                            <small class="d-block text-muted">$2.00</small>
-                                        </div>
-                                    </div>
-                                </div>
+        <!-- Toolbar with Status Filters -->
+        <div class="admin-orders-toolbar">
+            <div>
+                <strong>{{ orders|length }}</strong> order{{ orders|length|pluralize }}
+            </div>
+            <div class="filter-pills">
+                <a href="{% url 'finalorder' %}" class="filter-pill {% if not request.GET.status %}active{% endif %}">All</a>
+                <a href="?status=Pending" class="filter-pill {% if request.GET.status == 'Pending' %}active{% endif %}">Pending</a>
+                <a href="?status=Processing" class="filter-pill {% if request.GET.status == 'Processing' %}active{% endif %}">Processing</a>
+                <a href="?status=Shipped" class="filter-pill {% if request.GET.status == 'Shipped' %}active{% endif %}">Shipped</a>
+                <a href="?status=Delivered" class="filter-pill {% if request.GET.status == 'Delivered' %}active{% endif %}">Delivered</a>
+                <a href="?status=Cancelled" class="filter-pill {% if request.GET.status == 'Cancelled' %}active{% endif %}">Cancelled</a>
+            </div>
+        </div>
+
+        <div class="admin-orders-card">
+            {% if orders %}
+            <table class="admin-order-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td data-label="Order ID">#{{ order.id }}</td>
+                        <td data-label="Customer">
+                            <div class="order-customer">
+                                {{ order.customer.fname }} {{ order.customer.lname }}
+                                <small>{{ order.customer.email }}</small>
                             </div>
-                            <div class="col-md-6">
-                                <div class="delivery-toggle" onclick="selectDelivery(this, 'pickup')" id="pickupOption">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-shop fs-4 me-3" style="color: var(--accent);"></i>
-                                        <div>
-                                            <strong>Pickup</strong>
-                                            <small class="d-block text-muted">Free</small>
-                                        </div>
-                                    </div>
-                                </div>
+                        </td>
+                        <td data-label="Product">{{ order.product.name }}</td>
+                        <td data-label="Qty">{{ order.quantity }}</td>
+                        <td data-label="Total" class="fw-semibold text-gold">${{ order.total_price }}</td>
+                        <td data-label="Date">{{ order.date }}</td>
+                        <td data-label="Status">
+                            <select class="status-select" data-order-id="{{ order.id }}" onchange="updateOrderStatus(this)">
+                                <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td data-label="Actions">
+                            <div class="action-btns">
+                                <a href="{% url 'edit_order' order.id %}" class="action-btn" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <button type="button" class="btn btn-era w-100 mt-4" onclick="goToStep(2)">
-                        Continue to Review <i class="bi bi-arrow-right ms-2"></i>
-                    </button>
-                </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox d-block"></i>
+                <h4>No orders found</h4>
+                <p class="text-muted-era mb-4">Orders will appear here once customers place them.</p>
             </div>
-        </div>
-
-        <!-- Step 2: Review Order -->
-        <div class="checkout-panel" id="step2">
-            <div class="card-era p-4">
-                <h5 class="mb-4">Review Your Order</h5>
-                
-                <div id="reviewItems"></div>
-                
-                <hr>
-                
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Subtotal</span>
-                    <strong id="reviewSubtotal">$0</strong>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Delivery Fee</span>
-                    <strong id="reviewDelivery">$2.00</strong>
-                </div>
-                <hr>
-                <div class="d-flex justify-content-between fs-5 fw-bold">
-                    <span>Total</span>
-                    <span id="reviewTotal" style="color: var(--accent);">$0</span>
-                </div>
-                
-                <div class="d-flex gap-2 mt-4">
-                    <button class="btn btn-outline-secondary flex-grow-1" onclick="goToStep(1)">
-                        <i class="bi bi-arrow-left me-1"></i> Back
-                    </button>
-                    <button class="btn btn-era flex-grow-1" onclick="placeOrder()">
-                        <i class="bi bi-check-circle me-1"></i> Place Order
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 3: Confirmation -->
-        <div class="checkout-panel" id="step3">
-            <div class="card-era">
-                <div class="success-animation">
-                    <div class="checkmark-circle">
-                        <i class="bi bi-check-lg"></i>
-                    </div>
-                    <h3 class="mb-2">Order Placed Successfully!</h3>
-                    <p class="text-muted mb-4">Thank you for shopping with ERA.</p>
-                    <div class="mb-4">
-                        <p class="mb-1">Order Number: <strong id="orderNumber">#{{ orders|length|add:1000 }}</strong></p>
-                        <p class="mb-1">Estimated Delivery: <strong id="estDelivery">3-5 business days</strong></p>
-                    </div>
-                    <a href="{% url 'home' %}" class="btn btn-era">
-                        <i class="bi bi-bag me-1"></i> Continue Shopping
-                    </a>
-                </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
-
-<form id="checkoutForm" action="{% url 'checkout' %}" method="POST" style="display: none;">
-    {% csrf_token %}
-    <input type="hidden" name="address" id="checkoutAddress">
-    <input type="hidden" name="phone" id="checkoutPhone">
-    <input type="hidden" name="Price" id="checkoutPrice">
-    <input type="hidden" name="delivery_method" id="checkoutDeliveryMethod" value="home_delivery">
-</form>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    let deliveryFee = 2;
-    let currentStep = 1;
+    function updateOrderStatus(selectEl) {
+        const orderId = selectEl.dataset.orderId;
+        const newStatus = selectEl.value;
 
-    function selectDelivery(el, method) {
-        document.querySelectorAll('.delivery-toggle').forEach(d => d.classList.remove('active'));
-        el.classList.add('active');
-        deliveryFee = method === 'home' ? 2 : 0;
-        document.getElementById('checkoutDeliveryMethod').value = method === 'home' ? 'home_delivery' : 'pickup';
-    }
-
-    function goToStep(step) {
-        if (step === 2 && currentStep === 1) {
-            // Validate step 1
-            const name = document.getElementById('fullName').value;
-            const phone = document.getElementById('phone').value;
-            const address = document.getElementById('address').value;
-            if (!name || !phone || !address) {
-                showToast('Please fill in all required fields', 'error');
-                return;
+        fetch('{% url "update_order_status" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `order_id=${orderId}&status=${encodeURIComponent(newStatus)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+            } else {
+                showToast(data.message || 'Error updating status', 'error');
             }
-            // Populate review
-            populateReview();
-        }
-        
-        document.querySelectorAll('.checkout-panel').forEach(p => p.classList.remove('active'));
-        document.getElementById(`step${step}`).classList.add('active');
-        
-        document.querySelectorAll('.checkout-step').forEach(s => {
-            s.classList.remove('active', 'completed');
-        });
-        for (let i = 1; i < step; i++) {
-            document.getElementById(`step${i}Indicator`).classList.add('completed');
-        }
-        document.getElementById(`step${step}Indicator`).classList.add('active');
-        
-        currentStep = step;
-    }
-
-    function populateReview() {
-        // Build review items from cart data
-        const items = document.getElementById('reviewItems');
-        items.innerHTML = '<p class="text-muted">Loading cart items...</p>';
-        // In a real scenario, you'd fetch cart items. For now, we use the server-side data.
-        items.innerHTML = '<div class="alert alert-info">Review your delivery details and click Place Order to confirm.</div>';
-    }
-
-    function placeOrder() {
-        // Populate hidden form
-        document.getElementById('checkoutAddress').value = document.getElementById('address').value;
-        document.getElementById('checkoutPhone').value = document.getElementById('phone').value;
-        document.getElementById('checkoutPrice').value = document.getElementById('reviewTotal').textContent.replace('$', '');
-        
-        // Submit
-        document.getElementById('checkoutForm').submit();
+        })
+        .catch(() => showToast('Something went wrong', 'error'));
     }
 </script>
 {% endblock %}

@@ -1,27 +1,602 @@
-http://127.0.0.1:8000/checkout
-when i click on proced to checkout
-it show below error fix it used agency aent for it
+ERA — God Level World-Class Prompt
+Every bug + complete redesign + animations + production-ready. Paste into a new Claude chat.
 
-TemplateDoesNotExist at /checkout
-checkout.html
-Request Method:	GET
-Request URL:	http://127.0.0.1:8000/checkout
-Django Version:	5.1.4
-Exception Type:	TemplateDoesNotExist
-Exception Value:	
-checkout.html
-Exception Location:	e:\My Projects\ERA Project\Cloth-Management-System\.venv\Lib\site-packages\django\template\loader.py, line 19, in get_template
-Raised during:	app.views._wrapped_view
-Python Executable:	e:\My Projects\ERA Project\Cloth-Management-System\.venv\Scripts\python.exe
-Python Version:	3.13.3
-Python Path:	
-['E:\\My Projects\\ERA Project\\Cloth-Management-System',
- 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313\\python313.zip',
- 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313\\DLLs',
- 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313\\Lib',
- 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313',
- 'e:\\My Projects\\ERA Project\\Cloth-Management-System\\.venv',
- 'e:\\My Projects\\ERA '
- 'Project\\Cloth-Management-System\\.venv\\Lib\\site-packages']
-Server time:	Tue, 07 Apr 2026 13:30:44 +0000
-Template-loader postmortem
+Copy Full Prompt
+
+ROLE & MISSION
+You are a world-class senior full-stack developer and UI/UX designer — the level of engineer who builds for Nike, Zara, and Amazon. I have a Django 5.1 fashion e-commerce project called "ERA" that needs a complete professional transformation. This is not a simple fix — I want every single page to look like it was designed by a top-tier agency, every feature to work perfectly, every animation to feel premium. No AI-generated looking colors. No boring layouts. Real, unique, production-ready. The kind of site that makes visitors stop scrolling and say "wow."
+
+Read EVERYTHING below before writing a single line of code.
+
+PROJECT FACTS
+- Django 5.1.4, Python 3.11.6
+- Bootstrap 5.3 (CDN only — no npm, no webpack, no build step)
+- Template folder: /Templete/ (keep this exact spelling forever)
+- App folder: /app/
+- templatetags: /app/templatetags/cart.py EXISTS — has multiply and cart_quantity filters
+- Models: Customer, Product, Category, Cart, CartItem, Order, OrderItem, Wishlist, Rating
+- Media files: MEDIA_URL and MEDIA_ROOT configured
+- NO .env file yet (must create it)
+- Vercel deployment target (must be production-ready)
+
+DESIGN SYSTEM — MANDATORY, NEVER DEVIATE
+This is the ONLY color palette allowed. No blue. No generic Bootstrap colors. No AI-looking dark gradients.
+
+PRIMARY PALETTE:
+  --era-black: #0D0D0D       (deep black for bold headings)
+  --era-navy: #1a1a2e        (navbar, footer, dark sections)
+  --era-gold: #C9A96E        (ALL primary buttons, accents, highlights)
+  --era-gold-dark: #A8844A   (button hover state)
+  --era-white: #FFFFFF       (main body background)
+  --era-cream: #FAF8F5       (alternate section background, warm off-white)
+  --era-stone: #F2EDE6       (card backgrounds, input backgrounds)
+  --era-muted: #8A8178       (placeholder text, secondary labels)
+  --era-border: #E8E2D9      (all borders, dividers)
+  --era-text: #2C2825        (all body text — warm dark brown, not pure black)
+  --era-success: #2D6A4F     (order delivered, in stock)
+  --era-warning: #B7791F     (low stock, processing)
+  --era-danger: #9B2335      (out of stock, cancelled, errors)
+
+TYPOGRAPHY:
+  Headings: "Cormorant Garamond" — weight 300, 400, 600 (luxury serif, more elegant than Playfair)
+  Body: "DM Sans" — weight 300, 400, 500 (modern, clean, readable at small sizes)
+  Load in base.html: https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap
+  
+  h1: font-size clamp(2.5rem, 5vw, 4.5rem), font-weight 300, letter-spacing -0.02em, color var(--era-black)
+  h2: font-size clamp(1.8rem, 3vw, 3rem), font-weight 400, letter-spacing -0.01em
+  h3: font-size 1.3rem, font-weight 500, font-family DM Sans
+  body: font-size 15px, line-height 1.7, color var(--era-text)
+  labels/captions: font-size 11px, letter-spacing 0.12em, text-transform uppercase, color var(--era-muted)
+
+SPACING SYSTEM:
+  Section padding: 100px 0 on desktop, 60px 0 on tablet, 40px 0 on mobile
+  Container: max-width 1200px, padding 0 24px
+  Card gap: 24px
+  Border-radius: 2px for buttons (sharp luxury), 8px for cards, 16px for images, 50px for pills/badges
+
+ANIMATION PHILOSOPHY — This is what makes it unique:
+  All animations: cubic-bezier(0.25, 0.46, 0.45, 0.94) — smooth deceleration
+  Hover transitions: 0.35s
+  Enter animations: 0.7s
+  Stagger delay between sibling elements: 0.08s each
+  NO bounce, NO elastic, NO spring — smooth luxury feel only
+  Scroll-triggered: elements enter from bottom (translateY 40px → 0) fading in (opacity 0 → 1)
+
+BUG 1 — ANNOUNCEMENT BAR CANNOT BE CLOSED (CRITICAL)
+PROBLEM SEEN: The X button on the gold announcement bar does not work. The bar stays even after clicking X. Also there is unwanted white space below the bar when it is dismissed.
+FIX in base.html:
+  <div id="announcement-bar" style="background:var(--era-gold);color:var(--era-navy);text-align:center;padding:10px 50px;font-size:13px;font-family:'DM Sans';font-weight:500;position:relative;letter-spacing:0.02em;">
+    FREE DELIVERY on orders above $200  |  Use code <strong>WELCOME10</strong> for 10% off
+    <button onclick="closeAnnouncement()" id="close-ann" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;color:var(--era-navy);line-height:1;padding:4px 8px;">&times;</button>
+  </div>
+  <script>
+  function closeAnnouncement(){
+    const bar = document.getElementById('announcement-bar');
+    bar.style.height = bar.offsetHeight + 'px';
+    bar.style.overflow = 'hidden';
+    bar.style.transition = 'height 0.3s ease, padding 0.3s ease, opacity 0.3s ease';
+    requestAnimationFrame(()=>{
+      bar.style.height = '0';
+      bar.style.padding = '0';
+      bar.style.opacity = '0';
+    });
+    setTimeout(()=>{ bar.style.display='none'; }, 300);
+    sessionStorage.setItem('ann-closed','1');
+  }
+  if(sessionStorage.getItem('ann-closed')==='1'){ document.getElementById('announcement-bar').style.display='none'; }
+  </script>
+
+BUG 2 — HERO IMAGE WRONG & NAVBAR OVERLAP
+PROBLEM: Hero background shows an interior/lamp photo (wrong — should be fashion). Navbar overlaps hero content. Buttons at top cut off.
+FIX home1.html hero:
+  Use this fashion image: https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1920&q=85
+  Hero section must be: min-height: 100vh, display:flex, align-items:center
+  Add padding-top equal to navbar height using CSS variable: padding-top: var(--navbar-height, 80px)
+  Text must be centered, all white, never cut off
+  Both buttons always fully visible, never hidden behind navbar
+
+BUG 3 — FILTER SIDEBAR SCROLLS WITH PAGE
+PROBLEM: Filter sidebar on shopping page scrolls away with the page. Should be sticky.
+FIX in home.html (shopping page):
+  Filter sidebar: position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow-y: auto;
+  Add scrollbar styling: thin gold scrollbar on sidebar only
+  On mobile (below 768px): filter sidebar collapses to an off-canvas drawer triggered by a "Filters" button at top of product grid
+
+BUG 4 — CHECKOUT CRASH (CRITICAL)
+PROBLEM: TypeError at /checkout — "unsupported operand type(s) for *: 'int' and 'dict'" at templatetags/cart.py line 41 in multiply.
+The multiply filter receives a dict instead of a number because the cart items are being passed incorrectly.
+FIX in views.py checkout() function — pre-calculate everything in Python, pass clean data:
+  def checkout(request):
+      if not request.user.is_authenticated:
+          return redirect('login')
+      customer, _ = Customer.objects.get_or_create(user=request.user)
+      try:
+          cart = Cart.objects.get(customer=customer)
+          cart_items = CartItem.objects.filter(cart=cart).select_related('product')
+      except Cart.DoesNotExist:
+          cart_items = []
+          cart = None
+      
+      processed_items = []
+      subtotal = 0
+      for item in cart_items:
+          price = float(item.product.price)
+          qty = int(item.quantity)
+          item_total = price * qty
+          subtotal += item_total
+          processed_items.append({
+              'product': item.product,
+              'quantity': qty,
+              'price': price,
+              'total': item_total,
+          })
+      
+      delivery = 2.0 if request.POST.get('delivery_method') == 'home' else 0.0
+      grand_total = subtotal + delivery
+      
+      context = {
+          'cart_items': processed_items,
+          'subtotal': subtotal,
+          'delivery': delivery,
+          'grand_total': grand_total,
+      }
+      
+      if request.method == 'POST':
+          # create order logic here
+          phone = request.POST.get('phone','')
+          address = request.POST.get('address','')
+          Order.objects.create(customer=customer, phone=phone, address=address, total=grand_total)
+          CartItem.objects.filter(cart=cart).delete()
+          return redirect('order')
+      
+      return render(request, 'checkout.html', context)
+
+  In checkout.html — use {{ item.total }}, {{ item.quantity }}, {{ item.price }} directly. NO custom filters.
+
+BUG 5 — ADMIN HEADER / NAVBAR FOR ADMIN PAGES
+PROBLEM: Admin pages (dashboard, add product, etc.) show the regular customer navbar. Admin needs its own clean admin navigation with links to: Dashboard, Products (list+add), Categories (list+add), Orders, Customers.
+FIX in base.html — conditional navbar based on user type:
+  {% if request.user.is_authenticated and request.user.is_staff %}
+    <!-- ADMIN NAVBAR -->
+    Dark navy navbar, ERA logo left side
+    Center links: Dashboard | Products | Categories | Orders | Customers | View Store
+    Right side: Admin name + logout
+    NO cart icon, NO wishlist icon, NO announcement bar on admin pages
+    Admin navbar has a subtle left colored border or badge saying "ADMIN MODE" in gold
+  {% else %}
+    <!-- CUSTOMER NAVBAR -->
+    [existing customer navbar with cart, wishlist, user dropdown]
+  {% endif %}
+
+BUG 6 — ADD PRODUCT / ADMIN FORMS LOOK TERRIBLE
+PROBLEM: Create Product page has a plain unstyled form — tiny label + tiny input, no layout, no visual hierarchy, just raw HTML. Completely unprofessional.
+FIX — Rewrite ALL admin forms (addpro.html, editpro.html, addcat.html, editcat.html) with this layout:
+  Full page with sidebar navigation on left (admin nav links as sidebar)
+  Main content area: clean white card with proper form layout
+  Form styling:
+    Section headers within form ("Basic Info", "Pricing & Inventory", "Media", "Visibility")
+    Two-column grid for short fields (Name + Price in one row, Category + Stock in another)
+    Full-width for description textarea with character counter
+    Image upload: drag-and-drop zone with dashed gold border, preview thumbnail on file select
+    Image URL alternative input below the uploader
+    Form validation with inline error messages in red
+    Save button: full-width gold button at bottom, loading state on click
+    Cancel button: outlined secondary button
+
+BUG 7 — LOGIN PAGE IMAGE TOO LARGE & MISALIGNED
+PROBLEM: Login page left side image is too tall and stretches the page. Right side form content is cut off at top ("Welcome Back" text hidden above scroll).
+FIX login.html:
+  Container: height: 100vh, overflow: hidden
+  Left panel: width 45%, height 100vh, object-fit: cover — image fills but never overflows
+  Right panel: width 55%, height 100vh, overflow-y: auto, display:flex, align-items:center, justify-content:center
+  Form wrapper inside right panel: max-width: 420px, width: 100%, padding: 40px 20px
+  On mobile: hide left image panel, full width form
+  Remove the "Demo Credentials" box — not professional for a real site
+
+BUG 8 — SIGNUP PAGE SAME LARGE IMAGE ISSUE
+Same fix as login — 100vh split layout, left image fills exactly, right form scrolls internally if needed.
+Use a different image for signup: https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85
+
+BUG 9 — ADMIN DASHBOARD MIXED UP LAYOUT
+PROBLEM: Dashboard has mixed colors (teal, orange, blue icons — clashes with ERA brand), stats and layout are unorganized, the "Delivered" stat card is floating without a number, section spacing is inconsistent.
+FIX dashboard.html — complete clean professional layout:
+
+TOP HERO BAR (full width, navy background #1a1a2e):
+  Left: "Admin Dashboard" in Cormorant Garamond gold, subtitle in muted white
+  Right: "Export CSV" button (outlined gold) + "View Store" button (solid gold)
+  
+ROW 1 — 4 STAT CARDS (white cards, gold icon accent, all same height):
+  Card 1: Total Orders — shopping bag icon, big number, "+X this week" subtitle
+  Card 2: Total Revenue — dollar sign icon, $XXX.XX formatted, "Lifetime" subtitle
+  Card 3: Total Products — tag icon, number, "Active" subtitle  
+  Card 4: Total Customers — users icon, number, "Registered" subtitle
+  ALL icons: same gold color (#C9A96E), same icon size (32px), same card padding
+  
+ROW 2 — 4 ORDER STATUS CARDS (cream background #FAF8F5):
+  Pending (warm amber), Processing (navy), Shipped (muted teal-green), Delivered (dark green)
+  Each has the status name, count number, and a small progress bar showing % of total orders
+  
+ROW 3 — TWO COLUMN LAYOUT:
+  Left 60%: "Orders This Week" — Chart.js bar chart, bars in gold color, clean minimal axes
+  Right 40%: "Recent Orders" list — each row: #ID, customer name, amount in gold, status badge
+  
+ROW 4 — TWO COLUMN LAYOUT:
+  Left 50%: "Category Performance" table — Category, Products count, Orders, Revenue
+  Right 50%: "Quick Actions" grid — 4 large action buttons (Add Product, Add Category, View Orders, View Customers) each with icon and label
+  
+ROW 5 (if applicable): Low Stock Alerts — horizontal card list, each showing product name, current stock, "Restock" button
+
+FOOTER on dashboard: Simple one-line — ERA Admin Panel © 2026. NO customer footer (newsletter, social links, etc.)
+
+BUG 10 — ADMIN PAGES HAVE CUSTOMER FOOTER WITH NEWSLETTER
+PROBLEM: Admin pages show the full customer footer with newsletter signup, social media links, Quick Links — completely wrong context.
+FIX: Create two separate footer blocks in base.html:
+  {% block footer %}
+    {% if request.user.is_staff %}
+      <footer style="background:#f8f7f4;border-top:1px solid var(--era-border);padding:20px;text-align:center;font-size:13px;color:var(--era-muted)">ERA Admin Panel © 2026</footer>
+    {% else %}
+      [full customer footer with newsletter, social, links]
+    {% endif %}
+  {% endblock %}
+
+COMPLETE HOME PAGE REDESIGN (home1.html)
+This page must be UNIQUE and ANIMATED — inspired by modern luxury fashion websites.
+
+SECTION 1 — HERO (full viewport, 100vh):
+  Background: layered — real fashion image + dark overlay rgba(13,13,13,0.5)
+  Image: https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1920&q=85
+  Content centered, max-width 800px:
+    Small label above: "NEW COLLECTION 2026" — 11px, gold, letter-spacing 0.2em, uppercase
+    Main headline in Cormorant Garamond 300 weight:
+      Line 1: "Limitless" (white, animate: fade in from left, delay 0s)
+      Line 2: "Fashion at Your" (white, animate: fade in from left, delay 0.15s)
+      Line 3: "Fingertips" (gold #C9A96E, animate: fade in from left, delay 0.3s)
+    Subtitle: "Discover 5K+ Products & 10M+ Happy Customers" — DM Sans 15px, white 70% opacity, animate: fade in, delay 0.5s
+    Two buttons (animate: fade in up, delay 0.7s):
+      "Shop Now" — gold background, navy text, sharp corners, 2px border-radius
+      "Login & Signup" — transparent, white border 1px, white text
+  Bottom: scroll indicator — small animated arrow bouncing up and down in CSS
+  PARALLAX: hero image moves at 0.4x scroll speed using JS scroll listener on hero section
+
+SECTION 2 — MARQUEE TICKER (full width):
+  Dark navy background, continuous scrolling text (CSS animation):
+  "FREE SHIPPING ABOVE $200 · NEW ARRIVALS WEEKLY · AUTHENTIC FASHION · 10M+ CUSTOMERS · ERA FASHION 2026 · "
+  Text in gold, DM Sans 12px uppercase letter-spacing 0.15em
+  Scroll speed: 30s linear infinite
+
+SECTION 3 — WHY ERA (cream background #FAF8F5):
+  Section title: "Why" (dark) + "ERA" (gold) + "?" centered
+  4 stat cards — DO NOT USE BOOTSTRAP CARDS WITH SHADOWS
+  Instead: minimal cards, just icon + number + label, separated by thin vertical lines
+  Numbers count up from 0 when section scrolls into view (Intersection Observer + requestAnimationFrame)
+  5,000+ Products | 10M+ Customers | 4.9 Star Rating | 24/7 Support
+
+SECTION 4 — FEATURED CATEGORIES:
+  Heading: "Featured" (dark) + "Categories" (gold)
+  3 cards in a row (full equal height, no gaps — flush to each other like panels):
+    Men: https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80
+    Women: https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80
+    Children: https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=800&q=80
+  Each card: full-width image, 450px height, dark gradient bottom overlay, category name in Cormorant 32px white bottom-left
+  HOVER effect: image scale 1.06 (0.5s ease), "Shop Now →" button slides up from bottom over 0.3s
+  On scroll into view: cards animate in from bottom staggered 0s, 0.15s, 0.3s
+
+SECTION 5 — NEW ARRIVALS (white background):
+  Heading: "New" (dark) + "Arrivals" (gold)
+  Horizontal scroll strip on mobile, 4-column grid on desktop
+  Show 8 most recently added products from Django context
+  Each product card — see PRODUCT CARD DESIGN below
+  "View All" button — outlined gold, centered below
+
+SECTION 6 — TRUST BADGES (navy background, white text):
+  5 columns: Free Delivery | Easy Returns | Secure Payment | 24/7 Support | Authentic Products
+  Thin SVG icon above each label, white color
+  Separator lines between each column (visible on desktop only)
+  Animate in on scroll: each column fades in with stagger
+
+SECTION 7 — LIMITED TIME OFFER:
+  Gold background (#C9A96E), navy text
+  "Limited Time Offer!" in Cormorant 36px
+  "Use code WELCOME10 for 10% off your first order" in DM Sans
+  Countdown timer: large monospace numbers "HH:MM:SS" resetting daily at midnight
+  "Shop the Sale" button — navy background, white text, hover: gold text
+  Full-width section, centered content
+
+PRODUCT CARD DESIGN (used everywhere: home, shopping, wishlist)
+Standardize one product card component used on ALL pages:
+
+Card container: white background, border-radius 8px, overflow hidden, border: 1px solid var(--era-border)
+  Hover: transform translateY(-4px), border-color var(--era-gold), transition 0.35s ease
+
+IMAGE AREA (aspect-ratio 3/4 — portrait, like real fashion sites):
+  position: relative, overflow: hidden
+  img: width 100%, height 100%, object-fit: cover, transition: transform 0.5s ease
+  img hover: scale(1.08)
+  
+  TOP-LEFT badge: "NEW" pill — gold background, navy text, 10px DM Sans uppercase, letter-spacing 0.1em, border-radius 2px, padding 4px 10px
+    Show only if product.created_at is within 14 days
+  TOP-RIGHT: Heart icon button — toggle wishlist, filled gold if in wishlist, outline if not
+    On click: smooth CSS heart fill animation
+
+CONTENT AREA (padding 16px):
+  Category label: 11px uppercase letter-spacing 0.1em, gold, DM Sans — "WOMEN", "MEN"
+  Product name: 15px DM Sans 500, color var(--era-black), line-clamp: 2
+  Star rating row: filled stars in gold, "No ratings yet" in muted gray if none
+  Price: 18px DM Sans 500, gold color — "$89"
+  
+  ADD TO CART button: appears on hover, slide up from bottom of card (translate Y 100% → 0), full width, gold background, navy text, border-radius 0 (sharp)
+  If out of stock: gray overlay + "Out of Stock" center text, button disabled
+
+SHOPPING PAGE REDESIGN (home.html)
+LAYOUT: Left sidebar 260px (sticky) + right product grid (flex: 1)
+On mobile: sidebar becomes slide-in drawer from left
+
+FILTER SIDEBAR (sticky, top 90px):
+  White background, thin right border var(--era-border)
+  "Filters" heading + "Clear All" link in gold (right side)
+  Category checkboxes with count badges "(9)", "(8)"
+  Price range: two text inputs (Min $, Max $) + "Apply" button
+  Star rating: clickable star rows "★★★★★ & Up"
+  Apply Filters button: full gold, bottom of sidebar
+  On desktop: always visible, sticky
+  On mobile: hidden behind overlay drawer, triggered by filter button
+
+PRODUCT GRID TOP BAR:
+  Left: "Showing X of Y Products" in 13px muted text
+  Right: Sort dropdown (Newest, Low-High, High-Low) + Grid/List toggle icons
+  
+GRID: 3 columns on desktop, 2 on tablet, 1 on mobile
+
+PAGINATION: Simple numbered pages, current page highlighted in gold
+
+EMPTY STATE: centered illustration (CSS art, no image needed) + "No products match your filters" + "Clear Filters" button
+
+CART PAGE REDESIGN (cart.html)
+Split layout: left 60% items + right 40% sticky order summary
+
+LEFT — CART ITEMS:
+  "Your Cart (X items)" heading
+  Each item row: thumbnail 80x80 rounded, product name + category, size/color selected, quantity +/- with gold buttons, unit price, line total, remove X icon
+  Quantity update: AJAX (fetch POST) updates totals without page reload
+  Empty cart: centered gold shopping bag SVG icon + "Your cart is empty" + "Start Shopping" gold button
+
+RIGHT — ORDER SUMMARY (sticky top 90px):
+  White card, border 1px var(--era-border), border-radius 8px, padding 24px
+  "Order Summary" heading
+  Line items: Subtotal, Delivery, Discount (if coupon applied)
+  Coupon code input + "Apply" button (AJAX, show error/success inline)
+  Thick divider
+  "Total" in large text, gold amount
+  "Free delivery progress bar" — shows how much more to add for free shipping
+  Checkout button: full width, gold, 50px height, "Proceed to Checkout →"
+  Secure payment badges below button
+
+CHECKOUT PAGE REDESIGN (checkout.html) — replaces finalorder.html
+Multi-step, single page (all steps visible, JS controls active step):
+
+Step indicator at top: 3 dots connected by line — "Delivery" — "Review" — "Done"
+Active step: gold filled dot, others: empty circle
+
+STEP 1 — DELIVERY:
+  Clean form: Full Name (pre-filled from user), Phone, Address (textarea), City, Country
+  Delivery method toggle: "Home Delivery +$2" card vs "Store Pickup Free" card (click to select, gold border on selected)
+  Form inputs: DM Sans, border-bottom-only style (no full box border), gold focus state
+  "Continue to Review →" button: gold, right-aligned
+
+STEP 2 — REVIEW ORDER:
+  Scrollable list of cart items (compact: image, name, qty, price in one row)
+  Order totals summary
+  "Place Order" button: gold, full width, large
+  Back link: "← Edit Details"
+
+STEP 3 — CONFIRMATION (after POST success):
+  Animated CSS checkmark (circle draws in, checkmark draws in — pure CSS keyframe animation)
+  "Order Placed Successfully!" in Cormorant 32px
+  Order number in gold
+  "Continue Shopping" button
+
+USE context variables: {{ subtotal }}, {{ grand_total }}, {{ cart_items }} — all pre-calculated in view (no custom template filters needed)
+
+ADMIN PAGES — ALL REDESIGNED
+
+ALL ADMIN PAGES share this layout:
+  Admin navbar at top (navy, ERA logo, admin links)
+  Page hero bar: dark navy, page title in Cormorant gold, breadcrumb below
+  Content area: white background, max-width 1200px container
+  Simple admin footer
+
+addpro.html & editpro.html — CREATE/EDIT PRODUCT:
+  Two-column form: left 60% for content fields, right 40% for image/media
+  Left: Name (full width), Price + Category (50/50), Description (full width with char count), Stock (full width)
+  Right: Image upload zone (dashed gold border, 200px height, drag-drop + click, shows preview), OR image URL field below
+  Bottom: Cancel (outline) + Save Product (solid gold)
+
+listpro.html — PRODUCTS TABLE:
+  Search input at top right
+  Table: Product image thumbnail (50px), Name, Category, Price, Stock (red if <10), Actions (Edit gold, Delete red)
+  Pagination below table
+  "Add New Product" button top right (gold)
+
+addcat.html & editcat.html — CATEGORY FORM:
+  Simple centered card: Category Name input, Description textarea, Image URL, Save button
+  Not a raw form — wrap in a proper centered card 500px max-width
+
+listcat.html — CATEGORIES TABLE:
+  Category name, Description excerpt, Product count, Actions (Edit, Delete)
+
+orderadmin.html — ALL ORDERS:
+  Search bar (filter by customer name or order ID)
+  Status filter tabs: All | Pending | Processing | Shipped | Delivered | Cancelled
+  Table: Order ID, Customer, Date, Total, Status dropdown (inline editable — POST on change), Phone, Address excerpt, View button
+  Status badge colors: Pending=amber, Processing=navy, Shipped=teal, Delivered=green, Cancelled=red
+
+MY ORDERS PAGE (order.html) — CUSTOMER
+Order cards in a timeline layout:
+  Each card: Order #ID + Date (top row), Status badge (top right)
+  Visual step progress: 4 dots (Placed → Processing → Shipped → Delivered), steps colored gold if reached
+  Items list: expandable, shows product thumbnails + names + prices
+  "Edit Order" button (only if Pending status)
+  "Track Order" button (links to tracking number if set)
+  Empty state: "No orders yet — Start Shopping!" with button
+
+WISHLIST PAGE (wishlist.html)
+Header: "My Wishlist (X items)" 
+Same product grid as shopping page with product cards
+Heart icon on each card: click to remove from wishlist (AJAX, card fades out)
+Empty state: outlined heart SVG + "Your wishlist is empty" + "Discover Products" button
+Top right: "Add All to Cart" button (gold outline)
+
+ABOUT PAGE (about.html)
+SECTION 1: Full-width hero — navy background, "About ERA" heading gold + white, subtitle
+SECTION 2: Brand story — 50/50 split: left text (story paragraphs), right image from Unsplash
+SECTION 3: 3 value cards (Quality, Authenticity, Customer First) — cream background, icon + title + paragraph
+SECTION 4: Stats bar — same counter animation as home (5000+ products, 10M+ customers, etc.)
+SECTION 5: Team — 3 cards with Unsplash portrait photos, name, role (Co-Founder, Head of Design, Customer Lead)
+
+CONTACT PAGE (contact.html)
+SECTION 1: Navy hero banner, "Contact Us", breadcrumb
+SECTION 2: Two column:
+  Left: Contact info cards (Address, Phone, Email, Hours) each as a card with gold icon
+  Embedded map placeholder (static map image from Unsplash, or just a styled div)
+  Right: Contact form (Name, Email, Subject, Message, Send button)
+  Form uses Django messages for success/error
+SECTION 3: FAQ accordion (3-4 common questions, Bootstrap accordion)
+NO infinite loop, NO red rows — the broken contact.html must be completely rewritten from scratch.
+
+GLOBAL FIXES — APPLY TO ALL PAGES
+
+1. CONSISTENT PAGE HERO BANNER for non-home pages:
+   Navy background, centered heading in Cormorant Garamond, gold breadcrumb below
+   Height: 180px on desktop, 140px on mobile
+   Pages that need it: Shop, Cart, Wishlist, My Orders, Profile, About, Contact, Login, Signup
+
+2. FOOTER — CUSTOMER (base.html, only for non-staff):
+   Navy background, 4 columns:
+     Col 1: ERA logo, tagline, social icons (Facebook, Instagram, Twitter, Pinterest)
+     Col 2: Quick Links (Home, Shop, About, Contact)
+     Col 3: Account (My Profile, My Orders, Wishlist, Cart)
+     Col 4: Newsletter (email input + gold send button, "Your email" placeholder)
+   Bottom bar: thin gold divider line + "© 2026 ERA Fashion. All rights reserved."
+   Footer must appear ONCE — not floating, not repeating
+   body must use flexbox: min-height:100vh, flex-direction:column — main content flex:1
+
+3. ALL IMAGES use loading="lazy" attribute
+
+4. ALL page transitions: body starts at opacity:0, transitions to opacity:1 over 0.4s on load via CSS animation
+
+5. TOAST NOTIFICATIONS: Create global JS toast() function used for:
+   - "Added to cart" (gold)
+   - "Added to wishlist" (gold)
+   - "Removed from wishlist" (muted)
+   - "Coupon applied" (green)
+   - "Invalid coupon" (red)
+   Toast appears bottom-right, slides in from right, auto-disappears after 3s
+
+6. RESPONSIVE BREAKPOINTS:
+   Mobile: < 576px — single column, full width buttons, hamburger menu
+   Tablet: 576px–991px — 2 column product grid, compact sidebar
+   Desktop: 992px+ — 3 column grid, sticky sidebar, full navbar
+   Large: 1200px+ — max-width container locks, generous whitespace
+
+7. FORM FIELD STYLING (universal):
+   No full borders — use border-bottom: 1.5px solid var(--era-border) only
+   On focus: border-bottom-color: var(--era-gold), transition 0.2s
+   Label: floats above input when focused or filled (CSS floating label pattern)
+   Error: red text below field, input border-bottom turns danger red
+
+SETTINGS.PY + .ENV SETUP
+Create .env file in project root (same level as manage.py):
+  SECRET_KEY=your-secret-key-min-50-chars
+  DEBUG=True
+  ALLOWED_HOSTS=127.0.0.1,localhost,.vercel.app
+  DATABASE_URL=sqlite:///db.sqlite3
+  EMAIL_HOST_USER=your@gmail.com
+  EMAIL_HOST_PASSWORD=your-gmail-app-password
+  MEDIA_URL=/media/
+  CLOUDINARY_URL=cloudinary://... (optional for Vercel image hosting)
+
+Install: pip install python-decouple whitenoise
+
+Update settings.py:
+  from decouple import config
+  SECRET_KEY = config('SECRET_KEY')
+  DEBUG = config('DEBUG', cast=bool, default=False)
+  ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+  
+  MIDDLEWARE: Add 'whitenoise.middleware.WhiteNoiseMiddleware' after SecurityMiddleware
+  STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+  STATIC_ROOT = BASE_DIR / 'staticfiles'
+  
+  EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+  EMAIL_HOST = 'smtp.gmail.com'
+  EMAIL_PORT = 587
+  EMAIL_USE_TLS = True
+  EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+  EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
+VERCEL DEPLOYMENT SETUP
+Create vercel.json in project root:
+  {
+    "version": 2,
+    "builds": [{"src": "YourProjectName/wsgi.py", "use": "@vercel/python", "config": {"maxLambdaSize": "15mb", "runtime": "python3.11"}}],
+    "routes": [{"src": "/(.*)", "dest": "YourProjectName/wsgi.py"}]
+  }
+
+Create requirements.txt with all dependencies:
+  Django==5.1.4
+  python-decouple
+  whitenoise
+  gunicorn
+  Pillow
+
+Create build_files.sh:
+  pip install -r requirements.txt
+  python manage.py collectstatic --noinput
+  python manage.py migrate
+
+Create runtime.txt: python-3.11.6
+Add DATABASE_URL with PostgreSQL for production (use Neon.tech free tier for Vercel).
+
+OUTPUT ORDER — GIVE EACH FILE COMPLETE, NO TRUNCATION
+Give me files one at a time in this order. After each file say "Ready for next file?" and wait for me to say "next":
+
+1. .env (example file)
+2. settings.py (only changed sections)
+3. vercel.json
+4. requirements.txt
+5. app/templatetags/cart.py (fixed multiply filter)
+6. app/models.py (add any missing models)
+7. app/views.py (ALL views, fully fixed)
+8. app/urls.py (complete)
+9. Templete/base.html (complete — announcement bar fix, conditional admin/user nav, flex footer)
+10. Templete/home1.html (complete — all 7 sections, animations)
+11. Templete/home.html (shopping page — sticky sidebar, product grid)
+12. Templete/cart.html (split layout, AJAX quantity)
+13. Templete/checkout.html (multi-step, pre-calculated totals, no custom filters)
+14. Templete/login.html (100vh split, fixed height)
+15. Templete/signup.html (100vh split, fixed height)
+16. Templete/order.html (timeline cards)
+17. Templete/wishlist.html (product grid, AJAX remove)
+18. Templete/about.html (complete)
+19. Templete/contact.html (complete — no infinite loop)
+20. Templete/dashboard.html (admin dashboard, Chart.js)
+21. Templete/addpro.html (professional admin form)
+22. Templete/editpro.html (same as addpro with prefilled values)
+23. Templete/listpro.html (products table with search)
+24. Templete/addcat.html (centered card form)
+25. Templete/editcat.html (centered card form prefilled)
+26. Templete/listcat.html (categories table)
+27. Templete/orderadmin.html (orders table, status tabs)
+
+ABSOLUTE RULES — NEVER BREAK THESE:
+- Every template: {% extends 'base.html' %} + {% block content %} / {% endblock %}
+- Every form: {% csrf_token %}
+- Never rename any URL names that already exist
+- Never use custom template filters in templates unless the filter exists in app/templatetags/cart.py
+- Never hardcode any color that is not in the design system palette above
+- All JS: vanilla only, no jQuery, no external JS libraries except Chart.js from CDN
+- All external images: only Unsplash URLs with ?w=XXXX&q=80 parameters
+- Never import React, Vue, Angular, or any JS framework
+- All animations: CSS keyframes + vanilla JS Intersection Observer only
+- Run at end: python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic
+31,398 characters — paste into a new Claude chat

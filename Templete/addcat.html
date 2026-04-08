@@ -1,17 +1,95 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-    Add Category
-{% endblock %}
-{% load crispy_forms_tags %}
+{% block title %}ERA - Add Category{% endblock %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h1 style="margin-top: 70px;">Create Category</h1>
-    <form method="post">
-      {% csrf_token %}
-      {{ form|crispy }}
-      <button type="submit" class="btn btn-secondary">Submit</button>
-    </form>
-  </div>
+<style>
+    .admin-page { padding-top: 120px; min-height: 80vh; }
+    .admin-container { max-width: 600px; margin: 0 auto; }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .admin-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    .admin-header h2 span { color: var(--era-gold); }
+
+    .admin-form-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+    }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-era-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+        color: var(--era-text);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .form-era {
+        width: 100%;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        padding: 0.85rem 1rem;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .form-era:focus {
+        outline: none;
+        border-color: var(--era-gold);
+        box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--era-border);
+    }
+</style>
+
+<div class="admin-page">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2>Add <span>Category</span></h2>
+            <a href="{% url 'listcat' %}" class="btn-era-outline btn-era-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Categories
+            </a>
+        </div>
+
+        <div class="admin-form-card">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-era-label">Category Name</label>
+                    <input type="text" name="name" class="form-era" value="{{ form.name.value|default:'' }}" placeholder="e.g. Men, Women, Accessories" required>
+                    {% if form.name.errors %}
+                    <div class="form-error" style="color: var(--era-danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-era">
+                        <i class="bi bi-plus-circle me-1"></i> Add Category
+                    </button>
+                    <a href="{% url 'listcat' %}" class="btn-era-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

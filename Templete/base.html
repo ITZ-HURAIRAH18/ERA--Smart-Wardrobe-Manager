@@ -6,374 +6,611 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}ERA - Limitless Fashion{% endblock %}</title>
+    <meta name="description" content="ERA Fashion - Discover limitless fashion with our curated collection of clothing, accessories and more.">
 
     <!-- Bootstrap 5.3 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
+    <!-- Google Fonts - Cormorant Garamond + DM Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
+        /* ========================================
+           ERA DESIGN SYSTEM
+           ======================================== */
         :root {
-            --primary: #1a1a2e;
-            --accent: #c9a96e;
-            --bg-white: #ffffff;
-            --surface: #f8f7f4;
-            --text-primary: #1a1a2e;
-            --text-secondary: #6b6b6b;
-            --success: #1D9E75;
-            --warning: #EF9F27;
-            --danger: #E24B4A;
+            /* Primary Palette */
+            --era-black: #0D0D0D;
+            --era-navy: #1a1a2e;
+            --era-gold: #C9A96E;
+            --era-gold-dark: #A8844A;
+            --era-white: #FFFFFF;
+            --era-cream: #FAF8F5;
+            --era-stone: #F2EDE6;
+            --era-muted: #8A8178;
+            --era-border: #E8E2D9;
+            --era-text: #2C2825;
+            --era-success: #2D6A4F;
+            --era-warning: #B7791F;
+            --era-danger: #9B2335;
+
+            /* Typography */
+            --font-heading: 'Cormorant Garamond', serif;
+            --font-body: 'DM Sans', sans-serif;
+
+            /* Spacing */
+            --section-padding-y: 100px;
+            --section-padding-y-tablet: 60px;
+            --section-padding-y-mobile: 40px;
+            --container-max: 1200px;
+            --container-padding-x: 24px;
+
+            /* Border Radius */
+            --radius-btn: 2px;
+            --radius-card: 8px;
+            --radius-img: 16px;
+            --radius-pill: 50px;
+
+            /* Animation */
+            --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --duration-hover: 0.35s;
+            --duration-enter: 0.7s;
+            --duration-stagger: 0.08s;
+
+            /* Navbar offset */
+            --navbar-offset: 0px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Reset & Base */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        html, body {
-            height: 100%;
-        }
+        html { scroll-behavior: smooth; }
+
+        html, body { height: 100%; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text-primary);
-            background: var(--bg-white);
+            font-family: var(--font-body);
+            font-weight: 400;
+            color: var(--era-text);
+            background: var(--era-white);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            margin: 0;
-            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Typography */
+        h1, h2, h3, h4, h5, h6, .era-heading {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--era-navy);
+            line-height: 1.2;
         }
 
-        h1, h2, h3, h4, h5, h6, .navbar-brand {
-            font-family: 'Playfair Display', serif;
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 300; }
+        h2 { font-size: clamp(2rem, 4vw, 3rem); }
+        h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+        h4 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
+
+        p { line-height: 1.7; }
+
+        a {
+            color: var(--era-gold);
+            text-decoration: none;
+            transition: color var(--duration-hover) var(--ease-out);
+        }
+        a:hover { color: var(--era-gold-dark); }
+
+        /* Section Spacing */
+        .section-era {
+            padding: var(--section-padding-y) 0;
+        }
+        @media (max-width: 991px) {
+            .section-era { padding: var(--section-padding-y-tablet) 0; }
+        }
+        @media (max-width: 767px) {
+            .section-era { padding: var(--section-padding-y-mobile) 0; }
         }
 
-        /* Bug 1 Fix: Announcement Bar - FIRST element inside body */
+        /* Container */
+        .container-era {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--container-padding-x);
+        }
+
+        /* ========================================
+           ANNOUNCEMENT BAR
+           ======================================== */
         .announcement-bar {
-            background: var(--accent);
-            color: var(--primary);
-            padding: 8px 0;
+            background: var(--era-gold);
+            color: var(--era-navy);
+            padding: 10px 0;
             font-size: 0.85rem;
             font-weight: 500;
             position: relative;
             z-index: 1060;
+            text-align: center;
+            transition: all var(--duration-hover) var(--ease-out);
         }
         .announcement-bar .btn-close-announce {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
             background: none;
             border: none;
-            color: var(--primary);
+            color: var(--era-navy);
             font-size: 1.2rem;
             cursor: pointer;
             padding: 0 8px;
             line-height: 1;
+            opacity: 0.7;
+            transition: opacity var(--duration-hover) var(--ease-out);
         }
+        .announcement-bar .btn-close-announce:hover { opacity: 1; }
+        .announcement-bar.hidden { display: none; }
 
-        /* Bug 5 Fix: Navbar */
+        /* ========================================
+           NAVBAR
+           ======================================== */
         .navbar-era {
-            background: var(--primary);
-            transition: all 0.3s ease;
-            padding: 0.75rem 0;
+            background: var(--era-navy);
+            padding: 1rem 0;
+            transition: all var(--duration-hover) var(--ease-out);
             z-index: 1050;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
         }
         .navbar-era.scrolled {
             background: rgba(255,255,255,0.98) !important;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            padding: 0.5rem 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+            padding: 0.75rem 0;
         }
-        .navbar-era.scrolled .nav-link-era { color: var(--text-primary) !important; }
-        .navbar-era.scrolled .navbar-brand-era { color: var(--primary) !important; }
-        .navbar-era.scrolled .navbar-toggler i { color: var(--primary) !important; }
+        .navbar-era.scrolled .nav-link-era { color: var(--era-text) !important; }
+        .navbar-era.scrolled .navbar-brand-era { color: var(--era-navy) !important; }
+        .navbar-era.scrolled .navbar-toggler-icon { color: var(--era-navy) !important; }
 
         .navbar-brand-era {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            font-family: var(--font-heading);
+            font-size: 2rem;
             font-weight: 700;
-            color: white !important;
+            color: var(--era-white) !important;
             text-decoration: none;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            transition: color var(--duration-hover) var(--ease-out);
         }
-        .navbar-brand-era span { color: var(--accent); }
+        .navbar-brand-era span { color: var(--era-gold); }
 
         .nav-link-era {
-            color: rgba(255,255,255,0.9) !important;
-            font-weight: 500;
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 400;
             padding: 0.5rem 1rem !important;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
             position: relative;
-            transition: color 0.3s ease;
-            letter-spacing: 0.3px;
+            transition: color var(--duration-hover) var(--ease-out);
         }
-        .nav-link-era:hover, .nav-link-era.active {
-            color: var(--accent) !important;
-        }
-        .nav-link-era.active::after {
+        .nav-link-era::after {
             content: '';
             position: absolute;
             bottom: 0;
             left: 50%;
+            width: 0;
+            height: 1px;
+            background: var(--era-gold);
+            transition: all var(--duration-hover) var(--ease-out);
             transform: translateX(-50%);
-            width: 60%;
-            height: 2px;
-            background: var(--accent);
         }
+        .nav-link-era:hover, .nav-link-era.active {
+            color: var(--era-gold) !important;
+        }
+        .nav-link-era:hover::after, .nav-link-era.active::after { width: 60%; }
 
-        /* Bug 5 Fix: Cart Badge alignment */
-        .cart-badge {
-            position: relative;
-        }
-        .cart-badge .badge-count {
+        /* Cart Badge */
+        .cart-badge-wrap { position: relative; }
+        .cart-badge-wrap .badge-count {
             position: absolute;
-            top: -6px;
-            right: -6px;
-            background: var(--accent);
-            color: var(--primary);
+            top: -4px;
+            right: -8px;
+            background: var(--era-gold);
+            color: var(--era-navy);
             border-radius: 50%;
             min-width: 18px;
             height: 18px;
             font-size: 0.65rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            padding: 0 4px;
             line-height: 1;
         }
 
-        /* Bug 9 Fix: Categories Dropdown */
-        .categories-dropdown {
-            position: static !important;
+        /* User Dropdown */
+        .user-avatar-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--era-gold);
         }
-        .categories-menu {
-            width: 100%;
-            padding: 1.5rem;
+
+        /* ========================================
+           BUTTONS
+           ======================================== */
+        .btn-era {
+            background: var(--era-gold);
+            color: var(--era-navy);
             border: none;
-            border-radius: 0 0 12px 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            background: white;
-            margin-top: 0;
-        }
-        .categories-menu .cat-item {
-            display: block;
-            padding: 0.6rem 1rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            border-radius: var(--radius-btn);
+            padding: 0.75rem 2rem;
             font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all var(--duration-hover) var(--ease-out);
+            cursor: pointer;
         }
-        .categories-menu .cat-item:hover {
-            background: var(--surface);
-            color: var(--accent);
-            padding-left: 1.25rem;
+        .btn-era:hover {
+            background: var(--era-gold-dark);
+            color: var(--era-white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201,169,110,0.35);
         }
-        .categories-menu .cat-item i {
-            color: var(--accent);
-            margin-right: 0.5rem;
+        .btn-era:active { transform: translateY(0); }
+        .btn-era:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-era-outline {
+            background: transparent;
+            color: var(--era-gold);
+            border: 1px solid var(--era-gold);
+            border-radius: var(--radius-btn);
+            padding: 0.7rem 2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all var(--duration-hover) var(--ease-out);
+            cursor: pointer;
+        }
+        .btn-era-outline:hover {
+            background: var(--era-gold);
+            color: var(--era-navy);
+            transform: translateY(-2px);
         }
 
-        /* Bug 8 Fix: Sticky Footer - Main content wrapper grows */
-        main.main-content {
-            flex: 1 0 auto;
+        .btn-era-dark {
+            background: var(--era-navy);
+            color: var(--era-white);
+            border: none;
+            border-radius: var(--radius-btn);
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all var(--duration-hover) var(--ease-out);
+        }
+        .btn-era-dark:hover {
+            background: var(--era-black);
+            color: var(--era-white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
 
-        /* Footer */
+        .btn-era-sm { padding: 0.5rem 1.25rem; font-size: 0.8rem; }
+        .btn-era-lg { padding: 1rem 2.5rem; font-size: 1rem; }
+
+        /* ========================================
+           CARDS
+           ======================================== */
+        .card-era {
+            border: 1px solid var(--era-border);
+            border-radius: var(--radius-card);
+            background: var(--era-white);
+            transition: all var(--duration-hover) var(--ease-out);
+            overflow: hidden;
+        }
+        .card-era:hover {
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+        }
+        .card-era-body { padding: 1.5rem; }
+
+        /* ========================================
+           FORMS
+           ======================================== */
+        .form-era {
+            width: 100%;
+            border: 1px solid var(--era-border);
+            border-radius: var(--radius-btn);
+            padding: 0.85rem 1rem;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--era-text);
+            background: var(--era-white);
+            transition: all var(--duration-hover) var(--ease-out);
+        }
+        .form-era:focus {
+            outline: none;
+            border-color: var(--era-gold);
+            box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+        }
+        .form-era::placeholder { color: var(--era-muted); }
+        .form-era-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--era-text);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .form-era-error { color: var(--era-danger); font-size: 0.8rem; margin-top: 0.25rem; }
+
+        textarea.form-era { resize: vertical; min-height: 100px; }
+        select.form-era { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238A8178' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+
+        /* ========================================
+           BADGES
+           ======================================== */
+        .badge-era {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-era-new { background: var(--era-gold); color: var(--era-navy); }
+        .badge-era-sale { background: var(--era-danger); color: var(--era-white); }
+        .badge-era-out { background: var(--era-muted); color: var(--era-white); }
+
+        .badge-status-pending { background: var(--era-warning); color: var(--era-white); }
+        .badge-status-processing { background: #3b82f6; color: var(--era-white); }
+        .badge-status-shipped { background: #f59e0b; color: var(--era-white); }
+        .badge-status-delivered { background: var(--era-success); color: var(--era-white); }
+        .badge-status-cancelled { background: var(--era-danger); color: var(--era-white); }
+
+        /* ========================================
+           IMAGES
+           ======================================== */
+        .img-era {
+            border-radius: var(--radius-img);
+            object-fit: cover;
+        }
+
+        /* ========================================
+           PILLS
+           ======================================== */
+        .pill-era {
+            display: inline-block;
+            padding: 0.4rem 1.25rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--era-border);
+            background: var(--era-white);
+            color: var(--era-text);
+            cursor: pointer;
+            transition: all var(--duration-hover) var(--ease-out);
+        }
+        .pill-era:hover, .pill-era.active {
+            background: var(--era-gold);
+            border-color: var(--era-gold);
+            color: var(--era-navy);
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
         .footer-era {
-            background: var(--primary);
-            color: white;
-            padding: 3rem 0 1.5rem;
+            background: var(--era-navy);
+            color: rgba(255,255,255,0.7);
+            padding: 4rem 0 2rem;
             margin-top: auto;
         }
         .footer-era a {
             color: rgba(255,255,255,0.7);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: color var(--duration-hover) var(--ease-out);
+            font-size: 0.9rem;
         }
-        .footer-era a:hover { color: var(--accent); }
+        .footer-era a:hover { color: var(--era-gold); }
+        .footer-era h6 {
+            font-family: var(--font-heading);
+            color: var(--era-gold);
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+        }
         .footer-era .social-icon {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all var(--duration-hover) var(--ease-out);
+            color: rgba(255,255,255,0.7);
         }
         .footer-era .social-icon:hover {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: var(--primary);
+            background: var(--era-gold);
+            border-color: var(--era-gold);
+            color: var(--era-navy);
         }
 
-        /* Buttons */
-        .btn-era {
-            background: var(--accent);
-            color: var(--primary);
-            border: none;
-            border-radius: 8px;
-            padding: 0.7rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            letter-spacing: 0.3px;
-        }
-        .btn-era:hover {
-            background: #b8944f;
-            color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(201,169,110,0.4);
-        }
-        .btn-outline-era {
-            background: transparent;
-            color: var(--accent);
-            border: 2px solid var(--accent);
-            border-radius: 8px;
-            padding: 0.65rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .btn-outline-era:hover {
-            background: var(--accent);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        /* Cards */
-        .card-era {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            background: white;
-        }
-        .card-era:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        /* Badges */
-        .badge-status-pending { background: var(--warning); color: white; }
-        .badge-status-processing { background: #3498db; color: white; }
-        .badge-status-shipped { background: #e67e22; color: white; }
-        .badge-status-delivered { background: var(--success); color: white; }
-        .badge-status-cancelled { background: var(--danger); color: white; }
-
-        /* Form inputs */
-        .form-control-era {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 0.7rem 1rem;
-            transition: all 0.3s ease;
-        }
-        .form-control-era:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
-        }
-
-        /* Section spacing */
-        .section-era {
-            padding: 4rem 0;
-        }
-
-        /* Page hero */
-        .page-hero {
-            background: var(--primary);
-            color: white;
-            padding: 3rem 0;
-            text-align: center;
-        }
-        .page-hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .page-hero p {
-            color: rgba(255,255,255,0.7);
-            font-size: 1.1rem;
-        }
-
-        /* Toast Notifications */
-        .toast-era {
+        /* ========================================
+           TOAST NOTIFICATIONS
+           ======================================== */
+        .toast-container-era {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 24px;
+            right: 24px;
             z-index: 9999;
-            min-width: 300px;
-            background: white;
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            border-radius: 8px;
-            padding: 1rem 1.5rem;
-            animation: slideInRight 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        @keyframes slideInRight {
+        .toast-era {
+            min-width: 320px;
+            max-width: 420px;
+            background: var(--era-white);
+            border-radius: var(--radius-card);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastSlideIn 0.4s var(--ease-out);
+            border-left: 3px solid var(--era-gold);
+        }
+        .toast-era.toast-success { border-left-color: var(--era-success); }
+        .toast-era.toast-error { border-left-color: var(--era-danger); }
+        .toast-era.toast-warning { border-left-color: var(--era-warning); }
+        .toast-era.toast-info { border-left-color: #3b82f6; }
+        .toast-era-icon { font-size: 1.25rem; flex-shrink: 0; }
+        .toast-era.toast-success .toast-era-icon { color: var(--era-success); }
+        .toast-era.toast-error .toast-era-icon { color: var(--era-danger); }
+        .toast-era.toast-warning .toast-era-icon { color: var(--era-warning); }
+        .toast-era.toast-info .toast-era-icon { color: #3b82f6; }
+        .toast-era-message { flex: 1; font-size: 0.9rem; }
+        .toast-era-close {
+            background: none;
+            border: none;
+            color: var(--era-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0;
+            line-height: 1;
+        }
+        @keyframes toastSlideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        @keyframes toastSlideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
 
-        /* Animations */
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
         .animate-on-scroll {
             opacity: 0;
             transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
+            transition: opacity var(--duration-enter) var(--ease-out), transform var(--duration-enter) var(--ease-out);
         }
         .animate-on-scroll.visible {
             opacity: 1;
             transform: translateY(0);
         }
+        .animate-fade-in { animation: fadeIn var(--duration-enter) var(--ease-out) both; }
+        .animate-fade-in-up { animation: fadeInUp var(--duration-enter) var(--ease-out) both; }
+        .animate-fade-in-down { animation: fadeInDown var(--duration-enter) var(--ease-out) both; }
 
-        /* Mobile Sidebar */
-        .mobile-sidebar {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100vh;
-            background: white;
-            z-index: 9998;
-            transition: left 0.3s ease;
-            box-shadow: 5px 0 20px rgba(0,0,0,0.1);
-            overflow-y: auto;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        .mobile-sidebar.active { left: 0; }
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 9997;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .sidebar-overlay.active { display: block; }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Stagger children */
+        .stagger-children > * { opacity: 0; animation: fadeInUp 0.6s var(--ease-out) both; }
+        .stagger-children > *:nth-child(1) { animation-delay: 0s; }
+        .stagger-children > *:nth-child(2) { animation-delay: var(--duration-stagger); }
+        .stagger-children > *:nth-child(3) { animation-delay: calc(var(--duration-stagger) * 2); }
+        .stagger-children > *:nth-child(4) { animation-delay: calc(var(--duration-stagger) * 3); }
+        .stagger-children > *:nth-child(5) { animation-delay: calc(var(--duration-stagger) * 4); }
+        .stagger-children > *:nth-child(6) { animation-delay: calc(var(--duration-stagger) * 5); }
+        .stagger-children > *:nth-child(7) { animation-delay: calc(var(--duration-stagger) * 6); }
+        .stagger-children > *:nth-child(8) { animation-delay: calc(var(--duration-stagger) * 7); }
+
+        /* ========================================
+           UTILITY CLASSES
+           ======================================== */
+        .text-gold { color: var(--era-gold) !important; }
+        .text-navy { color: var(--era-navy) !important; }
+        .text-muted-era { color: var(--era-muted) !important; }
+        .bg-cream { background: var(--era-cream) !important; }
+        .bg-stone { background: var(--era-stone) !important; }
+        .border-era { border-color: var(--era-border) !important; }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 991px) {
+            :root {
+                --section-padding-y: 60px;
+            }
+        }
+        @media (max-width: 767px) {
+            :root {
+                --section-padding-y: 40px;
+            }
+        }
+
+        /* ========================================
+           STAR RATING
+           ======================================== */
+        .star-rating .bi-star-fill { color: var(--era-gold); }
+        .star-rating .bi-star { color: var(--era-border); }
+
+        /* ========================================
+           LOADING SPINNER
+           ======================================== */
+        .spinner-era {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--era-border);
+            border-top-color: var(--era-gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         {% block extra_css %}{% endblock %}
     </style>
 </head>
 
 <body>
-    <!-- Bug 1 Fix: Announcement bar is FIRST element inside body -->
+    <!-- Announcement Bar -->
     <div class="announcement-bar" id="announcementBar">
-        <div class="container d-flex justify-content-between align-items-center">
-            <span class="mx-auto">FREE DELIVERY on orders above $200 | Use code <strong>WELCOME10</strong> for 10% off</span>
-            <button class="btn-close-announce" onclick="closeAnnouncement()" aria-label="Close announcement">&times;</button>
+        <div class="container">
+            <span>FREE DELIVERY on orders above $200 | Use code <strong>WELCOME10</strong> for 10% off</span>
+            <button class="btn-close-announce" id="btnCloseAnnounce" aria-label="Close announcement">&times;</button>
         </div>
     </div>
 
-    <!-- Bug 5 Fix: Navbar with proper logo, spacing, scroll transform, admin links -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top navbar-era" id="mainNavbar">
         <div class="container">
-            <!-- Bug 5 Fix: Logo always renders properly -->
             <a class="navbar-brand-era" href="{% url 'home1' %}">ERA<span>.</span></a>
 
-            <!-- Mobile toggle -->
+            <!-- Mobile Toggle -->
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list text-white fs-4"></i>
+                <span class="navbar-toggler-icon" style="filter: brightness(0) invert(1);"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
@@ -384,25 +621,18 @@
                     <li class="nav-item">
                         <a class="nav-link-era{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'home' %}">Shop</a>
                     </li>
-
-                    <!-- Bug 9 Fix: Styled Categories Dropdown -->
                     {% if categories_all %}
-                    <li class="nav-item dropdown categories-dropdown">
-                        <a class="nav-link-era dropdown-toggle{% if request.resolver_match.url_name == 'home' and current_category %} active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link-era dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Categories
                         </a>
-                        <ul class="dropdown-menu categories-menu">
+                        <ul class="dropdown-menu">
                             {% for cat in categories_all %}
-                            <li>
-                                <a class="cat-item" href="{% url 'home' %}?category={{ cat.id }}">
-                                    <i class="bi bi-chevron-right"></i> {{ cat.name }}
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'home' %}?category={{ cat.id }}">{{ cat.name }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
                     {% endif %}
-
                     <li class="nav-item">
                         <a class="nav-link-era{% if request.resolver_match.url_name == 'about' %} active{% endif %}" href="{% url 'about' %}">About</a>
                     </li>
@@ -410,15 +640,13 @@
                         <a class="nav-link-era{% if request.resolver_match.url_name == 'contact' %} active{% endif %}" href="{% url 'contact' %}">Contact</a>
                     </li>
 
-                    <!-- Bug 14 Fix: Admin links based on user.is_staff or admin email -->
-                    {% if request.session.customer_id %}
-                        {% if request.session.customer_email == 'admin@era.com' or request.user.is_staff %}
-                        <li class="nav-item">
-                            <a class="nav-link-era" href="{% url 'admin_dashboard' %}">
-                                <i class="bi bi-speedometer2 me-1"></i>Admin
-                            </a>
-                        </li>
-                        {% endif %}
+                    <!-- Admin Link (Conditional) -->
+                    {% if request.session.customer_email == 'admin@era.com' or request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link-era" href="{% url 'admin_dashboard' %}">
+                            <i class="bi bi-speedometer2 me-1"></i>Admin
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
 
@@ -433,7 +661,7 @@
                     {% endif %}
 
                     <!-- Cart -->
-                    <li class="nav-item cart-badge">
+                    <li class="nav-item cart-badge-wrap">
                         <a class="nav-link-era" href="{% url 'cart' %}" title="Cart" id="cartLink">
                             <i class="bi bi-bag"></i>
                             {% if cart_count > 0 %}
@@ -470,13 +698,13 @@
         </div>
     </nav>
 
-    <!-- Main Content Wrapper (Bug 8 Fix: flex-grow for sticky footer) -->
-    <main class="main-content">
+    <!-- Main Content -->
+    <main class="flex-grow-1">
         <!-- Django Messages -->
         {% if messages %}
-        <div class="container mt-3">
+        <div class="container mt-4 pt-3">
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert" style="border-radius: var(--radius-card);">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -487,22 +715,22 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Bug 8 Fix: Footer stays at bottom with flexbox pattern -->
+    <!-- Footer -->
     <footer class="footer-era">
         <div class="container">
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-lg-4 mb-4">
-                    <h3 class="mb-3">ERA<span style="color: var(--accent);">.</span></h3>
-                    <p class="text-white-50">Limitless fashion at your fingertips. Discover the latest trends with ERA's curated collection.</p>
-                    <div class="mt-3">
-                        <a href="#" class="social-icon me-2" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-icon me-2" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="social-icon me-2" aria-label="Twitter"><i class="bi bi-twitter"></i></a>
+                    <h3 class="mb-3" style="font-family: var(--font-heading); font-size: 2rem; color: var(--era-white);">ERA<span class="text-gold">.</span></h3>
+                    <p>Limitless fashion at your fingertips. Discover the latest trends with ERA's curated collection.</p>
+                    <div class="mt-3 d-flex gap-2">
+                        <a href="#" class="social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-icon" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
                         <a href="#" class="social-icon" aria-label="Pinterest"><i class="bi bi-pinterest"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 mb-4">
-                    <h6 class="text-uppercase mb-3 fw-bold" style="color: var(--accent);">Quick Links</h6>
+                    <h6>Quick Links</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="{% url 'home1' %}">Home</a></li>
                         <li class="mb-2"><a href="{% url 'home' %}">Shop</a></li>
@@ -511,7 +739,7 @@
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-4 mb-4">
-                    <h6 class="text-uppercase mb-3 fw-bold" style="color: var(--accent);">Account</h6>
+                    <h6>Account</h6>
                     <ul class="list-unstyled">
                         {% if request.session.customer_id %}
                         <li class="mb-2"><a href="{% url 'profile' %}">My Profile</a></li>
@@ -522,50 +750,69 @@
                     </ul>
                 </div>
                 <div class="col-lg-4 col-md-4 mb-4">
-                    <h6 class="text-uppercase mb-3 fw-bold" style="color: var(--accent);">Newsletter</h6>
-                    <p class="text-white-50">Subscribe for exclusive offers and updates.</p>
-                    <form action="{% url 'newsletter_signup' %}" method="POST" class="d-flex">
+                    <h6>Newsletter</h6>
+                    <p class="mb-3">Subscribe for exclusive offers and updates.</p>
+                    <form action="{% url 'newsletter_signup' %}" method="POST" class="d-flex gap-2">
                         {% csrf_token %}
-                        <input type="email" name="email" class="form-control me-2 rounded-pill" placeholder="Your email" required>
-                        <button type="submit" class="btn btn-era"><i class="bi bi-send"></i></button>
+                        <input type="email" name="email" class="form-era flex-grow-1" placeholder="Your email address" required>
+                        <button type="submit" class="btn-era btn-era-sm"><i class="bi bi-send"></i></button>
                     </form>
                 </div>
             </div>
-            <hr style="border-color: rgba(255,255,255,0.1);">
-            <div class="text-center text-white-50 py-3">
-                <p class="mb-0">&copy; {% now "Y" %} ERA Fashion. All rights reserved.</p>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 small">&copy; {% now "Y" %} ERA Fashion. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 small">
+                        <a href="#" class="me-3">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </p>
+                </div>
             </div>
         </div>
     </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container-era" id="toastContainer"></div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Bug 1 Fix: Adjust navbar offset on page load based on announcement bar visibility
+        // ========================================
+        // ANNOUNCEMENT BAR (sessionStorage)
+        // ========================================
         document.addEventListener('DOMContentLoaded', function() {
             const announcementBar = document.getElementById('announcementBar');
+            const btnClose = document.getElementById('btnCloseAnnounce');
             const navbar = document.getElementById('mainNavbar');
-            if (announcementBar && announcementBar.offsetParent !== null) {
-                const totalHeight = announcementBar.offsetHeight + navbar.offsetHeight;
-                document.body.style.setProperty('--navbar-offset', totalHeight + 'px');
-                navbar.style.top = announcementBar.offsetHeight + 'px';
-            } else {
-                document.body.style.setProperty('--navbar-offset', '76px');
+
+            // Check sessionStorage
+            if (sessionStorage.getItem('announcementClosed') === 'true') {
+                announcementBar.classList.add('hidden');
                 navbar.style.top = '0';
+            }
+
+            // Close handler
+            if (btnClose) {
+                btnClose.addEventListener('click', function() {
+                    announcementBar.classList.add('hidden');
+                    sessionStorage.setItem('announcementClosed', 'true');
+                    navbar.style.top = '0';
+                });
+            }
+
+            // Set initial navbar offset
+            if (announcementBar && !announcementBar.classList.contains('hidden')) {
+                navbar.style.top = announcementBar.offsetHeight + 'px';
             }
         });
 
-        // Close announcement
-        function closeAnnouncement() {
-            const announcementBar = document.getElementById('announcementBar');
-            const navbar = document.getElementById('mainNavbar');
-            announcementBar.style.display = 'none';
-            navbar.style.top = '0';
-            document.body.style.setProperty('--navbar-offset', '76px');
-        }
-
-        // Bug 5 Fix: Navbar scroll transformation
+        // ========================================
+        // NAVBAR SCROLL EFFECT
+        // ========================================
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('mainNavbar');
             if (window.scrollY > 50) {
@@ -575,33 +822,84 @@
             }
         });
 
-        // Toast notification
-        function showToast(message, type = 'success') {
+        // ========================================
+        // TOAST NOTIFICATIONS
+        // ========================================
+        function showToast(message, type = 'success', duration = 3500) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
             const toast = document.createElement('div');
-            toast.className = 'toast-era';
-            const icon = type === 'success' ? '&#10003;' : type === 'error' ? '&#10007;' : '&#8505;';
-            toast.innerHTML = `<strong>${icon}</strong> ${message}`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            toast.className = `toast-era toast-${type}`;
+
+            const icons = {
+                success: '<i class="bi bi-check-circle-fill toast-era-icon"></i>',
+                error: '<i class="bi bi-x-circle-fill toast-era-icon"></i>',
+                warning: '<i class="bi bi-exclamation-triangle-fill toast-era-icon"></i>',
+                info: '<i class="bi bi-info-circle-fill toast-era-icon"></i>'
+            };
+
+            toast.innerHTML = `
+                ${icons[type] || icons.info}
+                <span class="toast-era-message">${message}</span>
+                <button class="toast-era-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideOut 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, duration);
         }
 
-        // Scroll animations
-        const observer = new IntersectionObserver((entries) => {
+        // Auto-show Django messages as toasts
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.alert-dismissible').forEach(alert => {
+                const message = alert.textContent.trim().replace(/\s+/g, ' ').slice(0, -1);
+                const type = alert.classList.contains('alert-danger') ? 'error' :
+                             alert.classList.contains('alert-warning') ? 'warning' :
+                             alert.classList.contains('alert-info') ? 'info' : 'success';
+                showToast(message, type, 5000);
+                alert.remove();
+            });
+        });
+
+        // ========================================
+        // SCROLL ANIMATIONS
+        // ========================================
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
+                    scrollObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.1 });
+        }, observerOptions);
 
-        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                scrollObserver.observe(el);
+            });
+        });
 
-        // Cart badge pulse animation
-        function pulseCart() {
-            const badge = document.getElementById('cartLink');
+        // ========================================
+        // CART BADGE UPDATE
+        // ========================================
+        function updateCartBadge(count) {
+            const badge = document.getElementById('cartBadgeCount');
+            const cartLink = document.getElementById('cartLink');
             if (badge) {
-                badge.classList.add('pulse');
-                setTimeout(() => badge.classList.remove('pulse'), 400);
+                badge.textContent = count;
+                if (count === 0) badge.style.display = 'none';
+                else badge.style.display = 'flex';
+            } else if (count > 0 && cartLink) {
+                const newBadge = document.createElement('span');
+                newBadge.className = 'badge-count';
+                newBadge.id = 'cartBadgeCount';
+                newBadge.textContent = count;
+                cartLink.appendChild(newBadge);
             }
         }
     </script>

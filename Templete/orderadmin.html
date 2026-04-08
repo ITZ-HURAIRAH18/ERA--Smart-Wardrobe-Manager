@@ -1,75 +1,208 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}ERA - Admin Orders{% endblock %}
+{% block title %}ERA - Manage Orders{% endblock %}
 
 {% block content %}
 <style>
-    .status-select {
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 0.3rem 0.5rem;
-        font-size: 0.85rem;
+    .admin-page { padding-top: 120px; min-height: 80vh; }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    .status-select option[value="Pending"] { background: #fff3cd; }
-    .status-select option[value="Processing"] { background: #cfe2ff; }
-    .status-select option[value="Shipped"] { background: #ffe5cc; }
-    .status-select option[value="Delivered"] { background: #d1e7dd; }
-    .status-select option[value="Cancelled"] { background: #f8d7da; }
-    
-    .row-pending { background-color: rgba(255, 243, 205, 0.3); }
-    .row-processing { background-color: rgba(207, 226, 255, 0.3); }
-    .row-shipped { background-color: rgba(255, 229, 204, 0.3); }
-    .row-delivered { background-color: rgba(209, 231, 221, 0.3); }
-    .row-cancelled { background-color: rgba(248, 215, 218, 0.3); }
+    .admin-header h2 {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    .admin-header h2 span { color: var(--era-gold); }
+
+    .admin-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        overflow: hidden;
+    }
+
+    /* Toolbar */
+    .admin-toolbar {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--era-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .filter-pill {
+        padding: 0.35rem 1rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid var(--era-border);
+        background: var(--era-white);
+        color: var(--era-text);
+        cursor: pointer;
+        text-decoration: none;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .filter-pill:hover, .filter-pill.active {
+        background: var(--era-navy);
+        border-color: var(--era-navy);
+        color: var(--era-white);
+    }
+
+    /* Table */
+    .admin-table { width: 100%; }
+    .admin-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--era-muted);
+        border-bottom: 2px solid var(--era-border);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        background: var(--era-cream);
+    }
+    .admin-table tbody td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--era-border);
+        font-size: 0.9rem;
+    }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+    .admin-table tbody tr:hover { background: var(--era-cream); }
+
+    .order-id { font-weight: 600; font-family: var(--font-heading); }
+    .customer-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .customer-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--era-stone);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--era-muted);
+    }
+
+    /* Status Dropdown */
+    .status-select {
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .status-select:focus {
+        outline: none;
+        border-color: var(--era-gold);
+    }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 4rem 2rem; }
+    .empty-state i { font-size: 4rem; color: var(--era-border); margin-bottom: 1rem; }
+
+    /* Export Button */
+    .btn-export {
+        background: var(--era-success);
+        color: var(--era-white);
+        border: none;
+        border-radius: var(--radius-btn);
+        padding: 0.5rem 1.25rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .btn-export:hover { background: #245a3f; color: var(--era-white); }
+
+    @media (max-width: 767px) {
+        .admin-table { display: block; overflow-x: auto; }
+    }
 </style>
 
-<div class="container-fluid mt-5 pt-4 px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2>Admin - Order Management</h2>
-        <div class="d-flex gap-2">
-            <input type="text" id="searchOrders" class="form-control form-control-sm" placeholder="Search by customer or order ID..." style="width: 250px;" onkeyup="searchOrders()">
-            <button class="btn btn-sm btn-era" onclick="bulkMarkShipped()">
-                <i class="bi bi-truck me-1"></i> Mark Selected as Shipped
-            </button>
-            <a href="{% url 'export_orders_csv' %}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-download me-1"></i> Export CSV
-            </a>
+<div class="admin-page">
+    <div class="container">
+        <div class="admin-header">
+            <h2>Manage <span>Orders</span></h2>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'export_orders_csv' %}" class="btn-export">
+                    <i class="bi bi-download"></i> Export CSV
+                </a>
+            </div>
         </div>
-    </div>
 
-    <div class="card-era p-3">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle" id="ordersTable">
-                <thead class="table-light">
+        <div class="admin-card">
+            <!-- Filter Toolbar -->
+            <div class="admin-toolbar">
+                <div class="filter-pills">
+                    <a href="{% url 'finalorder' %}" class="filter-pill {% if not request.GET.status %}active{% endif %}">All ({{ orders|length }})</a>
+                    <a href="?status=Pending" class="filter-pill {% if request.GET.status == 'Pending' %}active{% endif %}">Pending</a>
+                    <a href="?status=Processing" class="filter-pill {% if request.GET.status == 'Processing' %}active{% endif %}">Processing</a>
+                    <a href="?status=Shipped" class="filter-pill {% if request.GET.status == 'Shipped' %}active{% endif %}">Shipped</a>
+                    <a href="?status=Delivered" class="filter-pill {% if request.GET.status == 'Delivered' %}active{% endif %}">Delivered</a>
+                    <a href="?status=Cancelled" class="filter-pill {% if request.GET.status == 'Cancelled' %}active{% endif %}">Cancelled</a>
+                </div>
+            </div>
+
+            <!-- Table -->
+            {% if orders %}
+            <table class="admin-table" id="ordersTable">
+                <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
                         <th>Order ID</th>
                         <th>Customer</th>
-                        <th>Date</th>
                         <th>Product</th>
                         <th>Qty</th>
                         <th>Total</th>
-                        <th>Phone</th>
-                        <th>Address</th>
+                        <th>Date</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Tracking</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                    <tr class="row-{{ order.status|lower }}" data-search="{{ order.customer.fname }} {{ order.customer.lname }} {{ order.id }}">
-                        <td><input type="checkbox" class="order-checkbox" value="{{ order.id }}"></td>
-                        <td><strong>#{{ order.id }}</strong></td>
-                        <td>{{ order.customer.fname }} {{ order.customer.lname }}</td>
-                        <td>{{ order.date }}</td>
-                        <td>{{ order.product.name }}</td>
-                        <td>{{ order.quantity }}</td>
-                        <td class="fw-semibold" style="color: var(--accent);">${{ order.price }}</td>
-                        <td>{{ order.Phone_no }}</td>
-                        <td>{{ order.address|truncatechars:30 }}</td>
+                    <tr>
+                        <td class="order-id">#{{ order.id }}</td>
                         <td>
-                            <select class="status-select" onchange="updateOrderStatus({{ order.id }}, this.value)">
+                            <div class="customer-cell">
+                                <div class="customer-avatar">{{ order.customer.fname|first }}</div>
+                                <div>
+                                    <p class="mb-0 fw-semibold small">{{ order.customer.fname }} {{ order.customer.lname }}</p>
+                                    <p class="mb-0 text-muted-era small">{{ order.customer.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="mb-0 small">{{ order.product.name }}</p>
+                        </td>
+                        <td class="text-center">{{ order.quantity }}</td>
+                        <td class="fw-semibold">${{ order.total_price }}</td>
+                        <td class="text-muted-era small">{{ order.date|date:"M d, Y" }}</td>
+                        <td>
+                            <select class="status-select" data-order-id="{{ order.id }}" onchange="updateStatus(this)">
                                 <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
                                 <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
                                 <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
@@ -78,18 +211,29 @@
                             </select>
                         </td>
                         <td>
-                            <a href="{% url 'edit_order' order.id %}" class="btn btn-sm btn-outline-secondary" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            {% if order.tracking_number %}
+                            <span class="small text-muted-era">{{ order.tracking_number }}</span>
+                            {% else %}
+                            <span class="small text-muted-era">—</span>
+                            {% endif %}
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="11" class="text-center text-muted py-4">No orders available</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-clipboard-data d-block"></i>
+                <h4>No orders found</h4>
+                <p class="text-muted-era">
+                    {% if request.GET.status %}
+                    No orders with status "{{ request.GET.status }}". <a href="{% url 'finalorder' %}">View all orders</a>
+                    {% else %}
+                    Orders will appear here once customers start placing them.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -98,56 +242,37 @@
 
 {% block extra_js %}
 <script>
-    function toggleSelectAll() {
-        const selectAll = document.getElementById('selectAll').checked;
-        document.querySelectorAll('.order-checkbox').forEach(cb => cb.checked = selectAll);
-    }
+    function updateStatus(select) {
+        const orderId = select.dataset.orderId;
+        const newStatus = select.value;
 
-    function searchOrders() {
-        const query = document.getElementById('searchOrders').value.toLowerCase();
-        document.querySelectorAll('#ordersTable tbody tr').forEach(row => {
-            const searchText = row.dataset.search.toLowerCase();
-            row.style.display = searchText.includes(query) ? '' : 'none';
-        });
-    }
-
-    function updateOrderStatus(orderId, status) {
         fetch('{% url "update_order_status" %}', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ order_id: orderId, status: status })
+            body: `order_id=${orderId}&status=${encodeURIComponent(newStatus)}`
         })
         .then(res => res.json())
         .then(data => {
-            if (data.success) {
-                showToast(`Order #${orderId} updated to ${status}`);
-                // Update row color
-                const row = document.querySelector(`tr[data-search*="${orderId}"]`);
-                if (row) {
-                    row.className = row.className.replace(/row-\w+/, `row-${status.toLowerCase()}`);
-                }
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                // Update badge color
+                const row = select.closest('tr');
+                // Visual feedback
+                select.style.borderColor = 'var(--era-success)';
+                setTimeout(() => { select.style.borderColor = ''; }, 1000);
             } else {
-                showToast('Failed to update status', 'error');
+                showToast(data.message || 'Error updating status', 'error');
+                // Revert select value
+                location.reload();
             }
-        });
-    }
-
-    function bulkMarkShipped() {
-        const selected = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
-        if (selected.length === 0) {
-            showToast('Please select orders first', 'error');
-            return;
-        }
-        
-        selected.forEach(orderId => {
-            const select = document.querySelector(`tr[data-search*="${orderId}"] .status-select`);
-            if (select) {
-                select.value = 'Shipped';
-                updateOrderStatus(orderId, 'Shipped');
-            }
+        })
+        .catch(() => {
+            showToast('Network error', 'error');
+            location.reload();
         });
     }
 </script>

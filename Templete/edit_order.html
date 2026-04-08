@@ -1,18 +1,172 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-    Edit Product
-{% endblock %}
-
-{% load crispy_forms_tags %}
+{% block title %}ERA - Edit Order #{{ form.instance.id }}{% endblock %}
 
 {% block content %}
-  <div class="container " style="margin-top: 70px;">
-    <h1>Edit Order</h1>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ form|crispy }}
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-  </div>
+<style>
+    .edit-order-page { padding-top: 120px; min-height: 80vh; }
+
+    .edit-order-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    .edit-order-card h3 {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+    .edit-order-card h3 span { color: var(--era-gold); }
+    .edit-order-card .subtitle {
+        color: var(--era-muted);
+        margin-bottom: 2rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group { flex: 1; }
+    .form-group.full { flex: 1 1 100%; }
+
+    .form-era-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+        color: var(--era-text);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .form-era {
+        width: 100%;
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-btn);
+        padding: 0.85rem 1rem;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        color: var(--era-text);
+        background: var(--era-white);
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .form-era:focus {
+        outline: none;
+        border-color: var(--era-gold);
+        box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+    }
+    select.form-era {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238A8178' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+    textarea.form-era { resize: vertical; min-height: 80px; }
+
+    .form-errors {
+        background: rgba(155,35,53,0.08);
+        border: 1px solid rgba(155,35,53,0.2);
+        color: var(--era-danger);
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-btn);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 767px) {
+        .form-row { flex-direction: column; gap: 0; }
+    }
+</style>
+
+<div class="edit-order-page">
+    <div class="container">
+        <div class="edit-order-card">
+            <h3>Edit Order <span>#{{ form.instance.id }}</span></h3>
+            <p class="subtitle">Update order details and status</p>
+
+            {% if form.errors %}
+            <div class="form-errors">
+                <i class="bi bi-exclamation-circle me-1"></i> Please correct the errors below.
+                <ul class="mb-0 mt-1">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label">Customer</label>
+                        <input type="text" class="form-era" value="{{ form.instance.customer.fname }} {{ form.instance.customer.lname }}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label">Product</label>
+                        <input type="text" class="form-era" value="{{ form.instance.product.name }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_quantity">Quantity</label>
+                        {{ form.quantity }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_price">Price</label>
+                        {{ form.price }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_status">Status</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_tracking_number">Tracking Number</label>
+                        {{ form.tracking_number }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_address">Address</label>
+                        {{ form.address }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_Phone_no">Phone</label>
+                        {{ form.Phone_no }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-era-label" for="id_estimated_delivery">Estimated Delivery</label>
+                        {{ form.estimated_delivery }}
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-era">
+                        <i class="bi bi-check-lg me-1"></i> Save Changes
+                    </button>
+                    <a href="{% url 'finalorder' %}" class="btn-era-outline">
+                        <i class="bi bi-x-lg me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

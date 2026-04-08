@@ -1,228 +1,247 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load cart %}
 
 {% block title %}ERA - My Orders{% endblock %}
 
 {% block content %}
 <style>
-    .order-card {
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    .orders-page { padding-top: 120px; min-height: 80vh; }
+
+    .order-timeline {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2rem;
         margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
-        overflow: hidden;
+        transition: all var(--duration-hover) var(--ease-out);
     }
-    .order-card:hover {
-        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    .order-timeline:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     }
     .order-header {
-        background: var(--surface);
-        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--era-border);
+        margin-bottom: 1.5rem;
+    }
+    .order-header h6 {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+    .order-meta {
+        font-size: 0.85rem;
+        color: var(--era-muted);
+    }
+
+    /* Order Progress */
+    .order-progress {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+        position: relative;
+    }
+    .progress-dot {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--era-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: var(--era-muted);
+        margin-bottom: 0.5rem;
+        transition: all var(--duration-hover) var(--ease-out);
+    }
+    .progress-dot.active {
+        background: var(--era-gold);
+        color: var(--era-white);
+    }
+    .progress-dot.current {
+        background: var(--era-navy);
+        color: var(--era-white);
+        box-shadow: 0 0 0 4px rgba(26,26,46,0.15);
+    }
+    .progress-label {
+        font-size: 0.7rem;
+        color: var(--era-muted);
+        text-align: center;
+    }
+    .progress-label.active { color: var(--era-text); font-weight: 500; }
+    .progress-connector {
+        width: 40px;
+        height: 2px;
+        background: var(--era-border);
+        margin-bottom: 1.5rem;
+    }
+    .progress-connector.active { background: var(--era-gold); }
+
+    /* Order Items */
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--era-border);
+    }
+    .order-item:last-child { border-bottom: none; }
+    .order-item-img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: var(--radius-btn);
+    }
+    .order-item-details { flex: 1; }
+    .order-item-name { font-weight: 500; margin-bottom: 0.25rem; }
+    .order-item-meta { font-size: 0.8rem; color: var(--era-muted); }
+    .order-item-price { font-weight: 600; color: var(--era-gold); white-space: nowrap; }
+
+    /* Order Footer */
+    .order-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--era-border);
     }
-    .order-body {
-        padding: 1.5rem;
-    }
-
-    .status-badge {
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
+    .order-total {
+        font-size: 1.1rem;
         font-weight: 600;
-    }
-    .status-pending { background: #fff3cd; color: #856404; }
-    .status-processing { background: #cfe2ff; color: #084298; }
-    .status-shipped { background: #ffe5cc; color: #cc5500; }
-    .status-delivered { background: #d1e7dd; color: #0f5132; }
-    .status-cancelled { background: #f8d7da; color: #842029; }
-
-    /* Order Timeline */
-    .order-timeline {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.5rem 0;
-        position: relative;
-    }
-    .order-timeline::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: #eee;
-        z-index: 0;
-    }
-    .timeline-step {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-    }
-    .timeline-dot {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: #eee;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 0.5rem;
-        color: white;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-    }
-    .timeline-step.completed .timeline-dot { background: var(--success); }
-    .timeline-step.active .timeline-dot {
-        background: var(--accent);
-        animation: pulse 1.5s infinite;
-    }
-    .timeline-label { font-size: 0.75rem; color: var(--text-secondary); }
-    .timeline-step.completed .timeline-label { color: var(--success); font-weight: 600; }
-
-    .filter-pills {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-bottom: 1.5rem;
-    }
-    .filter-pill {
-        padding: 0.5rem 1.25rem;
-        border-radius: 20px;
-        border: 1px solid #ddd;
-        background: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-    .filter-pill:hover, .filter-pill.active {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: var(--primary);
+        color: var(--era-navy);
     }
 
-    @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.4); }
-        50% { box-shadow: 0 0 0 10px rgba(201, 169, 110, 0); }
-    }
-
+    /* Empty State */
     .empty-orders {
         text-align: center;
-        padding: 5rem 2rem;
+        padding: 4rem 2rem;
     }
-    .empty-orders i {
-        font-size: 4rem;
-        color: #ddd;
-        margin-bottom: 1.5rem;
+    .empty-orders i { font-size: 5rem; color: var(--era-border); margin-bottom: 1.5rem; }
+
+    /* Tracking */
+    .tracking-info {
+        background: var(--era-cream);
+        border-radius: var(--radius-btn);
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    .tracking-info strong { color: var(--era-navy); }
+
+    @media (max-width: 767px) {
+        .order-header { flex-direction: column; }
+        .order-footer { flex-direction: column; align-items: flex-start; }
     }
 </style>
 
-<div class="container py-4">
-    <h2 class="mb-4" style="font-family: 'Playfair Display', serif;">My <span style="color: var(--accent);">Orders</span></h2>
+<div class="orders-page">
+    <div class="container">
+        <h1 class="text-center mb-2" style="font-family: var(--font-heading);">My <span class="text-gold">Orders</span></h1>
+        <p class="text-center text-muted-era mb-5">Track your orders and delivery status</p>
 
-    <!-- Filter Pills -->
-    <div class="filter-pills">
-        <button class="filter-pill active" onclick="filterOrders('all')">All Orders</button>
-        <button class="filter-pill" onclick="filterOrders('Pending')">Pending</button>
-        <button class="filter-pill" onclick="filterOrders('Processing')">Processing</button>
-        <button class="filter-pill" onclick="filterOrders('Shipped')">Shipped</button>
-        <button class="filter-pill" onclick="filterOrders('Delivered')">Delivered</button>
-    </div>
-
-    {% if orders %}
-    {% for order in orders %}
-    <div class="order-card" data-status="{{ order.status }}">
-        <div class="order-header">
-            <div>
-                <h6 class="mb-1 fw-bold">Order #{{ order.id }}</h6>
-                <small class="text-muted">Placed on {{ order.date }}</small>
-            </div>
-            <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
-            <!-- Bug 12 Fix: Pre-calculated order_total from view -->
-            <div class="fw-bold" style="color: var(--accent);">${{ order.order_total }}</div>
-        </div>
-
-        <div class="order-body">
-            <!-- Order Timeline -->
-            <div class="order-timeline">
-                <div class="timeline-step completed">
-                    <div class="timeline-dot"><i class="bi bi-check"></i></div>
-                    <div class="timeline-label">Placed</div>
-                </div>
-                <div class="timeline-step {% if order.status != 'Pending' %}completed{% endif %} {% if order.status == 'Processing' %}active{% endif %}">
-                    <div class="timeline-dot"><i class="bi bi-gear"></i></div>
-                    <div class="timeline-label">Processing</div>
-                </div>
-                <div class="timeline-step {% if order.status == 'Shipped' or order.status == 'Delivered' %}completed{% endif %} {% if order.status == 'Shipped' %}active{% endif %}">
-                    <div class="timeline-dot"><i class="bi bi-truck"></i></div>
-                    <div class="timeline-label">Shipped</div>
-                </div>
-                <div class="timeline-step {% if order.status == 'Delivered' %}completed{% endif %}">
-                    <div class="timeline-dot"><i class="bi bi-house-check"></i></div>
-                    <div class="timeline-label">Delivered</div>
-                </div>
-            </div>
-
-            <!-- Order Details -->
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-2">
+        {% if orders %}
+        {% for order in orders %}
+        <div class="order-timeline">
+            <!-- Header -->
+            <div class="order-header">
                 <div>
-                    <small class="text-muted">Product: <strong>{{ order.product.name }}</strong></small>
-                    <br>
-                    <small class="text-muted">Qty: {{ order.quantity }} | Tracking: {{ order.tracking_number|default:"N/A" }}</small>
-                    {% if order.estimated_delivery %}
-                    <br>
-                    <small class="text-muted">Est. Delivery: {{ order.estimated_delivery }}</small>
+                    <h6>Order #{{ order.id }}</h6>
+                    <p class="order-meta mb-0">
+                        <i class="bi bi-calendar3 me-1"></i>Placed on {{ order.date|date:"M d, Y" }}
+                        {% if order.estimated_delivery %}
+                        &middot; <i class="bi bi-truck me-1"></i>Est. delivery: {{ order.estimated_delivery|date:"M d, Y" }}
+                        {% endif %}
+                    </p>
+                </div>
+                <span class="badge-status-{{ order.status|lower|cut:' ' }} badge-era">{{ order.status }}</span>
+            </div>
+
+            <!-- Progress Steps -->
+            <div class="order-progress">
+                {% with status_list="Pending,Processing,Shipped,Delivered" %}
+                {% with status_array=status_list|split:"," %}
+                {% with current_status=order.status %}
+                {% for step in "Pending,Processing,Shipped,Delivered"|split:"," %}
+                    {% if forloop.counter0 > 0 %}
+                    <div class="progress-connector {% if forloop.counter0 <= current_status_index %}active{% endif %}"></div>
+                    {% endif %}
+                    <div class="progress-step">
+                        <div class="progress-dot {% if forloop.counter0 < current_status_index %}active{% elif forloop.counter0 == current_status_index %}current{% endif %}">
+                            {% if forloop.counter0 < current_status_index %}<i class="bi bi-check"></i>{% else %}{{ forloop.counter }}{% endif %}
+                        </div>
+                        <span class="progress-label {% if forloop.counter0 <= current_status_index %}active{% endif %}">{{ step }}</span>
+                    </div>
+                {% endfor %}
+                {% endwith %}
+                {% endwith %}
+                {% endwith %}
+            </div>
+
+            <!-- Order Item -->
+            <div class="order-item">
+                <img src="{{ order.product.image.url }}" alt="{{ order.product.name }}" class="order-item-img">
+                <div class="order-item-details">
+                    <p class="order-item-name mb-1">{{ order.product.name }}</p>
+                    <p class="order-item-meta mb-0">
+                        Qty: {{ order.quantity }} &middot; {{ order.product.category.name }}
+                    </p>
+                </div>
+                <span class="order-item-price">${{ order.order_total }}</span>
+            </div>
+
+            <!-- Footer -->
+            <div class="order-footer">
+                <div>
+                    <span class="order-total">Total: ${{ order.order_total }}</span>
+                    {% if order.tracking_number %}
+                    <div class="tracking-info mt-2">
+                        <i class="bi bi-upc-scan me-1"></i>Tracking: <strong>{{ order.tracking_number }}</strong>
+                    </div>
                     {% endif %}
                 </div>
                 <div class="d-flex gap-2">
                     {% if order.status == 'Pending' or order.status == 'Processing' %}
-                    <a href="{% url 'edit_order' order.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    <form method="POST" action="{% url 'cancel_order' order.id %}" style="display: inline;">
+                    <form action="{% url 'cancel_order' order.id %}" method="POST" class="mb-0" onsubmit="return confirm('Are you sure you want to cancel this order?');">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel</button>
+                        <button type="submit" class="btn-era-outline btn-era-sm" style="color: var(--era-danger); border-color: var(--era-danger);">
+                            <i class="bi bi-x-lg me-1"></i>Cancel Order
+                        </button>
                     </form>
                     {% endif %}
+                    <a href="{% url 'home' %}" class="btn-era btn-era-sm">
+                        <i class="bi bi-bag-plus me-1"></i>Shop More
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <div class="card-era">
+        {% endfor %}
+
+        {% else %}
+        <!-- Empty State -->
         <div class="empty-orders">
-            <i class="bi bi-box d-block"></i>
-            <h5 class="mt-3">No orders yet</h5>
-            <p class="text-muted">Start shopping to see your orders here!</p>
-            <a href="{% url 'home' %}" class="btn btn-era mt-3">
-                <i class="bi bi-bag-plus me-1"></i>Start Shopping
-            </a>
+            <i class="bi bi-box-seam d-block"></i>
+            <h3>No orders yet</h3>
+            <p class="text-muted-era mb-4">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+            <a href="{% url 'home' %}" class="btn-era">Browse Products</a>
         </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    function filterOrders(status) {
-        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-        event.target.classList.add('active');
-
-        document.querySelectorAll('.order-card').forEach(card => {
-            if (status === 'all' || card.dataset.status === status) {
-                card.style.display = 'block';
-                card.style.animation = 'fadeIn 0.3s ease';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    }
-</script>
 {% endblock %}

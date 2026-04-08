@@ -6,345 +6,302 @@
 
 {% block content %}
 <style>
-    .checkout-page {
-        background: var(--surface);
-        min-height: calc(100vh - 76px);
-        padding: 2rem 0;
-    }
-    .checkout-header {
-        background: linear-gradient(135deg, var(--primary) 0%, #2a2a4e 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-    }
+    .checkout-page { padding-top: 120px; min-height: 80vh; }
+
+    /* Progress Steps */
     .checkout-steps {
         display: flex;
         justify-content: center;
-        gap: 2rem;
-        margin-bottom: 1rem;
+        align-items: center;
+        margin-bottom: 3rem;
+        gap: 0;
     }
-    .checkout-step {
+    .step {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: rgba(255,255,255,0.6);
-        font-weight: 500;
     }
-    .checkout-step.active {
-        color: white;
-    }
-    .checkout-step .step-number {
-        width: 32px;
-        height: 32px;
+    .step-number {
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.2);
+        background: var(--era-border);
+        color: var(--era-muted);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
+        font-weight: 600;
         font-size: 0.9rem;
+        transition: all var(--duration-hover) var(--ease-out);
     }
-    .checkout-step.active .step-number {
-        background: var(--accent);
-        color: var(--primary);
+    .step.active .step-number {
+        background: var(--era-gold);
+        color: var(--era-white);
     }
-    .checkout-step.completed .step-number {
-        background: var(--success);
-        color: white;
+    .step.completed .step-number {
+        background: var(--era-success);
+        color: var(--era-white);
     }
-    .form-group-custom {
-        margin-bottom: 1.25rem;
-    }
-    .form-group-custom label {
-        display: block;
-        margin-bottom: 0.4rem;
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--era-muted);
         font-weight: 500;
-        font-size: 0.9rem;
-        color: var(--text-primary);
     }
-    .form-group-custom label .required {
-        color: var(--danger);
+    .step.active .step-label { color: var(--era-navy); font-weight: 600; }
+    .step.completed .step-label { color: var(--era-success); }
+    .step-connector {
+        width: 60px;
+        height: 2px;
+        background: var(--era-border);
+        margin: 0 0.75rem;
     }
-    .form-group-custom input,
-    .form-group-custom textarea,
-    .form-group-custom select {
-        width: 100%;
-        border: 1.5px solid #e0ddd5;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-        background: white;
+    .step-connector.completed { background: var(--era-success); }
+
+    /* Form Sections */
+    .checkout-section {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
     }
-    .form-group-custom input:focus,
-    .form-group-custom textarea:focus,
-    .form-group-custom select:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
-        outline: none;
+    .checkout-section h5 {
+        font-family: var(--font-heading);
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--era-border);
     }
-    .form-group-custom textarea {
-        resize: vertical;
-        min-height: 80px;
+
+    /* Order Summary Sidebar */
+    .order-summary {
+        background: var(--era-cream);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        position: sticky;
+        top: 100px;
+    }
+    .order-summary h5 {
+        font-family: var(--font-heading);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--era-border);
     }
     .order-item {
         display: flex;
-        align-items: center;
         gap: 1rem;
         padding: 0.75rem 0;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--era-border);
     }
-    .order-item:last-child {
-        border-bottom: none;
-    }
-    .order-item img {
+    .order-item:last-child { border-bottom: none; }
+    .order-item-img {
         width: 60px;
         height: 60px;
         object-fit: cover;
-        border-radius: 8px;
+        border-radius: var(--radius-btn);
     }
-    .order-item-details {
-        flex: 1;
-    }
-    .order-item-details h6 {
-        margin-bottom: 0.25rem;
-        font-size: 0.9rem;
-    }
-    .order-item-details .qty {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-    }
-    .order-item-price {
-        font-weight: 600;
-        color: var(--accent);
-    }
+    .order-item-details { flex: 1; }
+    .order-item-name { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.25rem; }
+    .order-item-qty { font-size: 0.8rem; color: var(--era-muted); }
+    .order-item-price { font-weight: 600; color: var(--era-gold); }
+
     .summary-row {
         display: flex;
         justify-content: space-between;
         margin-bottom: 0.5rem;
+        font-size: 0.9rem;
     }
     .summary-row.total {
-        font-size: 1.2rem;
-        font-weight: 700;
-        border-top: 2px solid var(--primary);
+        font-size: 1.15rem;
+        font-weight: 600;
         padding-top: 0.75rem;
         margin-top: 0.75rem;
+        border-top: 2px solid var(--era-border);
+        color: var(--era-navy);
     }
-    .secure-checkout-badge {
+
+    /* Coupon */
+    .coupon-input-group {
         display: flex;
-        align-items: center;
-        justify-content: center;
         gap: 0.5rem;
-        padding: 0.75rem;
-        background: var(--surface);
-        border-radius: 8px;
-        color: var(--text-secondary);
-        font-size: 0.85rem;
     }
-    .payment-method-option {
-        border: 2px solid #e0ddd5;
-        border-radius: 8px;
-        padding: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-bottom: 0.75rem;
-    }
-    .payment-method-option:hover {
-        border-color: var(--accent);
-    }
-    .payment-method-option.selected {
-        border-color: var(--accent);
-        background: rgba(201,169,110,0.05);
-    }
-    .payment-method-option input[type="radio"] {
-        display: none;
+    .coupon-input-group input { flex: 1; }
+
+    @media (max-width: 991px) {
+        .order-summary { position: static; }
     }
 </style>
 
-<!-- Checkout Header -->
-<div class="checkout-header">
-    <div class="container">
-        <h2 class="text-center mb-3" style="font-family: 'Playfair Display', serif;">Checkout</h2>
-        
-        <!-- Steps -->
-        <div class="checkout-steps">
-            <div class="checkout-step completed">
-                <span class="step-number"><i class="bi bi-check"></i></span>
-                <span>Cart</span>
-            </div>
-            <div class="checkout-step active">
-                <span class="step-number">2</span>
-                <span>Shipping & Payment</span>
-            </div>
-            <div class="checkout-step">
-                <span class="step-number">3</span>
-                <span>Confirmation</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="checkout-page">
     <div class="container">
-        {% if prod %}
-        <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
-            {% csrf_token %}
-            <input type="hidden" name="Price" value="{{ total }}">
-            
-            <div class="row g-4">
-                <!-- Left: Shipping Details -->
-                <div class="col-lg-7">
-                    <div class="card-era p-4">
-                        <h4 class="mb-4" style="font-family: 'Playfair Display', serif;">
-                            <i class="bi bi-truck me-2" style="color: var(--accent);"></i>Shipping Details
-                        </h4>
-                        
+        <h1 class="text-center mb-4" style="font-family: var(--font-heading);">Checkout</h1>
+
+        <!-- Progress Steps -->
+        <div class="checkout-steps">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <span class="step-label">Shipping</span>
+            </div>
+            <div class="step-connector" id="connector1"></div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <span class="step-label">Review</span>
+            </div>
+            <div class="step-connector" id="connector2"></div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <span class="step-label">Confirm</span>
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Checkout Form -->
+            <div class="col-lg-7">
+                <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
+                    {% csrf_token %}
+
+                    <!-- Step 1: Shipping Info -->
+                    <div class="checkout-section" id="shippingSection">
+                        <h5><i class="bi bi-geo-alt me-2 text-gold"></i>Shipping Information</h5>
+
                         <div class="row g-3">
-                            <div class="col-md-6 form-group-custom">
-                                <label>First Name <span class="required">*</span></label>
-                                <input type="text" name="first_name" value="{{ customer.fname }}" required placeholder="John">
+                            <div class="col-md-6">
+                                <label class="form-era-label">First Name</label>
+                                <input type="text" name="fname" class="form-era" value="{{ customer.fname }}" required>
                             </div>
-                            <div class="col-md-6 form-group-custom">
-                                <label>Last Name <span class="required">*</span></label>
-                                <input type="text" name="last_name" value="{{ customer.lname }}" required placeholder="Doe">
+                            <div class="col-md-6">
+                                <label class="form-era-label">Last Name</label>
+                                <input type="text" name="lname" class="form-era" value="{{ customer.lname }}" required>
                             </div>
-                        </div>
-                        
-                        <div class="form-group-custom">
-                            <label>Email Address <span class="required">*</span></label>
-                            <input type="email" name="email" value="{{ customer.email }}" required placeholder="john@example.com" readonly>
-                        </div>
-                        
-                        <div class="form-group-custom">
-                            <label>Phone Number <span class="required">*</span></label>
-                            <input type="tel" name="phone" value="{{ customer.phone }}" required placeholder="+1 (234) 567-8900">
-                        </div>
-                        
-                        <div class="form-group-custom">
-                            <label>Street Address <span class="required">*</span></label>
-                            <textarea name="address" required placeholder="Enter your full street address, apartment/suite number, city, and postal code"></textarea>
-                        </div>
-                        
-                        <div class="row g-3">
-                            <div class="col-md-6 form-group-custom">
-                                <label>City <span class="required">*</span></label>
-                                <input type="text" name="city" required placeholder="New York">
+                            <div class="col-md-6">
+                                <label class="form-era-label">Email</label>
+                                <input type="email" name="email" class="form-era" value="{{ customer.email }}" required>
                             </div>
-                            <div class="col-md-6 form-group-custom">
-                                <label>Postal Code <span class="required">*</span></label>
-                                <input type="text" name="postal_code" required placeholder="10001">
+                            <div class="col-md-6">
+                                <label class="form-era-label">Phone Number</label>
+                                <input type="tel" name="phone" class="form-era" value="{{ customer.phone }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-era-label">Delivery Address</label>
+                                <input type="text" name="address" class="form-era" placeholder="Street address, apartment, suite, etc." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-era-label">City</label>
+                                <input type="text" name="city" class="form-era" placeholder="City" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-era-label">Postal Code</label>
+                                <input type="text" name="postal_code" class="form-era" placeholder="Postal code" required>
                             </div>
                         </div>
-                        
-                        <div class="form-group-custom">
-                            <label>Order Notes (Optional)</label>
-                            <textarea name="notes" placeholder="Special instructions for delivery or gift wrapping..."></textarea>
-                        </div>
+
+                        <input type="hidden" name="Price" value="{{ final_total|default:total }}">
+
+                        <button type="button" class="btn-era w-100 mt-4" onclick="goToStep(2)">
+                            Continue to Review <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
                     </div>
-                </div>
-                
-                <!-- Right: Order Summary -->
-                <div class="col-lg-5">
-                    <div class="card-era p-4" style="position: sticky; top: 100px;">
-                        <h4 class="mb-4" style="font-family: 'Playfair Display', serif;">
-                            <i class="bi bi-bag-check me-2" style="color: var(--accent);"></i>Order Summary
-                        </h4>
-                        
-                        <!-- Order Items -->
-                        <div class="mb-3" style="max-height: 250px; overflow-y: auto;">
-                            {% for product in prod %}
-                            <div class="order-item">
-                                <img src="{{ product.get_image_url }}" alt="{{ product.name }}">
-                                <div class="order-item-details">
-                                    <h6>{{ product.name }}</h6>
-                                    <span class="qty">Qty: {{ cart|dict_get:product.id|stringformat:"s" }}</span>
+
+                    <!-- Step 2: Review Order -->
+                    <div class="checkout-section d-none" id="reviewSection">
+                        <h5><i class="bi bi-receipt me-2 text-gold"></i>Review Your Order</h5>
+
+                        <div id="reviewShippingInfo" class="mb-4 p-3 rounded" style="background: var(--era-stone);">
+                            <h6 class="mb-2" style="font-family: var(--font-heading);">Shipping To:</h6>
+                            <p class="mb-0 small" id="reviewAddress"></p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="font-family: var(--font-heading);">Items:</h6>
+                            {% for item in prod %}
+                            {% with qty=cart|dict_get:item.id|stringformat:"d" %}
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
+                                    <div>
+                                        <p class="mb-0 fw-semibold small">{{ item.name }}</p>
+                                        <p class="mb-0 text-muted-era small">Qty: {{ qty }}</p>
+                                    </div>
                                 </div>
-                                <div class="order-item-price">
-                                    ${{ product.price|multiply:cart|dict_get:product.id|stringformat:"s" }}
-                                </div>
+                                <span class="fw-semibold">${% widthratio item.price 1 qty %}</span>
                             </div>
+                            {% endwith %}
                             {% endfor %}
                         </div>
-                        
-                        <!-- Pricing Summary -->
-                        <div class="mb-3">
-                            <div class="summary-row">
-                                <span class="text-muted">Subtotal</span>
-                                <span class="fw-semibold">${{ total }}</span>
-                            </div>
-                            <div class="summary-row">
-                                <span class="text-muted">Shipping</span>
-                                <span class="fw-semibold {% if total >= 200 %}text-success{% endif %}">
-                                    {% if total >= 200 %}FREE{% else %}$15.00{% endif %}
-                                </span>
-                            </div>
-                            
-                            {% if coupon_discount > 0 %}
-                            <div class="summary-row text-success">
-                                <span>Discount ({{ coupon_code }})</span>
-                                <span>-${{ coupon_discount }}</span>
-                            </div>
-                            {% endif %}
-                            
-                            <div class="summary-row total">
-                                <span>Total</span>
-                                <span style="color: var(--accent);">${% if total >= 200 %}{{ total }}{% else %}{{ total|add:15 }}{% endif %}</span>
-                            </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn-era-outline flex-grow-1" onclick="goToStep(1)">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </button>
+                            <button type="submit" class="btn-era flex-grow-1">
+                                <i class="bi bi-lock me-1"></i> Place Order
+                            </button>
                         </div>
-                        
-                        <!-- Payment Methods -->
-                        <h5 class="mb-3">Payment Method</h5>
-                        <label class="payment-method-option selected d-block">
-                            <input type="radio" name="payment_method" value="cod" checked>
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-cash-stack me-2" style="font-size: 1.5rem; color: var(--accent);"></i>
-                                <div>
-                                    <div class="fw-semibold">Cash on Delivery</div>
-                                    <small class="text-muted">Pay when you receive your order</small>
-                                </div>
-                            </div>
-                        </label>
-                        
-                        <label class="payment-method-option d-block">
-                            <input type="radio" name="payment_method" value="card">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-credit-card me-2" style="font-size: 1.5rem; color: var(--accent);"></i>
-                                <div>
-                                    <div class="fw-semibold">Credit/Debit Card</div>
-                                    <small class="text-muted">Secure payment via Stripe/PayPal</small>
-                                </div>
-                            </div>
-                        </label>
-                        
-                        <!-- Secure Checkout Badge -->
-                        <div class="secure-checkout-badge mb-3">
-                            <i class="bi bi-shield-lock-fill" style="color: var(--success);"></i>
-                            <span>Your information is secure and encrypted</span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-5">
+                <div class="order-summary">
+                    <h5>Order Summary</h5>
+
+                    <!-- Items -->
+                    {% for item in prod %}
+                    {% with qty=cart|dict_get:item.id|stringformat:"d" %}
+                    <div class="order-item">
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="order-item-img">
+                        <div class="order-item-details">
+                            <p class="order-item-name mb-0">{{ item.name }}</p>
+                            <p class="order-item-qty mb-0">Qty: {{ qty }}</p>
                         </div>
-                        
-                        <!-- Place Order Button -->
-                        <button type="submit" class="btn btn-era w-100 py-3 mb-2" style="font-size: 1rem;">
-                            <i class="bi bi-lock-fill me-2"></i>Place Order
-                        </button>
-                        
-                        <a href="{% url 'cart' %}" class="btn btn-outline-secondary w-100 btn-sm">
-                            <i class="bi bi-arrow-left me-1"></i>Back to Cart
-                        </a>
+                        <span class="order-item-price">${% widthratio item.price 1 qty %}</span>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+
+                    <!-- Coupon -->
+                    <div class="mt-4 mb-3">
+                        <label class="form-era-label">Coupon Code</label>
+                        <div class="coupon-input-group">
+                            <input type="text" id="couponCode" class="form-era" placeholder="Enter code" style="text-transform:uppercase;">
+                            <button type="button" class="btn-era btn-era-sm" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <small id="couponMessage" class="d-block mt-1"></small>
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="mt-3">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="summarySubtotal">${{ total }}</span>
+                        </div>
+                        {% if coupon_discount > 0 %}
+                        <div class="summary-row text-success">
+                            <span>Discount</span>
+                            <span id="summaryDiscount">-${{ coupon_discount }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span id="summaryShipping">${% if total >= 200 %}0{% else %}15{% endif %}</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span id="summaryTotal">${{ final_total|default:total|add:15 }}</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <div class="d-flex justify-content-center gap-3 text-muted-era small">
+                            <span><i class="bi bi-shield-lock me-1"></i>Secure</span>
+                            <span><i class="bi bi-truck me-1"></i>Fast Delivery</span>
+                            <span><i class="bi bi-arrow-return-left me-1"></i>Easy Returns</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </form>
-        {% else %}
-        <!-- Empty Cart State -->
-        <div class="card-era p-5 text-center">
-            <i class="bi bi-bag-x" style="font-size: 4rem; color: #ddd;"></i>
-            <h3 class="mt-3">Your cart is empty</h3>
-            <p class="text-muted">Add items to your cart before proceeding to checkout.</p>
-            <a href="{% url 'home' %}" class="btn btn-era mt-3">
-                <i class="bi bi-bag-plus me-1"></i>Start Shopping
-            </a>
         </div>
-        {% endif %}
     </div>
 </div>
 
@@ -352,33 +309,104 @@
 
 {% block extra_js %}
 <script>
-    // Payment method selection
-    document.querySelectorAll('.payment-method-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
-            this.querySelector('input[type="radio"]').checked = true;
-        });
-    });
+    let currentStep = 1;
 
-    // Form validation
-    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-        const requiredFields = this.querySelectorAll('[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.style.borderColor = 'var(--danger)';
-                isValid = false;
-            } else {
-                field.style.borderColor = '#e0ddd5';
+    function goToStep(step) {
+        if (step === 2 && currentStep === 1) {
+            // Validate shipping form
+            const form = document.getElementById('checkoutForm');
+            const requiredFields = form.querySelectorAll('#shippingSection input[required]');
+            let valid = true;
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'var(--era-danger)';
+                    valid = false;
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+            if (!valid) {
+                showToast('Please fill in all required fields', 'error');
+                return;
             }
-        });
-        
-        if (!isValid) {
-            e.preventDefault();
-            alert('Please fill in all required fields.');
+
+            // Populate review info
+            const fname = form.querySelector('[name="fname"]').value;
+            const lname = form.querySelector('[name="lname"]').value;
+            const email = form.querySelector('[name="email"]').value;
+            const phone = form.querySelector('[name="phone"]').value;
+            const address = form.querySelector('[name="address"]').value;
+            const city = form.querySelector('[name="city"]').value;
+            const postal = form.querySelector('[name="postal_code"]').value;
+
+            document.getElementById('reviewAddress').innerHTML = `
+                <strong>${fname} ${lname}</strong><br>
+                ${address}<br>
+                ${city}, ${postal}<br>
+                ${email}<br>
+                ${phone}
+            `;
         }
-    });
+
+        currentStep = step;
+
+        // Update UI
+        document.getElementById('shippingSection').classList.toggle('d-none', step !== 1);
+        document.getElementById('reviewSection').classList.toggle('d-none', step !== 2);
+
+        // Update step indicators
+        for (let i = 1; i <= 3; i++) {
+            const stepEl = document.getElementById(`step${i}`);
+            stepEl.classList.remove('active', 'completed');
+            if (i < step) stepEl.classList.add('completed');
+            else if (i === step) stepEl.classList.add('active');
+        }
+
+        // Update connectors
+        document.getElementById('connector1').classList.toggle('completed', step > 1);
+        document.getElementById('connector2').classList.toggle('completed', step > 2);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function applyCoupon() {
+        const code = document.getElementById('couponCode').value.trim();
+        const msg = document.getElementById('couponMessage');
+        const cartTotal = {{ total }};
+
+        if (!code) {
+            msg.textContent = 'Please enter a coupon code';
+            msg.style.color = 'var(--era-danger)';
+            return;
+        }
+
+        fetch('{% url "apply_coupon" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `code=${encodeURIComponent(code)}&cart_total=${cartTotal}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                msg.textContent = data.message;
+                msg.style.color = 'var(--era-success)';
+                document.getElementById('summaryDiscount').textContent = `-$${data.discount}`;
+                document.getElementById('summaryTotal').textContent = `$${data.final_total}`;
+                showToast(data.message, 'success');
+            } else {
+                msg.textContent = data.message;
+                msg.style.color = 'var(--era-danger)';
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(() => {
+            msg.textContent = 'Error applying coupon';
+            msg.style.color = 'var(--era-danger)';
+        });
+    }
 </script>
 {% endblock %}

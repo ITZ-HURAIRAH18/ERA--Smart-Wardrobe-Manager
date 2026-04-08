@@ -1,120 +1,141 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load cart %}
 
-{% block title %}ERA - My Wishlist{% endblock %}
+{% block title %}ERA - Wishlist{% endblock %}
 
 {% block content %}
 <style>
-    .wishlist-item {
-        transition: all 0.3s ease;
-        border-radius: 12px;
+    .wishlist-page { padding-top: 120px; min-height: 80vh; }
+
+    .wishlist-card {
+        background: var(--era-white);
+        border: 1px solid var(--era-border);
+        border-radius: var(--radius-card);
         overflow: hidden;
+        transition: all var(--duration-hover) var(--ease-out);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
-    .wishlist-item:hover {
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        transform: translateY(-3px);
+    .wishlist-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        transform: translateY(-4px);
     }
-    .wishlist-item-img {
-        height: 220px;
+    .wishlist-card .img-wrap {
+        position: relative;
+        height: 260px;
         overflow: hidden;
+        background: var(--era-stone);
     }
-    .wishlist-item-img img {
+    .wishlist-card .img-wrap img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.6s var(--ease-out);
     }
-    .wishlist-item:hover .wishlist-item-img img {
-        transform: scale(1.05);
+    .wishlist-card:hover .img-wrap img { transform: scale(1.05); }
+    .wishlist-card .remove-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--era-white);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--duration-hover) var(--ease-out);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 2;
+    }
+    .wishlist-card .remove-btn:hover {
+        background: var(--era-danger);
+        color: var(--era-white);
+    }
+    .wishlist-card .card-body {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .wishlist-card .card-body .product-name {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .wishlist-card .card-body .product-name a {
+        color: var(--era-text);
+        text-decoration: none;
+    }
+    .wishlist-card .card-body .product-name a:hover { color: var(--era-gold); }
+    .wishlist-card .card-body .actions {
+        margin-top: auto;
+        display: flex;
+        gap: 0.5rem;
     }
 
+    /* Empty State */
     .empty-wishlist {
         text-align: center;
-        padding: 5rem 2rem;
+        padding: 4rem 2rem;
     }
-    .empty-wishlist i {
-        font-size: 5rem;
-        color: #ddd;
-        margin-bottom: 1.5rem;
-    }
+    .empty-wishlist i { font-size: 5rem; color: var(--era-border); margin-bottom: 1.5rem; }
 </style>
 
-<div class="container py-4">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 style="font-family: 'Playfair Display', serif;">My <span style="color: var(--accent);">Wishlist</span></h2>
-        <a href="{% url 'home' %}" class="btn btn-outline-era btn-sm">
-            <i class="bi bi-bag-plus me-1"></i>Continue Shopping
-        </a>
-    </div>
+<div class="wishlist-page">
+    <div class="container">
+        <h1 class="text-center mb-2" style="font-family: var(--font-heading);">My <span class="text-gold">Wishlist</span></h1>
+        <p class="text-center text-muted-era mb-5">Items you've saved for later</p>
 
-    {% if wishlist_items %}
-    <div class="row g-4">
-        {% for item in wishlist_items %}
-        <div class="col-6 col-md-4 col-lg-3">
-            <div class="card-era wishlist-item h-100">
-                <!-- Product Image -->
-                <div class="wishlist-item-img position-relative">
-                    <a href="{% url 'product_detail' item.product.id %}">
-                        <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" loading="lazy">
-                    </a>
-                    <!-- Remove from Wishlist Button -->
-                    <button class="btn btn-sm position-absolute top-0 end-0 m-2" style="background: rgba(255,255,255,0.9); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"
-                            onclick="removeFromWishlist({{ item.product.id }})" title="Remove from wishlist">
-                        <i class="bi bi-heart-break" style="color: var(--danger);"></i>
-                    </button>
-                    {% if item.product.is_new %}
-                    <span class="badge position-absolute top-0 start-0 m-2" style="background: var(--accent); color: var(--primary);">NEW</span>
-                    {% endif %}
-                </div>
-
-                <!-- Product Info -->
-                <div class="p-3 d-flex flex-column flex-grow-1">
-                    <a href="{% url 'product_detail' item.product.id %}" class="text-decoration-none">
-                        <h6 class="mb-1 fw-semibold text-truncate">{{ item.product.name }}</h6>
-                    </a>
-                    <p class="text-muted small mb-2">${{ item.product.price }}</p>
-
-                    <!-- Star Rating -->
-                    {% if item.product.avg_rating %}
-                    <div class="mb-2">
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= item.product.avg_rating %}
-                                <i class="bi bi-star-fill" style="color: var(--accent); font-size: 0.75rem;"></i>
-                            {% else %}
-                                <i class="bi bi-star" style="color: #ddd; font-size: 0.75rem;"></i>
-                            {% endif %}
-                        {% endfor %}
-                        <small class="text-muted ms-1">({{ item.product.avg_rating }})</small>
-                    </div>
-                    {% endif %}
-
-                    <!-- Add to Cart Button -->
-                    <form method="POST" action="{% url 'home' %}" class="mt-auto">
-                        {% csrf_token %}
-                        <input type="hidden" name="product" value="{{ item.product.id }}">
-                        <button type="submit" class="btn btn-era btn-sm w-100">
-                            <i class="bi bi-bag-plus me-1"></i>Add to Cart
+        {% if wishlist_items %}
+        <div class="row g-4">
+            {% for item in wishlist_items %}
+            <div class="col-lg-3 col-md-4 col-6">
+                <div class="wishlist-card" data-product-id="{{ item.product.id }}">
+                    <div class="img-wrap">
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" loading="lazy">
+                        <button class="remove-btn" onclick="removeFromWishlist({{ item.product.id }})" title="Remove from wishlist">
+                            <i class="bi bi-x-lg"></i>
                         </button>
-                    </form>
+                    </div>
+                    <div class="card-body">
+                        <span class="text-muted-era small text-uppercase">{{ item.product.category.name }}</span>
+                        <h6 class="product-name">
+                            <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
+                        </h6>
+                        <span class="fw-semibold text-gold fs-5">${{ item.product.price }}</span>
+                        <div class="actions">
+                            {% if item.product.stock_quantity > 0 %}
+                            <form action="{% url 'home' %}" method="POST" class="mb-0 flex-grow-1">
+                                {% csrf_token %}
+                                <input type="hidden" name="product" value="{{ item.product.id }}">
+                                <button type="submit" class="btn-era w-100 btn-era-sm">
+                                    <i class="bi bi-bag-plus me-1"></i> Add to Cart
+                                </button>
+                            </form>
+                            {% else %}
+                            <button class="btn-era-outline w-100 btn-era-sm" disabled>Out of Stock</button>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <!-- Empty Wishlist State -->
-    <div class="card-era">
+
+        {% else %}
+        <!-- Empty State -->
         <div class="empty-wishlist">
             <i class="bi bi-heart d-block"></i>
-            <h4>Your wishlist is empty</h4>
-            <p class="text-muted">Save items you love to your wishlist and shop them later.</p>
-            <a href="{% url 'home' %}" class="btn btn-era mt-3">
-                <i class="bi bi-bag-plus me-1"></i>Explore Products
-            </a>
+            <h3>Your wishlist is empty</h3>
+            <p class="text-muted-era mb-4">Start adding items you love to your wishlist!</p>
+            <a href="{% url 'home' %}" class="btn-era">Discover Products</a>
         </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 
 {% endblock %}
@@ -122,33 +143,35 @@
 {% block extra_js %}
 <script>
     function removeFromWishlist(productId) {
-        if (!confirm('Remove this item from your wishlist?')) return;
-
-        fetch(`{% url 'remove_from_wishlist' 0 %}`.replace('0', productId), {
-            method: 'GET',
+        fetch(`/wishlist/remove/${productId}/`, {
+            method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
                 'X-Requested-With': 'XMLHttpRequest'
-            }
+            },
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                // Remove the item's card from DOM
-                const card = event.target.closest('.col-6');
+                const card = document.querySelector(`.wishlist-card[data-product-id="${productId}"]`);
                 if (card) {
                     card.style.opacity = '0';
-                    card.style.transform = 'scale(0.8)';
-                    setTimeout(() => card.remove(), 300);
+                    card.style.transform = 'scale(0.9)';
+                    card.style.transition = 'all 0.3s ease';
+                    setTimeout(() => {
+                        card.remove();
+                        // Check if no items left
+                        if (document.querySelectorAll('.wishlist-card').length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
                 }
-                showToast(data.message);
-                // If no items left, reload to show empty state
-                setTimeout(() => location.reload(), 500);
+                showToast(data.message, 'success');
             } else {
                 showToast(data.message || 'Error removing item', 'error');
             }
         })
-        .catch(() => showToast('Network error', 'error'));
+        .catch(() => showToast('Something went wrong', 'error'));
     }
 </script>
 {% endblock %}
