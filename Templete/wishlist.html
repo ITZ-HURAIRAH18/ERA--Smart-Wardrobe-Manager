@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ERA - My Wishlist{% endblock %}
+
+{% block content %}
+<style>
+    .wishlist-item {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .wishlist-item:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+    .wishlist-item-img {
+        height: 220px;
+        overflow: hidden;
+    }
+    .wishlist-item-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .wishlist-item:hover .wishlist-item-img img {
+        transform: scale(1.05);
+    }
+
+    .empty-wishlist {
+        text-align: center;
+        padding: 5rem 2rem;
+    }
+    .empty-wishlist i {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="font-family: 'Playfair Display', serif;">My <span style="color: var(--accent);">Wishlist</span></h2>
+        <a href="{% url 'home' %}" class="btn btn-outline-era btn-sm">
+            <i class="bi bi-bag-plus me-1"></i>Continue Shopping
+        </a>
+    </div>
+
+    {% if wishlist_items %}
+    <div class="row g-4">
+        {% for item in wishlist_items %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card-era wishlist-item h-100">
+                <!-- Product Image -->
+                <div class="wishlist-item-img position-relative">
+                    <a href="{% url 'product_detail' item.product.id %}">
+                        <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" loading="lazy">
+                    </a>
+                    <!-- Remove from Wishlist Button -->
+                    <button class="btn btn-sm position-absolute top-0 end-0 m-2" style="background: rgba(255,255,255,0.9); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"
+                            onclick="removeFromWishlist({{ item.product.id }})" title="Remove from wishlist">
+                        <i class="bi bi-heart-break" style="color: var(--danger);"></i>
+                    </button>
+                    {% if item.product.is_new %}
+                    <span class="badge position-absolute top-0 start-0 m-2" style="background: var(--accent); color: var(--primary);">NEW</span>
+                    {% endif %}
+                </div>
+
+                <!-- Product Info -->
+                <div class="p-3 d-flex flex-column flex-grow-1">
+                    <a href="{% url 'product_detail' item.product.id %}" class="text-decoration-none">
+                        <h6 class="mb-1 fw-semibold text-truncate">{{ item.product.name }}</h6>
+                    </a>
+                    <p class="text-muted small mb-2">${{ item.product.price }}</p>
+
+                    <!-- Star Rating -->
+                    {% if item.product.avg_rating %}
+                    <div class="mb-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= item.product.avg_rating %}
+                                <i class="bi bi-star-fill" style="color: var(--accent); font-size: 0.75rem;"></i>
+                            {% else %}
+                                <i class="bi bi-star" style="color: #ddd; font-size: 0.75rem;"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <small class="text-muted ms-1">({{ item.product.avg_rating }})</small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Add to Cart Button -->
+                    <form method="POST" action="{% url 'home' %}" class="mt-auto">
+                        {% csrf_token %}
+                        <input type="hidden" name="product" value="{{ item.product.id }}">
+                        <button type="submit" class="btn btn-era btn-sm w-100">
+                            <i class="bi bi-bag-plus me-1"></i>Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty Wishlist State -->
+    <div class="card-era">
+        <div class="empty-wishlist">
+            <i class="bi bi-heart d-block"></i>
+            <h4>Your wishlist is empty</h4>
+            <p class="text-muted">Save items you love to your wishlist and shop them later.</p>
+            <a href="{% url 'home' %}" class="btn btn-era mt-3">
+                <i class="bi bi-bag-plus me-1"></i>Explore Products
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function removeFromWishlist(productId) {
+        if (!confirm('Remove this item from your wishlist?')) return;
+
+        fetch(`{% url 'remove_from_wishlist' 0 %}`.replace('0', productId), {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove the item's card from DOM
+                const card = event.target.closest('.col-6');
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    setTimeout(() => card.remove(), 300);
+                }
+                showToast(data.message);
+                // If no items left, reload to show empty state
+                setTimeout(() => location.reload(), 500);
+            } else {
+                showToast(data.message || 'Error removing item', 'error');
+            }
+        })
+        .catch(() => showToast('Network error', 'error'));
+    }
+</script>
+{% endblock %}

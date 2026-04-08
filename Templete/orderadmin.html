@@ -1,53 +1,154 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-All Order
-{% endblock %}
+{% block title %}ERA - Admin Orders{% endblock %}
 
 {% block content %}
+<style>
+    .status-select {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.85rem;
+    }
+    .status-select option[value="Pending"] { background: #fff3cd; }
+    .status-select option[value="Processing"] { background: #cfe2ff; }
+    .status-select option[value="Shipped"] { background: #ffe5cc; }
+    .status-select option[value="Delivered"] { background: #d1e7dd; }
+    .status-select option[value="Cancelled"] { background: #f8d7da; }
+    
+    .row-pending { background-color: rgba(255, 243, 205, 0.3); }
+    .row-processing { background-color: rgba(207, 226, 255, 0.3); }
+    .row-shipped { background-color: rgba(255, 229, 204, 0.3); }
+    .row-delivered { background-color: rgba(209, 231, 221, 0.3); }
+    .row-cancelled { background-color: rgba(248, 215, 218, 0.3); }
+</style>
 
-{% load cart %}
+<div class="container-fluid mt-5 pt-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2>Admin - Order Management</h2>
+        <div class="d-flex gap-2">
+            <input type="text" id="searchOrders" class="form-control form-control-sm" placeholder="Search by customer or order ID..." style="width: 250px;" onkeyup="searchOrders()">
+            <button class="btn btn-sm btn-era" onclick="bulkMarkShipped()">
+                <i class="bi bi-truck me-1"></i> Mark Selected as Shipped
+            </button>
+            <a href="{% url 'export_orders_csv' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </a>
+        </div>
+    </div>
 
-<div class="container mt-4">
-    <h1>Your Orders</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Product</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Price</th>
-                <th scope="col">Total Price</th>
-                <th scope="col">Address</th>
-                <th scope="col">Phone No</th>
-                <th scope="col">Date</th>
-                <th scope="col">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-                <tr>
-                    <td>{{ order.product.name }}</td> <!-- Assuming the Std model has a name field -->
-                    <td>{{ order.quantity }}</td>
-                    <td>${{ order.price }}</td>
-                    <td>${{ order.Price }}</td>
-                    <td>{{ order.address }}</td>
-                    <td>{{ order.Phone_no }}</td>
-                    <td>{{ order.date }}</td>
-                    <td>
-                        {% if order.status %}
-                            <span class="badge bg-success">Completed</span>
-                        {% else %}
-                            <span class="badge bg-warning">Pending</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="8" class="text-center">No orders found.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card-era p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="ordersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="row-{{ order.status|lower }}" data-search="{{ order.customer.fname }} {{ order.customer.lname }} {{ order.id }}">
+                        <td><input type="checkbox" class="order-checkbox" value="{{ order.id }}"></td>
+                        <td><strong>#{{ order.id }}</strong></td>
+                        <td>{{ order.customer.fname }} {{ order.customer.lname }}</td>
+                        <td>{{ order.date }}</td>
+                        <td>{{ order.product.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td class="fw-semibold" style="color: var(--accent);">${{ order.price }}</td>
+                        <td>{{ order.Phone_no }}</td>
+                        <td>{{ order.address|truncatechars:30 }}</td>
+                        <td>
+                            <select class="status-select" onchange="updateOrderStatus({{ order.id }}, this.value)">
+                                <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td>
+                            <a href="{% url 'edit_order' order.id %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">No orders available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.order-checkbox').forEach(cb => cb.checked = selectAll);
+    }
+
+    function searchOrders() {
+        const query = document.getElementById('searchOrders').value.toLowerCase();
+        document.querySelectorAll('#ordersTable tbody tr').forEach(row => {
+            const searchText = row.dataset.search.toLowerCase();
+            row.style.display = searchText.includes(query) ? '' : 'none';
+        });
+    }
+
+    function updateOrderStatus(orderId, status) {
+        fetch('{% url "update_order_status" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ order_id: orderId, status: status })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`Order #${orderId} updated to ${status}`);
+                // Update row color
+                const row = document.querySelector(`tr[data-search*="${orderId}"]`);
+                if (row) {
+                    row.className = row.className.replace(/row-\w+/, `row-${status.toLowerCase()}`);
+                }
+            } else {
+                showToast('Failed to update status', 'error');
+            }
+        });
+    }
+
+    function bulkMarkShipped() {
+        const selected = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.value);
+        if (selected.length === 0) {
+            showToast('Please select orders first', 'error');
+            return;
+        }
+        
+        selected.forEach(orderId => {
+            const select = document.querySelector(`tr[data-search*="${orderId}"] .status-select`);
+            if (select) {
+                select.value = 'Shipped';
+                updateOrderStatus(orderId, 'Shipped');
+            }
+        });
+    }
+</script>
 {% endblock %}

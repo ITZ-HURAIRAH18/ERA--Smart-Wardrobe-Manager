@@ -1,85 +1,278 @@
 {% extends 'base.html' %}
-{% block title %}
-Shopping page
-{% endblock %}
+{% load static %}
+
+{% block title %}ERA - Shop{% endblock %}
 
 {% block content %}
 <style>
-    body {
-        background-image: url('/images/Af.jpg'); /* Update with the correct path */
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
+    .filter-sidebar {
+        position: sticky;
+        top: 90px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
     }
+    .product-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+    .product-card .card-img-top {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .product-card:hover .card-img-top { transform: scale(1.05); }
+    .product-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(26,26,46,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .product-card:hover .product-overlay { opacity: 1; }
+    .product-overlay .btn { border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+    
+    .ribbon {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        padding: 0.3rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .ribbon-new { background: var(--accent); color: var(--primary); }
+    .ribbon-sale { background: var(--danger); color: white; }
+    .ribbon-outofstock { background: #666; color: white; }
+
+    .out-of-stock-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .product-card.out-of-stock .out-of-stock-overlay { opacity: 1; }
+    .product-card.out-of-stock .product-overlay { display: none; }
+
+    .add-to-cart-slide {
+        position: absolute;
+        bottom: -50px;
+        left: 0;
+        right: 0;
+        transition: bottom 0.3s ease;
+    }
+    .product-card:hover .add-to-cart-slide { bottom: 0; }
+
+    .price-range-slider { width: 100%; }
+    
+    .sort-select { border-radius: 8px; border: 1px solid #ddd; padding: 0.5rem 1rem; }
+    
+    .mobile-filter-btn { display: none; }
+    @media (max-width: 991px) {
+        .filter-sidebar { display: none; }
+        .mobile-filter-btn { display: block; }
+    }
+
+    .star-rating .bi-star-fill { color: var(--accent); }
+    .star-rating .bi-star { color: #ddd; }
+
+    .category-badge {
+        background: var(--surface);
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .low-stock-warning { color: var(--danger); font-size: 0.8rem; }
+    
+    .empty-state { text-align: center; padding: 4rem 2rem; }
+    .empty-state i { font-size: 4rem; color: #ddd; }
 </style>
 
-{% load cart %}
-
-
-<h1 class="bg- text-light text-center">H</h1>
-<!-- <h1 class="bg-secondary text-light text-center">Shopping Here</h1> -->
-
-<div class="container mt-4 text-center">
-    <button class="btn  mb-2" style="max-width: 200px; background-color: black;">
-        <a href="/shopping" class="text-light d-block p-2 rounded" style="text-decoration: none;">
-            <strong>All Product</strong>
-        </a>
-    </button>
-    
-    {% for cat in categories %}
-    <button class="btn btn-dark mb-2" style="max-width: 200px; background-color: black;">
-        <a href="/shopping?category={{ cat.id }}" class="text-light d-block p-2 rounded" style="text-decoration: none;">
-            <strong >{{ cat.name }}</strong> 
-        </a>
-    </button>
-    {% endfor %}
-</div>
-
-<di class="container mt-4 text-center">
-    
-        <div class="container ">
-            <div class="row justify-content-center">
-                {% for product in products %}
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card shadow-sm mb- h-100 " id="{{ product.id }}">
-                        <!-- Product Image -->
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top rounded-top" style="height: 200px; object-fit: cover;">
-        
-                        <!-- Product Details -->
-                        <div class="card-body ">
-                            <h5 class="card-title text-center text-secondary" style="font-style: italic; font-weight:bold;">{{ product.name }}</h5>
-                            <p class="card-text text-center text-dark mb-1"><strong>Category:</strong> {{ product.category.name }}</p>
-                            <p class="card-text text-center mb-1"><strong>Price:</strong> ${{ product.price }}</p>
-                            <p class="card-text text-dark  text-center text-truncate:100">{{ product.description }}</p>
+<div class="container-fluid mt-4" style="margin-top: 90px !important;">
+    <div class="row">
+        <!-- Filter Sidebar (Desktop) -->
+        <div class="col-lg-3">
+            <div class="filter-sidebar pe-3">
+                <div class="card-era p-3 mb-3">
+                    <h5 class="mb-3">Filters</h5>
+                    <form id="filterForm" method="GET" action="{% url 'home' %}">
+                        <!-- Search -->
+                        <div class="mb-3">
+                            <label class="fw-semibold mb-2">Search</label>
+                            <input type="text" name="q" value="{{ search_query }}" class="form-control form-control-sm rounded-pill" placeholder="Search products...">
                         </div>
-        
-                        <!-- Add to Cart Section -->
-                        <div class="card-footer bg-light">
-                            {% if product|is_in_cart:request.session.cart %}
-                            <div class="row align-items-center">
-                                <!-- Decrease Quantity -->
-                                <form action="/shopping#{{ product.id }}" class="col-2" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="product" value="{{ product.id }}">
-                                    <input type="hidden" name="remove" value="true">
-                                    <button type="submit" class="btn btn-outline-dark btn-sm">-</button>
-                                </form>
-        
-                                <!-- Quantity Display -->
-                                <p class="col-8 text-center my-auto">{{ product|cart_quantity:request.session.cart }} in Cart</p>
-        
-                                <!-- Increase Quantity -->
-                                <form action="/shopping#{{ product.id }}" class="col-2" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="product" value="{{ product.id }}">
-                                    <button type="submit" class="btn btn-outline-dark btn-sm">+</button>
-                                </form>
+                        
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label class="fw-semibold mb-2">Category</label>
+                            {% for cat in categories %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" id="cat{{ cat.id }}"
+                                    {% if cat.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                                <label class="form-check-label" for="cat{{ cat.id }}">{{ cat.name }}</label>
                             </div>
-                            {% else %}
-                            <form action="/shopping#{{ product.id }}" method="POST" class="d-flex justify-content-center">
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="fw-semibold mb-2">Price Range</label>
+                            <div class="d-flex gap-2">
+                                <input type="number" name="min_price" value="{{ min_price }}" class="form-control form-control-sm" placeholder="Min" min="0">
+                                <input type="number" name="max_price" value="{{ max_price }}" class="form-control form-control-sm" placeholder="Max" min="0">
+                            </div>
+                        </div>
+                        
+                        <!-- Star Rating -->
+                        <div class="mb-3">
+                            <label class="fw-semibold mb-2">Rating</label>
+                            {% for i in "54321" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="min_rating" value="{{ i }}" id="rating{{ i }}">
+                                <label class="form-check-label star-rating" for="rating{{ i }}">
+                                    {% for star in "12345" %}
+                                        {% if forloop.counter <= forloop.parentloop.counter %}
+                                        <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                        <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    & Up
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-era btn-sm w-100">Apply Filters</button>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Clear All</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Top Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h4 class="mb-0">
+                        {% if search_query %}Results for "{{ search_query }}"
+                        {% else %}All Products{% endif %}
+                    </h4>
+                    <small class="text-muted">Showing {{ products.count }} of {{ total_products }} products</small>
+                </div>
+                
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <!-- Mobile Filter Button -->
+                    <button class="btn btn-outline-secondary btn-sm mobile-filter-btn" onclick="openFilterSidebar()">
+                        <i class="bi bi-funnel"></i> Filters
+                    </button>
+                    
+                    <!-- Sort -->
+                    <select class="sort-select" id="sortSelect" onchange="applySort(this.value)">
+                        <option value="newest">Newest</option>
+                        <option value="price_low">Price: Low to High</option>
+                        <option value="price_high">Price: High to Low</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            {% if products %}
+            <div class="row g-4" id="productGrid">
+                {% for product in products %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-card {% if product.stock_quantity == 0 %}out-of-stock{% endif %}">
+                        <!-- Ribbons -->
+                        {% if product.stock_quantity == 0 %}
+                        <span class="ribbon ribbon-outofstock">Out of Stock</span>
+                        {% elif product.is_new %}
+                        <span class="ribbon ribbon-new">NEW</span>
+                        {% endif %}
+                        
+                        <!-- Image -->
+                        <a href="{% url 'product_detail' product.id %}">
+                            <img src="{{ product.get_image_url }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
+                        </a>
+                        
+                        <!-- Hover Overlay -->
+                        <div class="product-overlay">
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-light" title="Quick View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if request.session.customer_id %}
+                            <button class="btn btn-light" onclick="toggleWishlist({{ product.id }}, this)" title="Add to Wishlist">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Out of Stock Overlay -->
+                        <div class="out-of-stock-overlay">Out of Stock</div>
+                        
+                        <!-- Card Body -->
+                        <div class="card-body p-3">
+                            <span class="category-badge d-inline-block mb-2">{{ product.category.name }}</span>
+                            <h6 class="card-title mb-2">
+                                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">{{ product.name }}</a>
+                            </h6>
+                            
+                            <!-- Star Rating -->
+                            <div class="star-rating mb-2">
+                                {% if product.avg_rating %}
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= product.avg_rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                        <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <small class="text-muted ms-1">({{ product.rating_count }})</small>
+                                {% else %}
+                                    <small class="text-muted">No ratings yet</small>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Price -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold" style="color: var(--accent);">${{ product.price }}</h5>
+                            </div>
+                            
+                            <!-- Low Stock Warning -->
+                            {% if product.stock_quantity > 0 and product.stock_quantity < 10 %}
+                            <p class="low-stock-warning mb-0 mt-1"><i class="bi bi-exclamation-triangle"></i> Only {{ product.stock_quantity }} left!</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Slide-up Add to Cart -->
+                        <div class="add-to-cart-slide p-2 bg-white border-top">
+                            {% if product.stock_quantity > 0 %}
+                            <form action="{% url 'home' %}#{{ product.id }}" method="POST" class="mb-0">
                                 {% csrf_token %}
                                 <input type="hidden" name="product" value="{{ product.id }}">
-                                <button type="submit" class="btn  btn-block w-100" style="background-color: black; color:white">Add to Cart</button>
+                                <button type="submit" class="btn btn-era btn-sm w-100" {% if product.stock_quantity == 0 %}disabled{% endif %}>
+                                    <i class="bi bi-bag-plus me-1"></i> Add to Cart
+                                </button>
                             </form>
                             {% endif %}
                         </div>
@@ -87,11 +280,87 @@ Shopping page
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <i class="bi bi-search d-block mb-3"></i>
+                <h4>No products found</h4>
+                <p class="text-muted">Try adjusting your filters or search terms.</p>
+                <a href="{% url 'home' %}" class="btn btn-era">Clear All Filters</a>
+            </div>
+            {% endif %}
         </div>
-        
-        
-        
-
+    </div>
 </div>
 
+<!-- Mobile Filter Sidebar -->
+<div class="sidebar-overlay" id="filterOverlay" onclick="closeFilterSidebar()"></div>
+<div class="mobile-sidebar p-4" id="filterSidebar" style="width: 320px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0">Filters</h5>
+        <button class="btn btn-sm btn-link" onclick="closeFilterSidebar()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <!-- Copy filter form content here -->
+    <form id="mobileFilterForm" method="GET" action="{% url 'home' %}">
+        <div class="mb-3">
+            <label class="fw-semibold mb-2">Search</label>
+            <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search...">
+        </div>
+        <div class="mb-3">
+            <label class="fw-semibold mb-2">Category</label>
+            {% for cat in categories %}
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="category" value="{{ cat.id }}" {% if cat.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                <label class="form-check-label">{{ cat.name }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="mb-3">
+            <label class="fw-semibold mb-2">Price Range</label>
+            <div class="d-flex gap-2">
+                <input type="number" name="min_price" value="{{ min_price }}" class="form-control" placeholder="Min">
+                <input type="number" name="max_price" value="{{ max_price }}" class="form-control" placeholder="Max">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-era w-100">Apply</button>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100 mt-2">Clear All</a>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openFilterSidebar() {
+        document.getElementById('filterSidebar').classList.add('active');
+        document.getElementById('filterOverlay').classList.add('active');
+    }
+    function closeFilterSidebar() {
+        document.getElementById('filterSidebar').classList.remove('active');
+        document.getElementById('filterOverlay').classList.remove('active');
+    }
+
+    function applySort(value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort', value);
+        window.location.href = url.toString();
+    }
+
+    function toggleWishlist(productId, btn) {
+        fetch(`/wishlist/add/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.added) {
+                btn.innerHTML = '<i class="bi bi-heart-fill text-danger"></i>';
+                showToast('Added to wishlist');
+            } else {
+                btn.innerHTML = '<i class="bi bi-heart"></i>';
+                showToast('Removed from wishlist');
+            }
+        });
+    }
+</script>
 {% endblock %}

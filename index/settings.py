@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+^&2uq(sc^j-&8u45hq(2p8fzguah0(qtf&@ml-l)p*=dtxzih'
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-+^&2uq(sc^j-&8u45hq(2p8fzguah0(qtf&@ml-l)p*=dtxzih')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 
 # Application definition
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -53,7 +55,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'index.urls'
@@ -69,20 +70,23 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'app.context_processors.cart_count',
+                'app.context_processors.categories_all',
             ],
         },
     },
 ]
-LOGIN_REDIRECT_URL = 'home' 
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
 WSGI_APPLICATION = 'index.wsgi.application'
 
 JET_THEMES = [
     {
-        'theme': 'default',  # theme folder name
-        'color': '#47bac1',  # button color in user menu
-        'title': 'Default'   # theme title
+        'theme': 'default',
+        'color': '#47bac1',
+        'title': 'Default'
     },
     {
         'theme': 'green',
@@ -117,12 +121,8 @@ JET_THEMES = [
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Ecom',       # Your PostgreSQL database name
-        'USER': 'postgres',       # Your PostgreSQL username
-        'PASSWORD': 'doge123789',  # Your PostgreSQL password
-        'HOST': 'localhost',          # Database host (usually 'localhost' for local development)
-        'PORT': '5432',               # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -162,6 +162,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_PASS', default='')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

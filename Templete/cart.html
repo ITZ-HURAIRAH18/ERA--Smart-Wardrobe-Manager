@@ -1,118 +1,299 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title%}
-Cart page
-{% endblock%}
+{% block title %}ERA - Shopping Cart{% endblock %}
+
 {% block content %}
-
-{% load cart %}
-
-<div class="container mt-4">
-  <h1  style="margin-top: 70px;" >Your Cart</h1>
-
-  <table class="table table-striped table-bordered">
-      <tr>
-          <th>Serial:</th>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Quantity:</th>
-          <th>Price</th>
-          <th>Total</th>
-      </tr>
-      {% for product in prod %}
-      <tr>
-          <td>{{forloop.counter}}</td>
-          <td class="rounded-circle" style="height:70px; overflow:hidden; width:80px;">
-              <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height:100%; width:100%; object-fit:cover;">
-          </td>
-          
-          <td>{{ product.name }}</td>
-          <td>{{ product|cart_quantity:request.session.cart}}</td>
-          <td>{{ product.price|currency }}</td>
-          <td>{{ product|price_total:request.session.cart|currency }}</td>
-      </tr>
-      {% endfor %}
-      <tfoot>
-          <tr>
-              <td colspan="4" class="text-right"><strong>Total:</strong></td>
-              <td><strong>{{ prod|cart_price_total:request.session.cart|currency }}</strong></td>
-      </tfoot>
-  </table>
-
-<button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#myModal">Check out</button>
-<!-- <button type="button" class="btn btn-primary" >
-  Open modal
-</button> -->
-
-<!-- The Modal -->
-<div class="modal" id="myModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h4 class="modal-title">Check Out</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <!-- Modal body -->
-      <div class="modal-body">
-        <form action="{% url 'checkout' %}" method="POST">
-          {% csrf_token %}
-          
-          <div class="mb-3">
-            <label for="phone" class="form-label">Phone Number</label>
-            <input type="text" class="form-control" id="phone" name="phone" required>
-          </div>
-      
-          <div class="mb-3">
-            <label for="address" class="form-label">Address</label>
-            <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
-          </div>
-      
-          <div class="mb-3">
-            <label for="Price" class="form-label">Price in Dollars</label>
-            <input type="text" class="form-control" id="Price" value="{{ prod|cart_price_total:request.session.cart}}" name="Price" readonly required>
-          </div>
-      
-          <!-- Checkbox for Home Delivery -->
-          <div class="mb-3">
-            <input type="checkbox" id="homeDelivery" name="delivery_method" value="home_delivery">
-            <label for="homeDelivery">Home Delivery with 2$</label>
-          </div>
-      
-          <!-- Checkbox for Hand Cash -->
-          <div class="mb-3">
-            <input type="checkbox" id="handCash" name="delivery_method" value="hand_cash">
-            <label for="handCash">By Hand</label>
-          </div>
-      
-          <input type="submit" class="btn btn-success">
-      
-        </form>
-      </div>
-
-
-  </div>
-</div>
-</div>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let priceInput = document.getElementById("Price");
-    let homeDelivery = document.getElementById("homeDelivery");
-    let handCash = document.getElementById("handCash");
-
-    let basePrice = parseFloat(priceInput.value.replace(/[^0-9.]/g, ''));
-
-    function updatePrice() {
-      priceInput.value = homeDelivery.checked ? (basePrice + 2).toFixed(2) : basePrice.toFixed(2); 
-
-      handCash.checked = !homeDelivery.checked;
+<style>
+    .cart-item-row {
+        transition: all 0.3s ease;
+        padding: 1.25rem 0;
+    }
+    .cart-item-row:not(:last-child) {
+        border-bottom: 1px solid #eee;
+    }
+    .cart-item-img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+    .quantity-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-primary);
+    }
+    .quantity-btn:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--primary);
     }
 
-    homeDelivery.addEventListener("change", updatePrice);
-    handCash.addEventListener("change", updatePrice);
-  });
-</script>
+    .order-summary-card {
+        position: sticky;
+        top: 100px;
+    }
+    .progress-bar-custom {
+        height: 8px;
+        background: #eee;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), #d4b878);
+        transition: width 0.5s ease;
+    }
 
-{% endblock %} 
+    .empty-cart {
+        text-align: center;
+        padding: 5rem 2rem;
+    }
+    .empty-cart i {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="font-family: 'Playfair Display', serif;">Shopping <span style="color: var(--accent);">Cart</span></h2>
+        <a href="{% url 'home' %}" class="btn btn-outline-era btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Continue Shopping
+        </a>
+    </div>
+
+    {% if cart_items %}
+    <div class="row g-4">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="card-era p-4">
+                {% for item in cart_items %}
+                <div class="cart-item-row d-flex align-items-center gap-3" id="cart-item-{{ item.product.id }}">
+                    <img src="{{ item.product.get_image_url }}" alt="{{ item.product.name }}" class="cart-item-img" loading="lazy">
+
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 fw-semibold">{{ item.product.name }}</h6>
+                        <p class="text-muted mb-0 small">${{ item.product.price }} each</p>
+                    </div>
+
+                    <!-- Quantity Controls -->
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, -1)" aria-label="Decrease quantity">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <span class="fw-semibold" id="qty-{{ item.product.id }}" style="min-width: 24px; text-align: center;">{{ item.quantity }}</span>
+                        <button class="quantity-btn" onclick="updateQuantity({{ item.product.id }}, 1)" aria-label="Increase quantity">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Line Total (Bug 11 Fix: Pre-calculated in view) -->
+                    <div class="fw-bold" style="min-width: 80px; text-align: right;" id="line-total-{{ item.product.id }}">
+                        ${{ item.line_total }}
+                    </div>
+
+                    <!-- Remove -->
+                    <button class="btn btn-sm btn-link text-decoration-none" style="color: var(--danger);" onclick="removeItem({{ item.product.id }})" aria-label="Remove item">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Order Summary (Bug 11 Fix: Pre-calculated totals from view) -->
+        <div class="col-lg-4">
+            <div class="order-summary-card">
+                <div class="card-era p-4">
+                    <h5 class="mb-3" style="font-family: 'Playfair Display', serif;">Order Summary</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal ({{ cart_count }} items)</span>
+                        <strong id="subtotal">${{ subtotal }}</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Shipping</span>
+                        <strong class="{% if total >= 200 %}text-success{% endif %}" id="shipping">
+                            {% if total >= 200 %}FREE{% else %}$15.00{% endif %}
+                        </strong>
+                    </div>
+
+                    <!-- Coupon Code -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted mb-1">Have a coupon?</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="couponCode" class="form-control" placeholder="Enter code">
+                            <button class="btn btn-era" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <small id="couponMsg" class="text-muted"></small>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 d-none" id="discountRow">
+                        <span class="text-muted">Discount</span>
+                        <strong class="text-success" id="discountAmount">-$0</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-3 fs-5 fw-bold">
+                        <span>Total</span>
+                        <span id="total">${% if total >= 200 %}{{ total }}{% else %}{{ total|add:15 }}{% endif %}</span>
+                    </div>
+
+                    <!-- Free Delivery Progress -->
+                    {% if total < 200 %}
+                    <div class="mb-3">
+                        <small class="text-muted">Add ${{ 200|add:"-0"|add:total|cut:"-$" }} more for free delivery!</small>
+                        <div class="progress-bar-custom mt-1">
+                            <div class="progress-bar-fill" style="width: {% widthratio total 200 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mb-3 text-success small">
+                        <i class="bi bi-check-circle-fill me-1"></i> You qualify for free delivery!
+                    </div>
+                    {% endif %}
+
+                    <a href="{% url 'checkout' %}" class="btn btn-era w-100 mb-2">
+                        <i class="bi bi-lock me-1"></i> Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty Cart State -->
+    <div class="card-era">
+        <div class="empty-cart">
+            <i class="bi bi-bag d-block"></i>
+            <h4>Your cart is empty</h4>
+            <p class="text-muted">Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'home' %}" class="btn btn-era mt-3">
+                <i class="bi bi-bag-plus me-1"></i>Start Shopping
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateQuantity(productId, change) {
+        const qtyEl = document.getElementById(`qty-${productId}`);
+        let currentQty = parseInt(qtyEl.textContent);
+        let newQty = currentQty + change;
+
+        if (newQty < 1) {
+            if (confirm('Remove this item from cart?')) {
+                removeItem(productId);
+            }
+            return;
+        }
+
+        fetch('{% url "update_cart_item" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `product_id=${productId}&quantity=${newQty}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                qtyEl.textContent = newQty;
+                document.getElementById(`line-total-${productId}`).textContent = `$${data.item_total}`;
+                document.getElementById('subtotal').textContent = `$${data.cart_total}`;
+                document.getElementById('total').textContent = `$${data.cart_total}`;
+                updateCartBadge(data.cart_count);
+                showToast('Cart updated');
+            } else {
+                showToast(data.message || 'Error updating cart', 'error');
+            }
+        })
+        .catch(() => showToast('Network error', 'error'));
+    }
+
+    function removeItem(productId) {
+        fetch('{% url "remove_cart_item" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `product_id=${productId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById(`cart-item-${productId}`).remove();
+                showToast('Item removed from cart');
+                setTimeout(() => location.reload(), 500);
+            } else {
+                showToast(data.message || 'Error removing item', 'error');
+            }
+        })
+        .catch(() => showToast('Network error', 'error'));
+    }
+
+    function applyCoupon() {
+        const code = document.getElementById('couponCode').value;
+        const subtotal = document.getElementById('subtotal').textContent.replace('$', '');
+
+        fetch('{% url "apply_coupon" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `code=${code}&cart_total=${subtotal}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            const msg = document.getElementById('couponMsg');
+            if (data.status === 'success') {
+                msg.textContent = data.message;
+                msg.className = 'text-success small';
+                document.getElementById('discountRow').classList.remove('d-none');
+                document.getElementById('discountAmount').textContent = `-$${data.discount}`;
+                document.getElementById('total').textContent = `$${data.final_total}`;
+                showToast('Coupon applied successfully!');
+            } else {
+                msg.textContent = data.message;
+                msg.className = 'text-danger small';
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(() => showToast('Network error', 'error'));
+    }
+
+    function updateCartBadge(count) {
+        let badge = document.getElementById('cartBadgeCount');
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'cartBadgeCount';
+                badge.className = 'badge-count';
+                document.getElementById('cartLink').appendChild(badge);
+            }
+            badge.textContent = count;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+</script>
+{% endblock %}

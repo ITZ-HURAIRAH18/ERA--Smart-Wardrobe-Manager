@@ -1,11 +1,323 @@
-{% extends 'base.html'%}
-{% block title%}
+{% extends 'base.html' %}
+{% load static %}
 
-THis is About
+{% block title %}ERA - About Us{% endblock %}
 
-{% endblock %} 
-    {% block content%}
+{% block content %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, #2a2a4e 100%);
+        color: white;
+        padding: 5rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .about-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80') center/cover no-repeat;
+        opacity: 0.15;
+    }
+    .about-hero h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        margin-bottom: 1rem;
+    }
+    .about-hero p {
+        font-size: 1.15rem;
+        color: rgba(255,255,255,0.8);
+        max-width: 600px;
+        margin: 0 auto;
+    }
 
+    .brand-story {
+        padding: 5rem 0;
+    }
+    .brand-story img {
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
 
-    <h1 class="bg-danger text-light text-center">About page</h1>
-    {% endblock %}
+    .value-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .value-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+    }
+    .value-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        font-size: 1.75rem;
+        color: var(--accent);
+    }
+
+    .team-card {
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    .team-card:hover {
+        transform: translateY(-5px);
+    }
+    .team-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        border: 4px solid var(--surface);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .stats-section {
+        background: var(--primary);
+        color: white;
+        padding: 4rem 0;
+    }
+    .stat-item {
+        text-align: center;
+    }
+    .stat-number {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        padding-bottom: 2rem;
+        border-left: 2px solid var(--accent);
+    }
+    .timeline-item:last-child {
+        border-left-color: transparent;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--accent);
+    }
+    .timeline-year {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        color: var(--accent);
+    }
+</style>
+
+<!-- Page Hero -->
+<section class="about-hero">
+    <div class="container position-relative" style="z-index: 2;">
+        <h1>Our <span style="color: var(--accent);">Story</span></h1>
+        <p>Where passion meets style. Discover the heart and soul behind ERA Fashion.</p>
+    </div>
+</section>
+
+<!-- Brand Story -->
+<section class="brand-story">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&q=80" alt="ERA Fashion Story" class="img-fluid w-100" style="min-height: 400px; object-fit: cover;">
+            </div>
+            <div class="col-lg-6">
+                <h2 class="mb-4" style="font-family: 'Playfair Display', serif;">The <span style="color: var(--accent);">ERA</span> Journey</h2>
+                <p class="text-muted mb-4">Founded in 2020, ERA Fashion was born from a simple belief: everyone deserves access to high-quality, stylish clothing without breaking the bank. What started as a small boutique has grown into a beloved online destination for fashion enthusiasts worldwide.</p>
+                <p class="text-muted mb-4">Our name, ERA, represents a new era of fashion — one that's inclusive, sustainable, and accessible. We curate collections that empower individuals to express their unique style while maintaining the highest standards of quality and craftsmanship.</p>
+                <p class="text-muted">Every piece in our collection is carefully selected by our team of fashion experts, ensuring that each item meets our rigorous standards for style, quality, and value.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-3 col-6 stat-item">
+                <div class="stat-number">5K+</div>
+                <p class="mb-0 text-white-50">Products</p>
+            </div>
+            <div class="col-md-3 col-6 stat-item">
+                <div class="stat-number">10M+</div>
+                <p class="mb-0 text-white-50">Happy Customers</p>
+            </div>
+            <div class="col-md-3 col-6 stat-item">
+                <div class="stat-number">50+</div>
+                <p class="mb-0 text-white-50">Countries</p>
+            </div>
+            <div class="col-md-3 col-6 stat-item">
+                <div class="stat-number">4.9</div>
+                <p class="mb-0 text-white-50">Star Rating</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Values -->
+<section class="section-era" style="background: var(--surface);">
+    <div class="container">
+        <h2 class="text-center mb-2">Our <span style="color: var(--accent);">Values</span></h2>
+        <p class="text-center text-muted mb-5">The principles that guide everything we do</p>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <h5 class="mb-3">Quality First</h5>
+                    <p class="text-muted small mb-0">Every product is carefully vetted to ensure exceptional quality and craftsmanship.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-leaf"></i>
+                    </div>
+                    <h5 class="mb-3">Sustainability</h5>
+                    <p class="text-muted small mb-0">Committed to eco-friendly practices and ethical sourcing across our supply chain.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h5 class="mb-3">Inclusivity</h5>
+                    <p class="text-muted small mb-0">Fashion for everyone, regardless of size, gender, or background.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <h5 class="mb-3">Customer Love</h5>
+                    <p class="text-muted small mb-0">Your satisfaction is our priority. We go above and beyond for our community.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Timeline -->
+<section class="section-era">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5">
+                <h2 class="mb-4" style="font-family: 'Playfair Display', serif;">Our <span style="color: var(--accent);">Milestones</span></h2>
+                <p class="text-muted">From humble beginnings to a global fashion destination.</p>
+            </div>
+            <div class="col-lg-7">
+                <div class="timeline-item">
+                    <div class="timeline-year">2020</div>
+                    <h5 class="mt-2">ERA Founded</h5>
+                    <p class="text-muted small mb-0">Started as a small online boutique with a vision for accessible fashion.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2021</div>
+                    <h5 class="mt-2">First 100K Customers</h5>
+                    <p class="text-muted small mb-0">Reached our first major milestone thanks to incredible customer support.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2023</div>
+                    <h5 class="mt-2">Global Expansion</h5>
+                    <p class="text-muted small mb-0">Began shipping to 50+ countries worldwide with localized experiences.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2025</div>
+                    <h5 class="mt-2">Sustainability Initiative</h5>
+                    <p class="text-muted small mb-0">Launched our eco-friendly collection and committed to carbon-neutral shipping.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="section-era" style="background: var(--surface);">
+    <div class="container">
+        <h2 class="text-center mb-2">Meet Our <span style="color: var(--accent);">Team</span></h2>
+        <p class="text-center text-muted mb-5">The passionate people behind ERA Fashion</p>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=80" alt="CEO" class="team-avatar">
+                    <h5 class="mb-1">Alexandra Chen</h5>
+                    <p class="text-muted small mb-2">Founder & CEO</p>
+                    <p class="text-muted small">Visionary leader with 15+ years in fashion retail.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80" alt="Creative Director" class="team-avatar">
+                    <h5 class="mb-1">Marcus Rivera</h5>
+                    <p class="text-muted small mb-2">Creative Director</p>
+                    <p class="text-muted small">Award-winning designer shaping ERA's aesthetic.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&q=80" alt="Head of Operations" class="team-avatar">
+                    <h5 class="mb-1">Sarah Kim</h5>
+                    <p class="text-muted small mb-2">Head of Operations</p>
+                    <p class="text-muted small">Ensuring seamless delivery from warehouse to your door.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 animate-on-scroll">
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80" alt="Customer Experience" class="team-avatar">
+                    <h5 class="mb-1">David Park</h5>
+                    <p class="text-muted small mb-2">Customer Experience</p>
+                    <p class="text-muted small">Dedicated to making every interaction exceptional.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5" style="background: var(--primary); color: white; text-align: center;">
+    <div class="container">
+        <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Ready to Find Your <span style="color: var(--accent);">Style</span>?</h2>
+        <p class="mb-4 text-white-50">Explore our curated collections and discover fashion that speaks to you.</p>
+        <a href="{% url 'home' %}" class="btn btn-era btn-lg">Start Shopping</a>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+</script>
+{% endblock %}

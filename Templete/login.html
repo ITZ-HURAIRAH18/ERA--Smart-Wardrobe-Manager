@@ -1,65 +1,208 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ERA - Login{% endblock %}
 
 {% block content %}
+<style>
+    .login-page {
+        min-height: calc(100vh - 76px);
+        display: flex;
+        align-items: center;
+        background: var(--surface);
+    }
+    .login-image {
+        background: linear-gradient(rgba(26,26,46,0.4), rgba(26,26,46,0.4)), url('https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80') center/cover no-repeat;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px 0 0 16px;
+    }
+    .login-quote {
+        color: white;
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        text-align: center;
+        padding: 2rem;
+        max-width: 400px;
+    }
+    .login-form-panel {
+        padding: 3rem;
+        background: white;
+        border-radius: 0 16px 16px 0;
+    }
+    .form-floating-custom {
+        position: relative;
+    }
+    .form-floating-custom input {
+        border: none;
+        border-bottom: 2px solid #ddd;
+        border-radius: 0;
+        padding: 0.75rem 0;
+        background: transparent;
+        transition: border-color 0.3s ease;
+    }
+    .form-floating-custom input:focus {
+        border-bottom-color: var(--accent);
+        box-shadow: none;
+    }
+    .form-floating-custom label {
+        position: absolute;
+        top: 0.75rem;
+        left: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        color: var(--text-secondary);
+    }
+    .form-floating-custom input:focus ~ label,
+    .form-floating-custom input:not(:placeholder-shown) ~ label {
+        top: -0.75rem;
+        font-size: 0.75rem;
+        color: var(--accent);
+    }
+    .password-toggle {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+    }
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #ddd;
+    }
+    .divider span {
+        padding: 0 1rem;
+    }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-5 col-md-7 col-sm-9 p-4 border rounded shadow-sm bg-light">
-            <div class="text-center mb-4">
-                <img 
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Shopping_cart_with_food_clip_art_2.svg/307px-Shopping_cart_with_food_clip_art_2.svg.png" 
-                    alt="Shopping Cart"
-                    style="height: 150px;">
-                <h2 class="my-3">Login</h2>
-                <hr>
+    @media (max-width: 768px) {
+        .login-image { display: none; }
+        .login-form-panel { border-radius: 16px; padding: 2rem; }
+    }
+</style>
+
+<div class="login-page">
+    <div class="container">
+        <div class="row g-0 shadow-lg rounded-4 overflow-hidden">
+            <!-- Left Image -->
+            <div class="col-lg-6 login-image d-none d-lg-flex">
+                <div class="login-quote">
+                    <p>"Style is a way to say who you are without having to speak."</p>
+                    <small class="d-block mt-3 opacity-75">— ERA Fashion</small>
+                </div>
             </div>
 
-            <!-- Login Form -->
-            <form action="/login" method="POST">
-                {% csrf_token %}
-                
-                <!-- Error Message -->
-                {% if error %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-                {% endif %}
-
-                <!-- Email -->
-                <div class="form-group mb-3">
-                    <label for="email">Email</label>
-                    <input 
-                        required 
-                        type="email" 
-                        name="email" 
-                        id="email"
-                        value="{{ values.email }}" 
-                        class="form-control form-control-sm" 
-                        placeholder="example@gmail.com">
+            <!-- Right Form (Bug 13 Fix: Unified login for both admins and regular users) -->
+            <div class="col-lg-6 login-form-panel">
+                <div class="text-center mb-4">
+                    <h2 class="mb-1" style="font-family: 'Playfair Display', serif;">Welcome <span style="color: var(--accent);">Back</span></h2>
+                    <p class="text-muted">Login to your ERA account</p>
                 </div>
 
-                <!-- Password -->
-                <div class="form-group mb-3">
-                    <label for="password">Password</label>
-                    <input 
-                        type="password" 
-                        name="password" 
-                        id="password"
-                        class="form-control form-control-sm" 
-                        placeholder="********">
-                </div>
+                <form method="POST" action="{% url 'login' %}" id="loginForm">
+                    {% csrf_token %}
 
-                <div class="form-group text-center">
-                    <input class="btn btn-dark btn-sm w-100" type="submit" value="Login">
-                </div>
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
 
-                <hr>
-                <div class="text-center">
-                    <p>Don't have an account? <a href="/signup" class="text-secondary">Sign up here</a></p>
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <div class="form-floating-custom">
+                            <input type="email" name="email" id="email" class="form-control" placeholder=" " value="{{ values.email }}" required autocomplete="email">
+                            <label for="email"><i class="bi bi-envelope me-2"></i>Email Address</label>
+                        </div>
+                        <div class="validation-feedback" id="emailFeedback"></div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <div class="form-floating-custom position-relative">
+                            <input type="password" name="password" id="password" class="form-control" placeholder=" " required autocomplete="current-password">
+                            <label for="password"><i class="bi bi-lock me-2"></i>Password</label>
+                            <button type="button" class="password-toggle" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-era w-100 py-2 mb-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="divider mb-3">
+                        <span>or</span>
+                    </div>
+
+                    <!-- Sign Up Link -->
+                    <div class="text-center">
+                        <p class="text-muted mb-0">Don't have an account? <a href="{% url 'signup' %}" class="fw-semibold" style="color: var(--accent);">Sign up here</a></p>
+                    </div>
+                </form>
+
+                <!-- Demo Credentials -->
+                <div class="mt-4 p-3 rounded" style="background: var(--surface);">
+                    <p class="mb-2 fw-semibold small">Demo Credentials:</p>
+                    <p class="mb-1 small text-muted"><strong>Admin:</strong> admin@era.com / admin123</p>
+                    <p class="mb-0 small text-muted"><strong>Customer:</strong> Sign up to create an account</p>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+            btn.setAttribute('aria-label', 'Hide password');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+            btn.setAttribute('aria-label', 'Show password');
+        }
+    }
+
+    // Real-time email validation
+    document.getElementById('email').addEventListener('input', function() {
+        const email = this.value;
+        const feedback = document.getElementById('emailFeedback');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (email.length === 0) {
+            feedback.textContent = '';
+            feedback.className = 'validation-feedback';
+        } else if (emailRegex.test(email)) {
+            feedback.innerHTML = '<i class="bi bi-check-circle"></i> Valid email';
+            feedback.className = 'validation-feedback valid';
+            feedback.style.color = 'var(--success)';
+        } else {
+            feedback.innerHTML = '<i class="bi bi-x-circle"></i> Please enter a valid email';
+            feedback.className = 'validation-feedback invalid';
+            feedback.style.color = 'var(--danger)';
+        }
+    });
+
+    // Auto-focus email field
+    document.getElementById('email').focus();
+</script>
 {% endblock %}

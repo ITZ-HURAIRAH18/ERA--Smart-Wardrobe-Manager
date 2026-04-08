@@ -1,0 +1,27 @@
+http://127.0.0.1:8000/checkout
+when i click on proced to checkout
+it show below error fix it used agency aent for it
+
+TemplateDoesNotExist at /checkout
+checkout.html
+Request Method:	GET
+Request URL:	http://127.0.0.1:8000/checkout
+Django Version:	5.1.4
+Exception Type:	TemplateDoesNotExist
+Exception Value:	
+checkout.html
+Exception Location:	e:\My Projects\ERA Project\Cloth-Management-System\.venv\Lib\site-packages\django\template\loader.py, line 19, in get_template
+Raised during:	app.views._wrapped_view
+Python Executable:	e:\My Projects\ERA Project\Cloth-Management-System\.venv\Scripts\python.exe
+Python Version:	3.13.3
+Python Path:	
+['E:\\My Projects\\ERA Project\\Cloth-Management-System',
+ 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313\\python313.zip',
+ 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313\\DLLs',
+ 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313\\Lib',
+ 'C:\\Users\\ADMIN\\AppData\\Local\\Programs\\Python\\Python313',
+ 'e:\\My Projects\\ERA Project\\Cloth-Management-System\\.venv',
+ 'e:\\My Projects\\ERA '
+ 'Project\\Cloth-Management-System\\.venv\\Lib\\site-packages']
+Server time:	Tue, 07 Apr 2026 13:30:44 +0000
+Template-loader postmortem

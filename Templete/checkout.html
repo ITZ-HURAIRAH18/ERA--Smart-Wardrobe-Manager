@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load cart %}
+
+{% block title %}ERA - Checkout{% endblock %}
+
+{% block content %}
+<style>
+    .checkout-page {
+        background: var(--surface);
+        min-height: calc(100vh - 76px);
+        padding: 2rem 0;
+    }
+    .checkout-header {
+        background: linear-gradient(135deg, var(--primary) 0%, #2a2a4e 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+    .checkout-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.6);
+        font-weight: 500;
+    }
+    .checkout-step.active {
+        color: white;
+    }
+    .checkout-step .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .checkout-step.active .step-number {
+        background: var(--accent);
+        color: var(--primary);
+    }
+    .checkout-step.completed .step-number {
+        background: var(--success);
+        color: white;
+    }
+    .form-group-custom {
+        margin-bottom: 1.25rem;
+    }
+    .form-group-custom label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+    .form-group-custom label .required {
+        color: var(--danger);
+    }
+    .form-group-custom input,
+    .form-group-custom textarea,
+    .form-group-custom select {
+        width: 100%;
+        border: 1.5px solid #e0ddd5;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    .form-group-custom input:focus,
+    .form-group-custom textarea:focus,
+    .form-group-custom select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
+        outline: none;
+    }
+    .form-group-custom textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    .order-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    .order-item-details {
+        flex: 1;
+    }
+    .order-item-details h6 {
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    .order-item-details .qty {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+    .order-item-price {
+        font-weight: 600;
+        color: var(--accent);
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .summary-row.total {
+        font-size: 1.2rem;
+        font-weight: 700;
+        border-top: 2px solid var(--primary);
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
+    }
+    .secure-checkout-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: var(--surface);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+    .payment-method-option {
+        border: 2px solid #e0ddd5;
+        border-radius: 8px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 0.75rem;
+    }
+    .payment-method-option:hover {
+        border-color: var(--accent);
+    }
+    .payment-method-option.selected {
+        border-color: var(--accent);
+        background: rgba(201,169,110,0.05);
+    }
+    .payment-method-option input[type="radio"] {
+        display: none;
+    }
+</style>
+
+<!-- Checkout Header -->
+<div class="checkout-header">
+    <div class="container">
+        <h2 class="text-center mb-3" style="font-family: 'Playfair Display', serif;">Checkout</h2>
+        
+        <!-- Steps -->
+        <div class="checkout-steps">
+            <div class="checkout-step completed">
+                <span class="step-number"><i class="bi bi-check"></i></span>
+                <span>Cart</span>
+            </div>
+            <div class="checkout-step active">
+                <span class="step-number">2</span>
+                <span>Shipping & Payment</span>
+            </div>
+            <div class="checkout-step">
+                <span class="step-number">3</span>
+                <span>Confirmation</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="checkout-page">
+    <div class="container">
+        {% if prod %}
+        <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
+            {% csrf_token %}
+            <input type="hidden" name="Price" value="{{ total }}">
+            
+            <div class="row g-4">
+                <!-- Left: Shipping Details -->
+                <div class="col-lg-7">
+                    <div class="card-era p-4">
+                        <h4 class="mb-4" style="font-family: 'Playfair Display', serif;">
+                            <i class="bi bi-truck me-2" style="color: var(--accent);"></i>Shipping Details
+                        </h4>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6 form-group-custom">
+                                <label>First Name <span class="required">*</span></label>
+                                <input type="text" name="first_name" value="{{ customer.fname }}" required placeholder="John">
+                            </div>
+                            <div class="col-md-6 form-group-custom">
+                                <label>Last Name <span class="required">*</span></label>
+                                <input type="text" name="last_name" value="{{ customer.lname }}" required placeholder="Doe">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label>Email Address <span class="required">*</span></label>
+                            <input type="email" name="email" value="{{ customer.email }}" required placeholder="john@example.com" readonly>
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label>Phone Number <span class="required">*</span></label>
+                            <input type="tel" name="phone" value="{{ customer.phone }}" required placeholder="+1 (234) 567-8900">
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label>Street Address <span class="required">*</span></label>
+                            <textarea name="address" required placeholder="Enter your full street address, apartment/suite number, city, and postal code"></textarea>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6 form-group-custom">
+                                <label>City <span class="required">*</span></label>
+                                <input type="text" name="city" required placeholder="New York">
+                            </div>
+                            <div class="col-md-6 form-group-custom">
+                                <label>Postal Code <span class="required">*</span></label>
+                                <input type="text" name="postal_code" required placeholder="10001">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label>Order Notes (Optional)</label>
+                            <textarea name="notes" placeholder="Special instructions for delivery or gift wrapping..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Order Summary -->
+                <div class="col-lg-5">
+                    <div class="card-era p-4" style="position: sticky; top: 100px;">
+                        <h4 class="mb-4" style="font-family: 'Playfair Display', serif;">
+                            <i class="bi bi-bag-check me-2" style="color: var(--accent);"></i>Order Summary
+                        </h4>
+                        
+                        <!-- Order Items -->
+                        <div class="mb-3" style="max-height: 250px; overflow-y: auto;">
+                            {% for product in prod %}
+                            <div class="order-item">
+                                <img src="{{ product.get_image_url }}" alt="{{ product.name }}">
+                                <div class="order-item-details">
+                                    <h6>{{ product.name }}</h6>
+                                    <span class="qty">Qty: {{ cart|dict_get:product.id|stringformat:"s" }}</span>
+                                </div>
+                                <div class="order-item-price">
+                                    ${{ product.price|multiply:cart|dict_get:product.id|stringformat:"s" }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pricing Summary -->
+                        <div class="mb-3">
+                            <div class="summary-row">
+                                <span class="text-muted">Subtotal</span>
+                                <span class="fw-semibold">${{ total }}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="text-muted">Shipping</span>
+                                <span class="fw-semibold {% if total >= 200 %}text-success{% endif %}">
+                                    {% if total >= 200 %}FREE{% else %}$15.00{% endif %}
+                                </span>
+                            </div>
+                            
+                            {% if coupon_discount > 0 %}
+                            <div class="summary-row text-success">
+                                <span>Discount ({{ coupon_code }})</span>
+                                <span>-${{ coupon_discount }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span style="color: var(--accent);">${% if total >= 200 %}{{ total }}{% else %}{{ total|add:15 }}{% endif %}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Methods -->
+                        <h5 class="mb-3">Payment Method</h5>
+                        <label class="payment-method-option selected d-block">
+                            <input type="radio" name="payment_method" value="cod" checked>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-cash-stack me-2" style="font-size: 1.5rem; color: var(--accent);"></i>
+                                <div>
+                                    <div class="fw-semibold">Cash on Delivery</div>
+                                    <small class="text-muted">Pay when you receive your order</small>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="payment-method-option d-block">
+                            <input type="radio" name="payment_method" value="card">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-credit-card me-2" style="font-size: 1.5rem; color: var(--accent);"></i>
+                                <div>
+                                    <div class="fw-semibold">Credit/Debit Card</div>
+                                    <small class="text-muted">Secure payment via Stripe/PayPal</small>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <!-- Secure Checkout Badge -->
+                        <div class="secure-checkout-badge mb-3">
+                            <i class="bi bi-shield-lock-fill" style="color: var(--success);"></i>
+                            <span>Your information is secure and encrypted</span>
+                        </div>
+                        
+                        <!-- Place Order Button -->
+                        <button type="submit" class="btn btn-era w-100 py-3 mb-2" style="font-size: 1rem;">
+                            <i class="bi bi-lock-fill me-2"></i>Place Order
+                        </button>
+                        
+                        <a href="{% url 'cart' %}" class="btn btn-outline-secondary w-100 btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% else %}
+        <!-- Empty Cart State -->
+        <div class="card-era p-5 text-center">
+            <i class="bi bi-bag-x" style="font-size: 4rem; color: #ddd;"></i>
+            <h3 class="mt-3">Your cart is empty</h3>
+            <p class="text-muted">Add items to your cart before proceeding to checkout.</p>
+            <a href="{% url 'home' %}" class="btn btn-era mt-3">
+                <i class="bi bi-bag-plus me-1"></i>Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Payment method selection
+    document.querySelectorAll('.payment-method-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+
+    // Form validation
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = 'var(--danger)';
+                isValid = false;
+            } else {
+                field.style.borderColor = '#e0ddd5';
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+</script>
+{% endblock %}

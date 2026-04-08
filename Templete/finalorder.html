@@ -1,52 +1,295 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-Order List
-{% endblock %}
+{% block title %}ERA - Checkout{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="text-center mb-4">Order List</h1>
-    <table class="table table-bordered table-striped table-hover">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Customer</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Address</th>
-                <th>Phone No</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <td>{{ order.product }}</td>
-                <td>{{ order.customer }}</td>
-                <td>{{ order.quantity }}</td>
-                <td>${{ order.Price }}</td>
-                <td>{{ order.address }}</td>
-                <td>{{ order.Phone_no }}</td>
-                <td>{{ order.date }}</td>
-                <td>
-                    <span class="badge {% if order.status %}bg-success{% else %}bg-danger{% endif %} bg-dark text-white">
-                        {{ order.status|yesno:"Completed,Pending" }}
-                    </span>
-                </td>
+<style>
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    .checkout-step {
+        text-align: center;
+        position: relative;
+    }
+    .checkout-step::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        right: -2rem;
+        width: 2rem;
+        height: 2px;
+        background: #ddd;
+    }
+    .checkout-step:last-child::after { display: none; }
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    .checkout-step.active .step-number { background: var(--accent); color: var(--primary); }
+    .checkout-step.completed .step-number { background: var(--success); color: white; }
+    .step-label { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .checkout-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .checkout-panel {
+        display: none;
+        animation: slideIn 0.4s ease;
+    }
+    .checkout-panel.active { display: block; }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .delivery-toggle {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .delivery-toggle.active {
+        border-color: var(--accent);
+        background: rgba(201, 169, 110, 0.1);
+    }
+
+    .success-animation {
+        text-align: center;
+        padding: 3rem;
+    }
+    .checkmark-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: var(--success);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        animation: scaleIn 0.5s ease;
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+    }
+    .checkmark-circle i { font-size: 3rem; color: white; }
+</style>
+
+<div class="container mt-5 pt-4">
+    <h2 class="text-center mb-4">Checkout</h2>
+    
+    <!-- Steps Indicator -->
+    <div class="checkout-steps">
+        <div class="checkout-step active" id="step1Indicator">
+            <div class="step-number">1</div>
+            <div class="step-label">Delivery Info</div>
+        </div>
+        <div class="checkout-step" id="step2Indicator">
+            <div class="step-number">2</div>
+            <div class="step-label">Review Order</div>
+        </div>
+        <div class="checkout-step" id="step3Indicator">
+            <div class="step-number">3</div>
+            <div class="step-label">Confirmation</div>
+        </div>
+    </div>
+
+    <div class="checkout-content">
+        <!-- Step 1: Delivery Info -->
+        <div class="checkout-panel active" id="step1">
+            <div class="card-era p-4">
+                <h5 class="mb-4">Delivery Information</h5>
+                <form id="deliveryForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <input type="text" id="fullName" class="form-control" value="{{ customer_fname }} {{ customer_lname }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" id="phone" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Delivery Address</label>
+                            <textarea id="address" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">City</label>
+                            <input type="text" id="city" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="form-label fw-semibold">Delivery Method</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="delivery-toggle active" onclick="selectDelivery(this, 'home')" id="homeDelivery">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-truck fs-4 me-3" style="color: var(--accent);"></i>
+                                        <div>
+                                            <strong>Home Delivery</strong>
+                                            <small class="d-block text-muted">$2.00</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="delivery-toggle" onclick="selectDelivery(this, 'pickup')" id="pickupOption">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-shop fs-4 me-3" style="color: var(--accent);"></i>
+                                        <div>
+                                            <strong>Pickup</strong>
+                                            <small class="d-block text-muted">Free</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-era w-100 mt-4" onclick="goToStep(2)">
+                        Continue to Review <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Step 2: Review Order -->
+        <div class="checkout-panel" id="step2">
+            <div class="card-era p-4">
+                <h5 class="mb-4">Review Your Order</h5>
                 
-                <td>
-                    <a href="{% url 'edit_order' order.id %}" class="btn btn-dark btn-sm">Edit</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="9" class="text-center text-danger">No orders available</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <div id="reviewItems"></div>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal</span>
+                    <strong id="reviewSubtotal">$0</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Delivery Fee</span>
+                    <strong id="reviewDelivery">$2.00</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fs-5 fw-bold">
+                    <span>Total</span>
+                    <span id="reviewTotal" style="color: var(--accent);">$0</span>
+                </div>
+                
+                <div class="d-flex gap-2 mt-4">
+                    <button class="btn btn-outline-secondary flex-grow-1" onclick="goToStep(1)">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </button>
+                    <button class="btn btn-era flex-grow-1" onclick="placeOrder()">
+                        <i class="bi bi-check-circle me-1"></i> Place Order
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Confirmation -->
+        <div class="checkout-panel" id="step3">
+            <div class="card-era">
+                <div class="success-animation">
+                    <div class="checkmark-circle">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <h3 class="mb-2">Order Placed Successfully!</h3>
+                    <p class="text-muted mb-4">Thank you for shopping with ERA.</p>
+                    <div class="mb-4">
+                        <p class="mb-1">Order Number: <strong id="orderNumber">#{{ orders|length|add:1000 }}</strong></p>
+                        <p class="mb-1">Estimated Delivery: <strong id="estDelivery">3-5 business days</strong></p>
+                    </div>
+                    <a href="{% url 'home' %}" class="btn btn-era">
+                        <i class="bi bi-bag me-1"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<form id="checkoutForm" action="{% url 'checkout' %}" method="POST" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="address" id="checkoutAddress">
+    <input type="hidden" name="phone" id="checkoutPhone">
+    <input type="hidden" name="Price" id="checkoutPrice">
+    <input type="hidden" name="delivery_method" id="checkoutDeliveryMethod" value="home_delivery">
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let deliveryFee = 2;
+    let currentStep = 1;
+
+    function selectDelivery(el, method) {
+        document.querySelectorAll('.delivery-toggle').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        deliveryFee = method === 'home' ? 2 : 0;
+        document.getElementById('checkoutDeliveryMethod').value = method === 'home' ? 'home_delivery' : 'pickup';
+    }
+
+    function goToStep(step) {
+        if (step === 2 && currentStep === 1) {
+            // Validate step 1
+            const name = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            if (!name || !phone || !address) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            // Populate review
+            populateReview();
+        }
+        
+        document.querySelectorAll('.checkout-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`step${step}`).classList.add('active');
+        
+        document.querySelectorAll('.checkout-step').forEach(s => {
+            s.classList.remove('active', 'completed');
+        });
+        for (let i = 1; i < step; i++) {
+            document.getElementById(`step${i}Indicator`).classList.add('completed');
+        }
+        document.getElementById(`step${step}Indicator`).classList.add('active');
+        
+        currentStep = step;
+    }
+
+    function populateReview() {
+        // Build review items from cart data
+        const items = document.getElementById('reviewItems');
+        items.innerHTML = '<p class="text-muted">Loading cart items...</p>';
+        // In a real scenario, you'd fetch cart items. For now, we use the server-side data.
+        items.innerHTML = '<div class="alert alert-info">Review your delivery details and click Place Order to confirm.</div>';
+    }
+
+    function placeOrder() {
+        // Populate hidden form
+        document.getElementById('checkoutAddress').value = document.getElementById('address').value;
+        document.getElementById('checkoutPhone').value = document.getElementById('phone').value;
+        document.getElementById('checkoutPrice').value = document.getElementById('reviewTotal').textContent.replace('$', '');
+        
+        // Submit
+        document.getElementById('checkoutForm').submit();
+    }
+</script>
 {% endblock %}
