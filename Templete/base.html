@@ -10,52 +10,62 @@
 
     <!-- Bootstrap 5.3 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts - Cormorant Garamond + DM Sans -->
+    <!-- Google Fonts - Cormorant Garamond + Barlow -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         /* ========================================
-           ERA DESIGN SYSTEM
+           ERA PREMIUM DARK DESIGN SYSTEM
            ======================================== */
         :root {
-            /* Primary Palette */
-            --era-black: #0D0D0D;
-            --era-navy: #1a1a2e;
-            --era-gold: #C9A96E;
-            --era-gold-dark: #A8844A;
-            --era-white: #FFFFFF;
-            --era-cream: #FAF8F5;
-            --era-stone: #F2EDE6;
-            --era-muted: #8A8178;
-            --era-border: #E8E2D9;
-            --era-text: #2C2825;
-            --era-success: #2D6A4F;
-            --era-warning: #B7791F;
-            --era-danger: #9B2335;
+            /* Premium Light-Dark Color Palette */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-card: #2a2a2a;
+            --bg-elevated: #333333;
+            
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.75);
+            --text-muted: rgba(255, 255, 255, 0.55);
+            --text-tertiary: rgba(255, 255, 255, 0.35);
+            
+            --gold-primary: #C9A96E;
+            --gold-light: #D4B87D;
+            --gold-dark: #A8844A;
+            --gold-gradient: linear-gradient(135deg, #C9A96E 0%, #A8844A 100%);
+            
+            --border-color: rgba(201, 169, 110, 0.2);
+            --border-light: rgba(255, 255, 255, 0.12);
+            
+            --success: #2D6A4F;
+            --warning: #B7791F;
+            --danger: #9B2335;
+            --info: #3b82f6;
 
             /* Typography */
             --font-heading: 'Cormorant Garamond', serif;
-            --font-body: 'DM Sans', sans-serif;
+            --font-body: 'Barlow', sans-serif;
 
             /* Spacing */
             --section-padding-y: 100px;
             --section-padding-y-tablet: 60px;
             --section-padding-y-mobile: 40px;
-            --container-max: 1200px;
-            --container-padding-x: 24px;
+            --container-max: 1400px;
+            --container-padding-x: 2rem;
 
             /* Border Radius */
-            --radius-btn: 2px;
-            --radius-card: 8px;
+            --radius-btn: 100px;
+            --radius-card: 16px;
             --radius-img: 16px;
             --radius-pill: 50px;
 
             /* Animation */
             --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --duration-hover: 0.35s;
             --duration-enter: 0.7s;
             --duration-stagger: 0.08s;
@@ -74,20 +84,97 @@
         body {
             font-family: var(--font-body);
             font-weight: 400;
-            color: var(--era-text);
-            background: var(--era-white);
+            color: var(--text-primary);
+            background: var(--bg-primary);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            line-height: 1.6;
         }
 
-        /* Typography */
+        /* ========================================
+           LIQUID GLASS EFFECTS
+           ======================================== */
+        .liquid-glass {
+            background: rgba(201, 169, 110, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(201, 169, 110, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .liquid-glass:hover {
+            background: rgba(201, 169, 110, 0.12);
+            border-color: rgba(201, 169, 110, 0.3);
+            box-shadow: 0 12px 48px rgba(201, 169, 110, 0.15);
+        }
+
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(
+                180deg,
+                rgba(201, 169, 110, 0.35) 0%,
+                rgba(201, 169, 110, 0.08) 50%,
+                rgba(201, 169, 110, 0) 100%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .liquid-glass-strong {
+            background: linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(168, 132, 74, 0.15) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 1px solid rgba(201, 169, 110, 0.35);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s var(--ease-bounce);
+        }
+
+        .liquid-glass-strong::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s;
+        }
+
+        .liquid-glass-strong:hover::before {
+            left: 100%;
+        }
+
+        .liquid-glass-strong:hover {
+            background: linear-gradient(135deg, rgba(201, 169, 110, 0.3) 0%, rgba(168, 132, 74, 0.22) 100%);
+            border-color: rgba(201, 169, 110, 0.5);
+            box-shadow: 0 12px 48px rgba(201, 169, 110, 0.22),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+        }
+
+        /* ========================================
+           TYPOGRAPHY
+           ======================================== */
         h1, h2, h3, h4, h5, h6, .era-heading {
             font-family: var(--font-heading);
             font-weight: 600;
-            color: var(--era-navy);
+            color: var(--text-primary);
             line-height: 1.2;
         }
 
@@ -96,16 +183,18 @@
         h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
         h4 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
 
-        p { line-height: 1.7; }
+        p { line-height: 1.7; color: var(--text-secondary); }
 
         a {
-            color: var(--era-gold);
+            color: var(--gold-primary);
             text-decoration: none;
             transition: color var(--duration-hover) var(--ease-out);
         }
-        a:hover { color: var(--era-gold-dark); }
+        a:hover { color: var(--gold-light); }
 
-        /* Section Spacing */
+        /* ========================================
+           SECTION SPACING
+           ======================================== */
         .section-era {
             padding: var(--section-padding-y) 0;
         }
@@ -127,11 +216,11 @@
            ANNOUNCEMENT BAR
            ======================================== */
         .announcement-bar {
-            background: var(--era-gold);
-            color: var(--era-navy);
+            background: var(--gold-gradient);
+            color: var(--bg-primary);
             padding: 10px 0;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
             position: relative;
             z-index: 1060;
             text-align: center;
@@ -144,7 +233,7 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: var(--era-navy);
+            color: var(--bg-primary);
             font-size: 1.2rem;
             cursor: pointer;
             padding: 0 8px;
@@ -159,35 +248,43 @@
            NAVBAR
            ======================================== */
         .navbar-era {
-            background: var(--era-navy);
+            background: rgba(26, 26, 26, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 1rem 0;
             transition: all var(--duration-hover) var(--ease-out);
             z-index: 1050;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
         }
         .navbar-era.scrolled {
-            background: rgba(255,255,255,0.98) !important;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+            background: rgba(26, 26, 26, 0.98) !important;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
             padding: 0.75rem 0;
         }
-        .navbar-era.scrolled .nav-link-era { color: var(--era-text) !important; }
-        .navbar-era.scrolled .navbar-brand-era { color: var(--era-navy) !important; }
-        .navbar-era.scrolled .navbar-toggler-icon { color: var(--era-navy) !important; }
+        .navbar-era.scrolled .nav-link-era { color: var(--text-primary) !important; }
+        .navbar-era.scrolled .navbar-brand-era { color: var(--text-primary) !important; }
 
         .navbar-brand-era {
             font-family: var(--font-heading);
             font-size: 2rem;
             font-weight: 700;
-            color: var(--era-white) !important;
+            font-style: italic;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
-            letter-spacing: 3px;
-            transition: color var(--duration-hover) var(--ease-out);
+            letter-spacing: 2px;
+            transition: all var(--duration-hover) var(--ease-out);
         }
-        .navbar-brand-era span { color: var(--era-gold); }
+        .navbar-brand-era:hover {
+            letter-spacing: 3px;
+        }
 
         .nav-link-era {
-            color: rgba(255,255,255,0.85) !important;
-            font-weight: 400;
+            color: var(--text-secondary) !important;
+            font-weight: 500;
             padding: 0.5rem 1rem !important;
             font-size: 0.95rem;
             letter-spacing: 0.5px;
@@ -200,13 +297,13 @@
             bottom: 0;
             left: 50%;
             width: 0;
-            height: 1px;
-            background: var(--era-gold);
+            height: 2px;
+            background: var(--gold-gradient);
             transition: all var(--duration-hover) var(--ease-out);
             transform: translateX(-50%);
         }
         .nav-link-era:hover, .nav-link-era.active {
-            color: var(--era-gold) !important;
+            color: var(--text-primary) !important;
         }
         .nav-link-era:hover::after, .nav-link-era.active::after { width: 60%; }
 
@@ -216,8 +313,8 @@
             position: absolute;
             top: -4px;
             right: -8px;
-            background: var(--era-gold);
-            color: var(--era-navy);
+            background: var(--gold-gradient);
+            color: var(--bg-primary);
             border-radius: 50%;
             min-width: 18px;
             height: 18px;
@@ -235,88 +332,123 @@
             height: 32px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--era-gold);
+            border: 2px solid var(--gold-primary);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        .dropdown-item {
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .dropdown-item:hover {
+            background: rgba(201, 169, 110, 0.1);
+            color: var(--text-primary);
+        }
+        .dropdown-divider {
+            border-color: var(--border-light);
         }
 
         /* ========================================
            BUTTONS
            ======================================== */
         .btn-era {
-            background: var(--era-gold);
-            color: var(--era-navy);
+            background: var(--gold-gradient);
+            color: var(--bg-primary);
             border: none;
             border-radius: var(--radius-btn);
             padding: 0.75rem 2rem;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.9rem;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            transition: all var(--duration-hover) var(--ease-out);
+            transition: all var(--duration-hover) var(--ease-bounce);
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3);
         }
         .btn-era:hover {
-            background: var(--era-gold-dark);
-            color: var(--era-white);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(201,169,110,0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(201, 169, 110, 0.5);
         }
         .btn-era:active { transform: translateY(0); }
         .btn-era:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .btn-era-outline {
             background: transparent;
-            color: var(--era-gold);
-            border: 1px solid var(--era-gold);
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
             border-radius: var(--radius-btn);
             padding: 0.7rem 2rem;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.9rem;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            transition: all var(--duration-hover) var(--ease-out);
+            transition: all var(--duration-hover) var(--ease-bounce);
             cursor: pointer;
         }
         .btn-era-outline:hover {
-            background: var(--era-gold);
-            color: var(--era-navy);
-            transform: translateY(-2px);
+            background: var(--gold-gradient);
+            color: var(--bg-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(201, 169, 110, 0.4);
         }
 
         .btn-era-dark {
-            background: var(--era-navy);
-            color: var(--era-white);
-            border: none;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-btn);
             padding: 0.75rem 2rem;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.9rem;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            transition: all var(--duration-hover) var(--ease-out);
+            transition: all var(--duration-hover) var(--ease-bounce);
         }
         .btn-era-dark:hover {
-            background: var(--era-black);
-            color: var(--era-white);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            background: var(--bg-card);
+            border-color: var(--gold-primary);
+            color: var(--text-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(201, 169, 110, 0.3);
         }
 
         .btn-era-sm { padding: 0.5rem 1.25rem; font-size: 0.8rem; }
         .btn-era-lg { padding: 1rem 2.5rem; font-size: 1rem; }
 
+        .btn-era-white {
+            background: white;
+            color: var(--bg-primary);
+            border: none;
+            border-radius: var(--radius-btn);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+        }
+        .btn-era-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+
         /* ========================================
            CARDS
            ======================================== */
         .card-era {
-            border: 1px solid var(--era-border);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-card);
-            background: var(--era-white);
             transition: all var(--duration-hover) var(--ease-out);
             overflow: hidden;
         }
         .card-era:hover {
-            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(201, 169, 110, 0.18);
+            transform: translateY(-6px);
+            border-color: rgba(201, 169, 110, 0.35);
         }
         .card-era-body { padding: 1.5rem; }
 
@@ -325,34 +457,41 @@
            ======================================== */
         .form-era {
             width: 100%;
-            border: 1px solid var(--era-border);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-btn);
             padding: 0.85rem 1rem;
             font-family: var(--font-body);
             font-size: 0.95rem;
-            color: var(--era-text);
-            background: var(--era-white);
+            color: var(--text-primary);
+            background: var(--bg-card);
             transition: all var(--duration-hover) var(--ease-out);
         }
         .form-era:focus {
             outline: none;
-            border-color: var(--era-gold);
-            box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
+            background: var(--bg-elevated);
         }
-        .form-era::placeholder { color: var(--era-muted); }
+        .form-era::placeholder { color: var(--text-muted); }
         .form-era-label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.85rem;
-            color: var(--era-text);
-            letter-spacing: 0.3px;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
-        .form-era-error { color: var(--era-danger); font-size: 0.8rem; margin-top: 0.25rem; }
+        .form-era-error { color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem; }
 
         textarea.form-era { resize: vertical; min-height: 100px; }
-        select.form-era { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238A8178' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+        select.form-era { 
+            appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23C9A96E' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); 
+            background-repeat: no-repeat; 
+            background-position: right 1rem center; 
+            padding-right: 2.5rem; 
+        }
 
         /* ========================================
            BADGES
@@ -366,15 +505,15 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
-        .badge-era-new { background: var(--era-gold); color: var(--era-navy); }
-        .badge-era-sale { background: var(--era-danger); color: var(--era-white); }
-        .badge-era-out { background: var(--era-muted); color: var(--era-white); }
+        .badge-era-new { background: var(--gold-gradient); color: var(--bg-primary); }
+        .badge-era-sale { background: var(--danger); color: var(--text-primary); }
+        .badge-era-out { background: var(--text-muted); color: var(--bg-primary); }
 
-        .badge-status-pending { background: var(--era-warning); color: var(--era-white); }
-        .badge-status-processing { background: #3b82f6; color: var(--era-white); }
-        .badge-status-shipped { background: #f59e0b; color: var(--era-white); }
-        .badge-status-delivered { background: var(--era-success); color: var(--era-white); }
-        .badge-status-cancelled { background: var(--era-danger); color: var(--era-white); }
+        .badge-status-pending { background: var(--warning); color: var(--bg-primary); }
+        .badge-status-processing { background: var(--info); color: var(--text-primary); }
+        .badge-status-shipped { background: #f59e0b; color: var(--bg-primary); }
+        .badge-status-delivered { background: var(--success); color: var(--text-primary); }
+        .badge-status-cancelled { background: var(--danger); color: var(--text-primary); }
 
         /* ========================================
            IMAGES
@@ -393,57 +532,61 @@
             border-radius: var(--radius-pill);
             font-size: 0.85rem;
             font-weight: 500;
-            border: 1px solid var(--era-border);
-            background: var(--era-white);
-            color: var(--era-text);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all var(--duration-hover) var(--ease-out);
         }
         .pill-era:hover, .pill-era.active {
-            background: var(--era-gold);
-            border-color: var(--era-gold);
-            color: var(--era-navy);
+            background: var(--gold-gradient);
+            border-color: var(--gold-primary);
+            color: var(--bg-primary);
         }
 
         /* ========================================
            FOOTER
            ======================================== */
         .footer-era {
-            background: var(--era-navy);
-            color: rgba(255,255,255,0.7);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
             padding: 4rem 0 2rem;
             margin-top: auto;
         }
         .footer-era a {
-            color: rgba(255,255,255,0.7);
+            color: var(--text-secondary);
             text-decoration: none;
             transition: color var(--duration-hover) var(--ease-out);
             font-size: 0.9rem;
         }
-        .footer-era a:hover { color: var(--era-gold); }
+        .footer-era a:hover { color: var(--gold-primary); }
         .footer-era h6 {
             font-family: var(--font-heading);
-            color: var(--era-gold);
+            color: var(--gold-primary);
             font-size: 1rem;
+            font-style: italic;
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 1.25rem;
         }
         .footer-era .social-icon {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid var(--border-color);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: all var(--duration-hover) var(--ease-out);
-            color: rgba(255,255,255,0.7);
+            transition: all var(--duration-hover) var(--ease-bounce);
+            color: var(--text-secondary);
+            background: var(--bg-card);
         }
         .footer-era .social-icon:hover {
-            background: var(--era-gold);
-            border-color: var(--era-gold);
-            color: var(--era-navy);
+            background: var(--gold-gradient);
+            border-color: var(--gold-primary);
+            color: var(--bg-primary);
+            transform: translateY(-3px);
         }
 
         /* ========================================
@@ -461,34 +604,40 @@
         .toast-era {
             min-width: 320px;
             max-width: 420px;
-            background: var(--era-white);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-card);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
             padding: 1rem 1.25rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
             animation: toastSlideIn 0.4s var(--ease-out);
-            border-left: 3px solid var(--era-gold);
+            border-left: 3px solid var(--gold-primary);
+            color: var(--text-primary);
         }
-        .toast-era.toast-success { border-left-color: var(--era-success); }
-        .toast-era.toast-error { border-left-color: var(--era-danger); }
-        .toast-era.toast-warning { border-left-color: var(--era-warning); }
-        .toast-era.toast-info { border-left-color: #3b82f6; }
+        .toast-era.toast-success { border-left-color: var(--success); }
+        .toast-era.toast-error { border-left-color: var(--danger); }
+        .toast-era.toast-warning { border-left-color: var(--warning); }
+        .toast-era.toast-info { border-left-color: var(--info); }
         .toast-era-icon { font-size: 1.25rem; flex-shrink: 0; }
-        .toast-era.toast-success .toast-era-icon { color: var(--era-success); }
-        .toast-era.toast-error .toast-era-icon { color: var(--era-danger); }
-        .toast-era.toast-warning .toast-era-icon { color: var(--era-warning); }
-        .toast-era.toast-info .toast-era-icon { color: #3b82f6; }
-        .toast-era-message { flex: 1; font-size: 0.9rem; }
+        .toast-era.toast-success .toast-era-icon { color: var(--success); }
+        .toast-era.toast-error .toast-era-icon { color: var(--danger); }
+        .toast-era.toast-warning .toast-era-icon { color: var(--warning); }
+        .toast-era.toast-info .toast-era-icon { color: var(--info); }
+        .toast-era-message { flex: 1; font-size: 0.9rem; color: var(--text-secondary); }
         .toast-era-close {
             background: none;
             border: none;
-            color: var(--era-muted);
+            color: var(--text-muted);
             cursor: pointer;
             font-size: 1.1rem;
             padding: 0;
             line-height: 1;
+            transition: color 0.2s;
+        }
+        .toast-era-close:hover {
+            color: var(--text-primary);
         }
         @keyframes toastSlideIn {
             from { transform: translateX(100%); opacity: 0; }
@@ -550,32 +699,19 @@
         /* ========================================
            UTILITY CLASSES
            ======================================== */
-        .text-gold { color: var(--era-gold) !important; }
-        .text-navy { color: var(--era-navy) !important; }
-        .text-muted-era { color: var(--era-muted) !important; }
-        .bg-cream { background: var(--era-cream) !important; }
-        .bg-stone { background: var(--era-stone) !important; }
-        .border-era { border-color: var(--era-border) !important; }
-
-        /* ========================================
-           RESPONSIVE
-           ======================================== */
-        @media (max-width: 991px) {
-            :root {
-                --section-padding-y: 60px;
-            }
-        }
-        @media (max-width: 767px) {
-            :root {
-                --section-padding-y: 40px;
-            }
-        }
+        .text-gold { color: var(--gold-primary) !important; }
+        .text-navy { color: var(--text-muted) !important; }
+        .text-muted-era { color: var(--text-muted) !important; }
+        .bg-cream { background: var(--bg-card) !important; }
+        .bg-stone { background: var(--bg-secondary) !important; }
+        .border-era { border-color: var(--border-color) !important; }
+        .bg-dark-era { background: var(--bg-card) !important; }
 
         /* ========================================
            STAR RATING
            ======================================== */
-        .star-rating .bi-star-fill { color: var(--era-gold); }
-        .star-rating .bi-star { color: var(--era-border); }
+        .star-rating .bi-star-fill { color: var(--gold-primary); }
+        .star-rating .bi-star { color: var(--border-color); }
 
         /* ========================================
            LOADING SPINNER
@@ -583,12 +719,54 @@
         .spinner-era {
             width: 24px;
             height: 24px;
-            border: 2px solid var(--era-border);
-            border-top-color: var(--era-gold);
+            border: 2px solid var(--border-color);
+            border-top-color: var(--gold-primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========================================
+           TABLE STYLES
+           ======================================== */
+        .table-era {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--text-primary);
+        }
+        .table-era th {
+            background: var(--bg-card);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .table-era td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .table-era tr:hover td {
+            background: rgba(201, 169, 110, 0.05);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 991px) {
+            :root {
+                --section-padding-y: 60px;
+                --container-padding-x: 1.5rem;
+            }
+        }
+        @media (max-width: 767px) {
+            :root {
+                --section-padding-y: 40px;
+            }
+        }
 
         {% block extra_css %}{% endblock %}
     </style>
@@ -606,7 +784,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top navbar-era" id="mainNavbar">
         <div class="container">
-            <a class="navbar-brand-era" href="{% url 'home1' %}">ERA<span>.</span></a>
+            <a class="navbar-brand-era" href="{% url 'home1' %}">ERA</a>
 
             <!-- Mobile Toggle -->
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -616,7 +794,7 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link-era{% if request.resolver_match.url_name == 'home1' %} active{% endif %}" href="{% url 'home1' %}">Home</a>
+                        <a class="nav-link-era{% if request.resolver_match.url_name == 'landing' or request.resolver_match.url_name == 'home1' %} active{% endif %}" href="{% url 'landing' %}">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link-era{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'home' %}">Shop</a>
@@ -641,7 +819,7 @@
                     </li>
 
                     <!-- Admin Link (Conditional) -->
-                    {% if request.session.customer_email == 'admin@era.com' or request.user.is_staff %}
+                    {% if request.user.is_authenticated and request.user.is_staff or request.session.customer_email == 'admin@era.com' %}
                     <li class="nav-item">
                         <a class="nav-link-era" href="{% url 'admin_dashboard' %}">
                             <i class="bi bi-speedometer2 me-1"></i>Admin
@@ -704,9 +882,9 @@
         {% if messages %}
         <div class="container mt-4 pt-3">
             {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert" style="border-radius: var(--radius-card);">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert" style="border-radius: var(--radius-card); background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% endfor %}
         </div>
@@ -720,8 +898,8 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4 mb-4">
-                    <h3 class="mb-3" style="font-family: var(--font-heading); font-size: 2rem; color: var(--era-white);">ERA<span class="text-gold">.</span></h3>
-                    <p>Limitless fashion at your fingertips. Discover the latest trends with ERA's curated collection.</p>
+                    <h3 class="mb-3" style="font-family: var(--font-heading); font-size: 2.5rem; font-style: italic; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">ERA</h3>
+                    <p style="color: var(--text-secondary);">Limitless fashion at your fingertips. Discover the latest trends with ERA's curated collection.</p>
                     <div class="mt-3 d-flex gap-2">
                         <a href="#" class="social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
                         <a href="#" class="social-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
@@ -732,7 +910,7 @@
                 <div class="col-lg-2 col-md-4 mb-4">
                     <h6>Quick Links</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{% url 'home1' %}">Home</a></li>
+                        <li class="mb-2"><a href="{% url 'landing' %}">Home</a></li>
                         <li class="mb-2"><a href="{% url 'home' %}">Shop</a></li>
                         <li class="mb-2"><a href="{% url 'about' %}">About</a></li>
                         <li class="mb-2"><a href="{% url 'contact' %}">Contact</a></li>
@@ -751,7 +929,7 @@
                 </div>
                 <div class="col-lg-4 col-md-4 mb-4">
                     <h6>Newsletter</h6>
-                    <p class="mb-3">Subscribe for exclusive offers and updates.</p>
+                    <p class="mb-3" style="color: var(--text-secondary);">Subscribe for exclusive offers and updates.</p>
                     <form action="{% url 'newsletter_signup' %}" method="POST" class="d-flex gap-2">
                         {% csrf_token %}
                         <input type="email" name="email" class="form-era flex-grow-1" placeholder="Your email address" required>
@@ -759,15 +937,15 @@
                     </form>
                 </div>
             </div>
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 2rem 0;">
+            <hr style="border-color: var(--border-light); margin: 2rem 0;">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0 small">&copy; {% now "Y" %} ERA Fashion. All rights reserved.</p>
+                    <p class="mb-0 small" style="color: var(--text-muted);">&copy; {% now "Y" %} ERA Fashion. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="mb-0 small">
-                        <a href="#" class="me-3">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
+                        <a href="#" class="me-3" style="color: var(--text-muted);">Privacy Policy</a>
+                        <a href="#" style="color: var(--text-muted);">Terms of Service</a>
                     </p>
                 </div>
             </div>

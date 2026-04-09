@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     # Main pages
+    path('', views.landing, name='landing'),  # New premium landing page
+    path('home', views.home1, name='home1'),  # Original landing page
     path('shopping', views.home, name='home'),
     path('about', views.about, name='about'),
     path('contact', views.contact, name='contact'),

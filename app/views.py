@@ -158,6 +158,11 @@ def home1(request):
     return render(request, 'home1.html')
 
 
+def landing(request):
+    """Premium landing page with dark aesthetic."""
+    return render(request, 'landing.html')
+
+
 def about(request):
     """About page."""
     return render(request, 'about.html')
