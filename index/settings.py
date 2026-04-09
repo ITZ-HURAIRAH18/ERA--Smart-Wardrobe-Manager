@@ -27,7 +27,16 @@ SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-+^&2uq(sc^j-&8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = config(
+    'DJANGO_ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,era-smart-wardrobe-manager.vercel.app,.vercel.app',
+    cast=Csv(),
+)
+CSRF_TRUSTED_ORIGINS = config(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    default='https://era-smart-wardrobe-manager.vercel.app,https://*.vercel.app',
+    cast=Csv(),
+)
 
 # Vercel/Production detection
 IS_PRODUCTION = not DEBUG
