@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load math_filters %}
+
+{% block title %}ERA - Shop{% endblock %}
+
+{% block content %}
+<style>
+    .shop-page { padding-top: 100px; min-height: 80vh; padding-bottom: 60px; }
+
+    .filter-sidebar {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-card);
+        padding: 24px;
+        position: sticky;
+        top: 100px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+
+    .filter-title {
+        color: var(--gold-primary);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+
+    .filter-option:hover, .filter-option.active {
+        background: rgba(201, 169, 110, 0.1);
+        border-color: rgba(201, 169, 110, 0.3);
+        color: var(--gold-primary);
+    }
+
+    .filter-input {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        padding: 10px 14px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .filter-input:focus {
+        border-color: var(--gold-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .product-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+
+    .product-card {
+        background: var(--bg-card);
+        border-radius: var(--radius-card);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        border-color: rgba(201, 169, 110, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(201, 169, 110, 0.15);
+    }
+
+    .product-card-img-wrap {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-card-img {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        object-position: top;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-card-img {
+        transform: scale(1.05);
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 2;
+    }
+
+    .product-card-body {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card-category {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .product-card-title a:hover {
+        color: var(--gold-primary);
+    }
+
+    .product-price {
+        color: var(--gold-primary);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .product-price-old {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
+    }
+
+    .product-card-footer {
+        margin-top: auto;
+        padding-top: 1rem;
+    }
+
+    /* Mobile Filter Toggle */
+    .mobile-filter-toggle {
+        display: none;
+    }
+
+    @media (max-width: 991px) {
+        .mobile-filter-toggle {
+            display: block;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-sidebar {
+            position: static;
+            max-height: none;
+            display: none;
+        }
+
+        .filter-sidebar.show {
+            display: block;
+        }
+    }
+
+    /* Pagination */
+    .pagination-era {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 3rem;
+    }
+
+    .pagination-era a, .pagination-era span {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .pagination-era a:hover {
+        border-color: var(--gold-primary);
+        color: var(--gold-primary);
+    }
+
+    .pagination-era .active {
+        background: var(--gold-gradient);
+        border-color: var(--gold-primary);
+        color: var(--bg-primary);
+        font-weight: 600;
+    }
+</style>
+
+<div class="shop-page">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 style="font-family: var(--font-heading);">
+                Shop <span class="text-gold">Collection</span>
+            </h1>
+            <p class="text-muted mb-0">{{ products.paginator.count }} products</p>
+        </div>
+
+        <!-- Mobile Filter Toggle -->
+        <button class="btn-era-outline w-100 mobile-filter-toggle" onclick="toggleFilters()">
+            <i class="bi bi-funnel me-2"></i>Filters & Search
+        </button>
+
+        <div class="row g-4">
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar" id="filterSidebar">
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <h5 class="filter-title">Search</h5>
+                        <form method="GET" action="{% url 'home' %}">
+                            <input type="text" name="q" class="filter-input mb-2" placeholder="Search products..." 
+                                   value="{{ search_query }}" id="searchInput">
+                            {% if current_category %}
+                            <input type="hidden" name="category" value="{{ current_category }}">
+                            {% endif %}
+                            {% if min_price %}
+                            <input type="hidden" name="min_price" value="{{ min_price }}">
+                            {% endif %}
+                            {% if max_price %}
+                            <input type="hidden" name="max_price" value="{{ max_price }}">
+                            {% endif %}
+                            <button type="submit" class="btn-era w-100 btn-era-sm">
+                                <i class="bi bi-search me-1"></i>Search
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="mb-4">
+                        <h5 class="filter-title">Categories</h5>
+                        <a href="{% url 'home' %}" class="filter-option {% if not current_category %}active{% endif %}">
+                            <i class="bi bi-grid"></i>All Products
+                        </a>
+                        {% for cat in categories %}
+                        <a href="{% url 'home' %}?category={{ cat.slug }}" 
+                           class="filter-option {% if current_category == cat.slug %}active{% endif %}">
+                            <i class="bi bi-tag"></i>{{ cat.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="mb-4">
+                        <h5 class="filter-title">Price Range</h5>
+                        <form method="GET" action="{% url 'home' %}">
+                            {% if current_category %}
+                            <input type="hidden" name="category" value="{{ current_category }}">
+                            {% endif %}
+                            {% if search_query %}
+                            <input type="hidden" name="q" value="{{ search_query }}">
+                            {% endif %}
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <input type="number" name="min_price" class="filter-input" placeholder="Min" value="{{ min_price }}">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="max_price" class="filter-input" placeholder="Max" value="{{ max_price }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-era w-100 btn-era-sm">
+                                <i class="bi bi-funnel me-1"></i>Apply Filter
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Sort -->
+                    <div>
+                        <h5 class="filter-title">Sort By</h5>
+                        <form method="GET" action="{% url 'home' %}">
+                            {% if current_category %}
+                            <input type="hidden" name="category" value="{{ current_category }}">
+                            {% endif %}
+                            {% if search_query %}
+                            <input type="hidden" name="q" value="{{ search_query }}">
+                            {% endif %}
+                            <select name="sort" class="filter-input mb-2" onchange="this.form.submit()">
+                                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                                <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                                <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>Price: High to Low</option>
+                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name: A to Z</option>
+                                <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>Name: Z to A</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="col-lg-9">
+                {% if products %}
+                <div class="product-grid">
+                    {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-card-img-wrap">
+                            <a href="{% url 'product_detail_new' product.slug %}">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                            </a>
+                            
+                            <!-- Badges -->
+                            <div class="product-badge">
+                                {% if product.discount_price %}
+                                <span class="badge-era badge-era-sale">-{{ product.get_discount_percentage }}%</span>
+                                {% elif product.is_new %}
+                                <span class="badge-era badge-era-new">NEW</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="product-card-body">
+                            <p class="product-card-category">{{ product.category.name|default:"Fashion" }}</p>
+                            <h5 class="product-card-title">
+                                <a href="{% url 'product_detail_new' product.slug %}">{{ product.name }}</a>
+                            </h5>
+                            <div class="mb-2">
+                                {% if product.discount_price %}
+                                <span class="product-price">${{ product.discount_price }}</span>
+                                <span class="product-price-old">${{ product.price }}</span>
+                                {% else %}
+                                <span class="product-price">${{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="product-card-footer">
+                                <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-era w-100 {% if not product.is_in_stock %}disabled{% endif %}"
+                                            {% if not product.is_in_stock %}disabled{% endif %}>
+                                        {% if product.is_in_stock %}
+                                        <i class="bi bi-bag-plus me-1"></i>Add to Cart
+                                        {% else %}
+                                        <i class="bi bi-x-circle me-1"></i>Out of Stock
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if products.has_other_pages %}
+                <div class="pagination-era">
+                    {% if products.has_previous %}
+                    <a href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                    {% endif %}
+
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                        <span class="active">{{ num }}</span>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <!-- Empty State -->
+                <div class="text-center" style="padding: 4rem 2rem;">
+                    <i class="bi bi-search" style="font-size: 5rem; color: var(--border-color);"></i>
+                    <h3 class="mt-3" style="font-family: var(--font-heading);">No Products Found</h3>
+                    <p class="text-muted mb-4">Try adjusting your filters or search terms.</p>
+                    <a href="{% url 'home' %}" class="btn-era">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Clear Filters
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFilters() {
+    const sidebar = document.getElementById('filterSidebar');
+    sidebar.classList.toggle('show');
+}
+</script>
+{% endblock %}

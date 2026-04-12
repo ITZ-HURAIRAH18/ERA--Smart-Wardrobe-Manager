@@ -1,0 +1,408 @@
+/* ========================================
+   ERA E-COMMERCE ADDITIONAL STYLES
+   Complement to base.html design system
+   ======================================== */
+
+/* Badge Status Colors */
+.badge-status-pending {
+    background: #f59e0b;
+    color: #000;
+}
+
+.badge-status-processing {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.badge-status-shipped {
+    background: #f59e0b;
+    color: #000;
+}
+
+.badge-status-delivered {
+    background: #10b981;
+    color: #fff;
+}
+
+.badge-status-cancelled {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* Admin Pages */
+.admin-page,
+.admin-list-page,
+.admin-form-page,
+.admin-detail-page {
+    min-height: 80vh;
+}
+
+/* Form Styles */
+.form-era-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Button Sizes */
+.btn-era-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-era-lg {
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+}
+
+/* Product Card Improvements */
+.product-card-img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+/* Filter Sidebar */
+.filter-sidebar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    position: sticky;
+    top: 100px;
+}
+
+.filter-title {
+    color: var(--gold-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+}
+
+.filter-option:hover,
+.filter-option.active {
+    background: rgba(201, 169, 110, 0.1);
+    border-color: rgba(201, 169, 110, 0.3);
+    color: var(--gold-primary);
+}
+
+.filter-input {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 10px 14px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.filter-input:focus {
+    border-color: var(--gold-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
+}
+
+/* Star Rating */
+.star-rating {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.star-rating .bi-star-fill {
+    color: var(--gold-primary);
+}
+
+.star-rating .bi-star {
+    color: var(--border-color);
+}
+
+/* Progress Bar for Free Delivery */
+.progress-era {
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-era-bar {
+    height: 100%;
+    background: var(--gold-gradient);
+    transition: width 0.3s ease;
+}
+
+/* Responsive Tables for Mobile */
+@media (max-width: 768px) {
+    .table-responsive-mobile {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .table-era {
+        min-width: 600px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease;
+}
+
+/* Loading Spinner */
+.spinner-era {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--gold-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state i {
+    font-size: 5rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    font-family: var(--font-heading);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* Quick Action Buttons */
+.quick-action-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-btn);
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+    display: block;
+    text-decoration: none;
+}
+
+.quick-action-btn:hover {
+    border-color: var(--gold-primary);
+    background: rgba(201, 169, 110, 0.1);
+    transform: translateY(-2px);
+    color: var(--gold-primary);
+}
+
+.quick-action-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Stat Cards */
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: rgba(201, 169, 110, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(201, 169, 110, 0.1);
+}
+
+/* Image Preview */
+.image-preview {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-placeholder {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.image-preview-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Checkout Steps */
+.checkout-steps {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.checkout-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+}
+
+.checkout-step.active {
+    color: var(--gold-primary);
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.checkout-step.active .step-number {
+    background: var(--gold-gradient);
+    border-color: var(--gold-primary);
+    color: var(--bg-primary);
+}
+
+/* Wishlist Heart Icon */
+.wishlist-heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(26, 26, 26, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.wishlist-heart:hover {
+    background: rgba(201, 169, 110, 0.2);
+    border-color: var(--gold-primary);
+}
+
+.wishlist-heart i {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.wishlist-heart.active i {
+    color: #ef4444;
+}
+
+/* Profile Avatar */
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--gold-gradient);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--bg-primary);
+}
+
+/* Order Cards (Mobile) */
+.order-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.order-card:hover {
+    border-color: rgba(201, 169, 110, 0.4);
+    box-shadow: 0 8px 24px rgba(201, 169, 110, 0.1);
+}
+
+/* Utility Classes */
+.text-gold {
+    color: var(--gold-primary) !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}

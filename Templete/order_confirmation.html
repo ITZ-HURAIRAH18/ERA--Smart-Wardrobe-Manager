@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ERA - Order Confirmation{% endblock %}
+
+{% block content %}
+<style>
+    .confirmation-page { padding-top: 120px; min-height: 80vh; padding-bottom: 60px; }
+
+    .confirmation-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-card);
+        padding: 3rem;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: var(--gold-gradient);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--bg-primary);
+        margin-bottom: 2rem;
+        animation: scaleIn 0.5s ease;
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+    }
+
+    .order-info-box {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+    }
+
+    .order-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .order-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .order-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .order-item-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .btn-group-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .confirmation-card {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+
+<div class="confirmation-page">
+    <div class="container">
+        <div class="confirmation-card">
+            <div class="success-icon">
+                <i class="bi bi-check-lg"></i>
+            </div>
+
+            <h1 style="font-family: var(--font-heading); margin-bottom: 1rem;">
+                Order <span class="text-gold">Confirmed!</span>
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                Thank you for your order! We've received your request and will process it shortly.
+            </p>
+
+            <!-- Order Info -->
+            <div class="order-info-box">
+                <div class="order-info-row">
+                    <span class="text-muted">Order Number</span>
+                    <strong class="text-gold">#{{ order.id }}</strong>
+                </div>
+                <div class="order-info-row">
+                    <span class="text-muted">Order Date</span>
+                    <span>{{ order.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="text-muted">Estimated Delivery</span>
+                    <span>{{ order.estimated_delivery|date:"M d, Y"|default:"7-10 business days" }}</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="text-muted">Status</span>
+                    <span class="badge-era badge-status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="text-muted">Total Amount</span>
+                    <strong class="text-gold">${{ order.total_amount }}</strong>
+                </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="order-info-box">
+                <h4 style="font-family: var(--font-heading); margin-bottom: 1rem;">
+                    <i class="bi bi-geo-alt me-2 text-gold"></i>Shipping Address
+                </h4>
+                <p class="mb-0" style="color: var(--text-secondary); white-space: pre-line;">{{ order.shipping_address }}</p>
+            </div>
+
+            <!-- Ordered Items -->
+            <div class="order-info-box">
+                <h4 style="font-family: var(--font-heading); margin-bottom: 1rem;">
+                    <i class="bi bi-bag me-2 text-gold"></i>Ordered Items
+                </h4>
+                {% for item in items %}
+                <div class="order-item">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-item-img">
+                    <div class="flex-grow-1 text-start">
+                        <p class="mb-1 fw-semibold">{{ item.product.name }}</p>
+                        <p class="text-muted small mb-1">Quantity: {{ item.quantity }}</p>
+                        <p class="text-gold fw-semibold mb-0">${{ item.get_total }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="btn-group-actions">
+                <a href="{% url 'home' %}" class="btn-era">
+                    <i class="bi bi-house me-2"></i>Continue Shopping
+                </a>
+                <a href="{% url 'my_orders' %}" class="btn-era-outline">
+                    <i class="bi bi-receipt me-2"></i>Track Order
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

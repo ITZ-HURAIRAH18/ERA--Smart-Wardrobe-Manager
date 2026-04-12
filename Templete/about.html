@@ -5,206 +5,188 @@
 
 {% block content %}
 <style>
-    .about-page { padding-top: 120px; }
+    .about-page { padding-top: 120px; min-height: 80vh; }
 
-    .hero-about {
-        background: linear-gradient(135deg, var(--era-navy) 0%, var(--era-black) 100%);
-        padding: 5rem 0;
+    .hero-section {
         text-align: center;
-        margin-bottom: 0;
-    }
-    .hero-about h1 {
-        font-family: var(--font-heading);
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        color: var(--era-white);
-        font-weight: 300;
-        margin-bottom: 1rem;
-    }
-    .hero-about h1 span { color: var(--era-gold); font-weight: 600; }
-    .hero-about p {
-        color: rgba(255,255,255,0.7);
-        font-size: 1.15rem;
-        max-width: 600px;
-        margin: 0 auto;
+        padding: 4rem 0;
     }
 
-    .about-story {
-        display: flex;
-        align-items: center;
-        gap: 4rem;
-        margin-bottom: 4rem;
-    }
-    .about-story-img {
-        flex: 1;
-        border-radius: var(--radius-img);
-        overflow: hidden;
-        height: 400px;
-    }
-    .about-story-img img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    .about-story-text { flex: 1; }
-    .about-story-text h2 {
-        font-family: var(--font-heading);
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-    .about-story-text p {
-        color: var(--era-text);
-        line-height: 1.8;
-        margin-bottom: 1rem;
+    .about-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-card);
+        padding: 3rem;
+        margin-bottom: 3rem;
     }
 
     .value-card {
-        text-align: center;
-        padding: 2.5rem 1.5rem;
-        background: var(--era-white);
-        border: 1px solid var(--era-border);
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-card);
-        transition: all var(--duration-hover) var(--ease-out);
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
         height: 100%;
     }
+
     .value-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.06);
-        border-color: var(--era-gold);
-    }
-    .value-card i {
-        font-size: 2.5rem;
-        color: var(--era-gold);
-        margin-bottom: 1.25rem;
-    }
-    .value-card h5 {
-        font-family: var(--font-heading);
-        margin-bottom: 0.75rem;
+        border-color: rgba(201, 169, 110, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(201, 169, 110, 0.1);
     }
 
-    .team-card {
+    .value-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--gold-gradient);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--bg-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
         text-align: center;
         padding: 2rem;
     }
-    .team-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 1.25rem;
-        border: 3px solid var(--era-border);
-        transition: border-color var(--duration-hover) var(--ease-out);
-    }
-    .team-card:hover .team-avatar { border-color: var(--era-gold); }
-    .team-card h6 {
-        font-family: var(--font-heading);
-        margin-bottom: 0.25rem;
-    }
-    .team-card .role { color: var(--era-gold); font-size: 0.85rem; font-weight: 500; }
 
-    @media (max-width: 991px) {
-        .about-story { flex-direction: column; gap: 2rem; }
-        .about-story-img { width: 100%; height: 300px; }
+    .stat-box h2 {
+        font-family: var(--font-heading);
+        font-size: 3rem;
+        color: var(--gold-primary);
+        margin-bottom: 0.5rem;
     }
 </style>
 
 <div class="about-page">
-    <!-- Hero -->
-    <div class="hero-about">
-        <div class="container">
-            <h1>About <span>ERA</span></h1>
-            <p>Redefining fashion with limitless style, quality, and affordability since day one.</p>
+    <div class="container">
+        <!-- Hero -->
+        <div class="hero-section">
+            <h1 style="font-family: var(--font-heading); font-size: 3.5rem;">
+                About <span class="text-gold">ERA</span>
+            </h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                Where timeless elegance meets modern fashion. We curate exceptional clothing for exceptional people.
+            </p>
+        </div>
+
+        <!-- Our Story -->
+        <div class="about-section">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <h2 style="font-family: var(--font-heading); margin-bottom: 1.5rem;">
+                        Our <span class="text-gold">Story</span>
+                    </h2>
+                    <p class="mb-3" style="color: var(--text-secondary); line-height: 1.8;">
+                        Founded in 2020, ERA began with a simple vision: to make premium fashion accessible without compromising on quality or style. What started as a small boutique has grown into a trusted destination for fashion-forward individuals worldwide.
+                    </p>
+                    <p class="mb-3" style="color: var(--text-secondary); line-height: 1.8;">
+                        We believe that clothing is more than fabric—it's self-expression. Every piece in our collection is carefully selected to empower you to look and feel your best, whether you're heading to the office, a special event, or a casual weekend outing.
+                    </p>
+                    <p style="color: var(--text-secondary); line-height: 1.8;">
+                        Our commitment to sustainability and ethical manufacturing ensures that looking good never comes at the expense of our planet or its people.
+                    </p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="ratio ratio-4x3" style="border-radius: var(--radius-card); overflow: hidden; border: 2px solid var(--border-color);">
+                        <div style="background: var(--bg-secondary); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-image" style="font-size: 5rem; color: var(--border-color);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Our Values -->
+        <div class="about-section">
+            <h2 class="text-center mb-4" style="font-family: var(--font-heading);">
+                Our <span class="text-gold">Values</span>
+            </h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <h4 style="font-family: var(--font-heading); margin-bottom: 0.75rem;">Quality First</h4>
+                        <p class="text-muted small mb-0">Every piece meets our exacting standards for materials and craftsmanship.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-leaf"></i>
+                        </div>
+                        <h4 style="font-family: var(--font-heading); margin-bottom: 0.75rem;">Sustainability</h4>
+                        <p class="text-muted small mb-0">We partner with eco-conscious manufacturers and use sustainable materials.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h4 style="font-family: var(--font-heading); margin-bottom: 0.75rem;">Community</h4>
+                        <p class="text-muted small mb-0">Building a community of fashion lovers who share our passion.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-heart"></i>
+                        </div>
+                        <h4 style="font-family: var(--font-heading); margin-bottom: 0.75rem;">Inclusivity</h4>
+                        <p class="text-muted small mb-0">Fashion for everyone, regardless of size, gender, or background.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="about-section">
+            <div class="row g-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-box">
+                        <h2>10K+</h2>
+                        <p class="text-muted mb-0">Happy Customers</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-box">
+                        <h2>500+</h2>
+                        <p class="text-muted mb-0">Products</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-box">
+                        <h2>50+</h2>
+                        <p class="text-muted mb-0">Brands</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-box">
+                        <h2>30+</h2>
+                        <p class="text-muted mb-0">Countries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center py-5">
+            <h2 style="font-family: var(--font-heading); margin-bottom: 1rem;">
+                Ready to <span class="text-gold">Explore</span>?
+            </h2>
+            <p class="text-muted mb-4">Discover our curated collection of premium fashion pieces.</p>
+            <a href="{% url 'home' %}" class="btn-era btn-era-lg">
+                <i class="bi bi-shop me-2"></i>Shop Now
+            </a>
         </div>
     </div>
-
-    <!-- Our Story -->
-    <section class="section-era">
-        <div class="container">
-            <div class="about-story animate-on-scroll">
-                <div class="about-story-img">
-                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80" alt="ERA Store" loading="lazy">
-                </div>
-                <div class="about-story-text">
-                    <h2>Our <span class="text-gold">Story</span></h2>
-                    <p>ERA was born from a simple belief: everyone deserves access to quality fashion that expresses who they are. We saw a world where style was often gatekept by price tags and trends moved too fast for most to keep up.</p>
-                    <p>So we built ERA — a platform that curates timeless pieces alongside contemporary trends, all at prices that make sense. Every item in our collection is handpicked for quality, sustainability, and style.</p>
-                    <p>Today, we serve millions of customers worldwide, but our mission remains the same: to make limitless fashion a reality for everyone.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Our Values -->
-    <section class="section-era bg-cream">
-        <div class="container">
-            <div class="text-center mb-5 animate-on-scroll">
-                <h2 class="mb-3">What We <span class="text-gold">Stand For</span></h2>
-                <p class="text-muted-era">The principles that guide everything we do</p>
-            </div>
-            <div class="row g-4 stagger-children">
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="value-card">
-                        <i class="bi bi-gem d-block"></i>
-                        <h5>Quality First</h5>
-                        <p class="text-muted-era small mb-0">Every product is vetted for quality and durability before it reaches our shelves.</p>
-                    </div>
-                </div>
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="value-card">
-                        <i class="bi bi-leaf d-block"></i>
-                        <h5>Sustainability</h5>
-                        <p class="text-muted-era small mb-0">We partner with brands that share our commitment to ethical and sustainable practices.</p>
-                    </div>
-                </div>
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="value-card">
-                        <i class="bi bi-heart d-block"></i>
-                        <h5>Inclusivity</h5>
-                        <p class="text-muted-era small mb-0">Fashion for everyone — all sizes, all styles, all backgrounds.</p>
-                    </div>
-                </div>
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="value-card">
-                        <i class="bi bi-lightning d-block"></i>
-                        <h5>Innovation</h5>
-                        <p class="text-muted-era small mb-0">Constantly improving the shopping experience with technology and design.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Numbers -->
-    <section class="section-era">
-        <div class="container">
-            <div class="row g-4 text-center stagger-children">
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="stat-number" style="font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--era-gold);">5K+</div>
-                    <p class="text-muted-era">Products</p>
-                </div>
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="stat-number" style="font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--era-gold);">10M+</div>
-                    <p class="text-muted-era">Customers</p>
-                </div>
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="stat-number" style="font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--era-gold);">50+</div>
-                    <p class="text-muted-era">Countries</p>
-                </div>
-                <div class="col-md-3 animate-on-scroll">
-                    <div class="stat-number" style="font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--era-gold);">4.9</div>
-                    <p class="text-muted-era">Star Rating</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="section-era bg-stone">
-        <div class="container text-center animate-on-scroll">
-            <h2 class="mb-3">Ready to Discover <span class="text-gold">Limitless Fashion</span>?</h2>
-            <p class="text-muted-era mb-4">Browse our curated collection and find your next favorite piece.</p>
-            <a href="{% url 'home' %}" class="btn-era btn-era-lg">Shop Now</a>
-        </div>
-    </section>
 </div>
 
 {% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ERA - My Orders{% endblock %}
+
+{% block content %}
+<style>
+    .orders-page { padding-top: 120px; min-height: 80vh; padding-bottom: 60px; }
+
+    .order-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-card);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .order-card:hover {
+        border-color: rgba(201, 169, 110, 0.4);
+        box-shadow: 0 8px 24px rgba(201, 169, 110, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-light);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .order-id {
+        font-family: var(--font-heading);
+        font-size: 1.25rem;
+    }
+
+    .order-meta {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .order-meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .order-meta-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .order-meta-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .order-items-preview {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .order-item-thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="orders-page">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 style="font-family: var(--font-heading);">My <span class="text-gold">Orders</span></h1>
+            <a href="{% url 'home' %}" class="btn-era-outline">
+                <i class="bi bi-house me-1"></i>Continue Shopping
+            </a>
+        </div>
+
+        {% if orders %}
+        <div class="row">
+            {% for order in orders %}
+            <div class="col-12">
+                <div class="order-card" onclick="window.location.href='{% url 'order_detail_admin' order.id %}'">
+                    <div class="order-header">
+                        <div>
+                            <p class="order-id mb-1">Order #{{ order.id }}</p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-calendar3 me-1"></i>{{ order.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                        <span class="badge-era badge-status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="order-meta">
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Items</span>
+                            <span class="order-meta-value">{{ order.get_items_count }}</span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Total</span>
+                            <span class="order-meta-value text-gold">${{ order.total_amount }}</span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Est. Delivery</span>
+                            <span class="order-meta-value">{{ order.estimated_delivery|date:"M d, Y"|default:"N/A" }}</span>
+                        </div>
+                        <div class="order-meta-item">
+                            <span class="order-meta-label">Tracking</span>
+                            <span class="order-meta-value">{{ order.tracking_number|default:"N/A" }}</span>
+                        </div>
+                    </div>
+
+                    {% with order_items=order.items.all %}
+                    {% if order_items %}
+                    <div class="order-items-preview">
+                        {% for item in order_items|slice:":4" %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-item-thumb" title="{{ item.product.name }}">
+                        {% endfor %}
+                        {% if order_items|length > 4 %}
+                        <div class="order-item-thumb d-flex align-items-center justify-content-center" style="background: var(--bg-secondary); color: var(--text-muted); font-weight: 600;">
+                            +{{ order_items|length|add:"-4" }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center" style="padding: 4rem 2rem;">
+            <i class="bi bi-bag-x" style="font-size: 5rem; color: var(--border-color);"></i>
+            <h3 class="mt-3" style="font-family: var(--font-heading);">No Orders Yet</h3>
+            <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping now!</p>
+            <a href="{% url 'home' %}" class="btn-era btn-era-lg">
+                <i class="bi bi-shop me-2"></i>Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -819,7 +819,13 @@
                     </li>
 
                     <!-- Admin Link (Conditional) -->
-                    {% if request.user.is_authenticated and request.user.is_staff or request.session.customer_email == 'admin@era.com' %}
+                    {% if request.user.is_authenticated and request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link-era" href="{% url 'admin_dashboard' %}">
+                            <i class="bi bi-speedometer2 me-1"></i>Admin
+                        </a>
+                    </li>
+                    {% elif request.session.customer_email == 'admin@era.com' %}
                     <li class="nav-item">
                         <a class="nav-link-era" href="{% url 'admin_dashboard' %}">
                             <i class="bi bi-speedometer2 me-1"></i>Admin
@@ -830,7 +836,7 @@
 
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <!-- Wishlist -->
-                    {% if request.session.customer_id %}
+                    {% if request.session.customer_id or request.user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link-era" href="{% url 'wishlist' %}" title="Wishlist">
                             <i class="bi bi-heart"></i>
@@ -848,22 +854,47 @@
                         </a>
                     </li>
 
-                    <!-- User Menu -->
-                    {% if request.session.customer_id %}
+                    <!-- User Menu (Django Auth) -->
+                    {% if request.user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link-era dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ request.user.first_name|default:request.user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'my_orders' %}"><i class="bi bi-box me-2"></i>My Orders</a></li>
+                            {% if request.user.is_staff %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'list_products' %}"><i class="bi bi-box-seam me-2"></i>Manage Products</a></li>
+                            <li><a class="dropdown-item" href="{% url 'list_categories' %}"><i class="bi bi-tags me-2"></i>Manage Categories</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin_orders' %}"><i class="bi bi-receipt me-2"></i>View Orders</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin_customers' %}"><i class="bi bi-people me-2"></i>View Customers</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    <!-- User Menu (Session-based Customer) -->
+                    {% elif request.session.customer_id %}
                     <li class="nav-item dropdown">
                         <a class="nav-link-era dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i>
+                            {{ request.session.customer_name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
                             <li><a class="dropdown-item" href="{% url 'order' %}"><i class="bi bi-box me-2"></i>My Orders</a></li>
-                            {% if request.session.customer_email == 'admin@era.com' or request.user.is_staff %}
+                            {% if request.session.customer_email == 'admin@era.com' %}
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
                             {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'signout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </li>
+                    <!-- Guest -->
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link-era" href="{% url 'login' %}">

@@ -1,9 +1,13 @@
 import datetime
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
-# Category model
+# =============================================================================
+# EXISTING MODELS (kept for backward compatibility)
+# =============================================================================
+
 class Cat(models.Model):
     name = models.CharField(max_length=200)
 
@@ -15,7 +19,6 @@ class Cat(models.Model):
         return Cat.objects.all()
 
 
-# Product model
 class Std(models.Model):
     name = models.CharField(max_length=200)
     price = models.IntegerField(default=0)
@@ -125,7 +128,6 @@ class Order(models.Model):
         return self.price * self.quantity
 
 
-# Cart and CartItem models
 class Cart(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -149,7 +151,6 @@ class CartItem(models.Model):
         return self.product.price * self.quantity
 
 
-# Rating model
 class Rating(models.Model):
     product = models.ForeignKey(Std, on_delete=models.CASCADE, related_name='ratings')
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -164,7 +165,6 @@ class Rating(models.Model):
         return f"{self.customer.fname} - {self.product.name} - {self.stars} stars"
 
 
-# Wishlist model
 class Wishlist(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='wishlists')
     product = models.ForeignKey(Std, on_delete=models.CASCADE)
@@ -181,7 +181,6 @@ class Wishlist(models.Model):
         return self.product.image.url if self.product.image else ''
 
 
-# Coupon model
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
     discount_percent = models.IntegerField()
@@ -203,10 +202,172 @@ class Coupon(models.Model):
         return True
 
 
-# Newsletter model
 class Newsletter(models.Model):
     email = models.EmailField(unique=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.email
+
+
+# =============================================================================
+# NEW E-COMMERCE MODELS (per prompt.txt specification)
+# These use Django's User model for proper auth integration
+# =============================================================================
+
+class Category(models.Model):
+    """Product category with slug and image."""
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True, max_length=100)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='categories/', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return f"/shopping/?category={self.slug}"
+
+    def product_count(self):
+        return self.products.count()
+
+
+class Product(models.Model):
+    """Product with pricing, inventory, and media."""
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, max_length=200)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    image = models.ImageField(upload_to='products/')
+    stock = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    is_new = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('product_detail_new', kwargs={'slug': self.slug})
+
+    def get_discount_percentage(self):
+        if self.discount_price and self.discount_price < self.price:
+            return int((1 - self.discount_price / self.price) * 100)
+        return 0
+
+    def final_price(self):
+        return self.discount_price if self.discount_price else self.price
+
+    def is_in_stock(self):
+        return self.stock > 0
+
+
+class OrderNew(models.Model):
+    """Order using Django User model with proper status tracking."""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    shipping_address = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    note = models.TextField(blank=True)
+    tracking_number = models.CharField(max_length=100, blank=True, default="")
+    estimated_delivery = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.user.get_full_name() or self.user.username}"
+
+    def get_items_count(self):
+        return self.items.count()
+
+
+class OrderItem(models.Model):
+    """Individual item within an order."""
+    order = models.ForeignKey(OrderNew, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.product.name} x {self.quantity}"
+
+    def get_total(self):
+        return self.price * self.quantity
+
+
+class CartNew(models.Model):
+    """Shopping cart linked to Django User."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart_new')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cart for {self.user.get_full_name() or self.user.username}"
+
+    def items_count(self):
+        return sum(item.quantity for item in self.items.all())
+
+    def get_subtotal(self):
+        return sum(item.get_total() for item in self.items.all())
+
+
+class CartItemNew(models.Model):
+    """Individual item within a cart."""
+    cart = models.ForeignKey(CartNew, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    selected_size = models.CharField(max_length=20, default="")
+    selected_color = models.CharField(max_length=50, default="")
+
+    class Meta:
+        unique_together = ('cart', 'product', 'selected_size', 'selected_color')
+
+    def __str__(self):
+        return f"{self.product.name} x {self.quantity}"
+
+    def get_total(self):
+        price = self.product.discount_price or self.product.price
+        return price * self.quantity
+
+
+class Review(models.Model):
+    """Product review with rating and comment."""
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_verified_purchase = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('product', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} - {self.rating}★"
+
+    def get_average_rating(self):
+        return self.rating

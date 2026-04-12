@@ -5,225 +5,186 @@
 
 {% block content %}
 <style>
-    .profile-page { padding-top: 120px; min-height: 80vh; }
+    .profile-page { padding-top: 120px; min-height: 80vh; padding-bottom: 60px; }
 
     .profile-header-card {
-        background: linear-gradient(135deg, var(--era-navy) 0%, var(--era-black) 100%);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-card);
-        padding: 3rem 2rem;
+        padding: 2.5rem;
         text-align: center;
         margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
     }
-    .profile-header-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(201,169,110,0.1) 0%, transparent 50%);
-    }
+
     .profile-avatar {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid var(--era-gold);
-        margin-bottom: 1rem;
-        position: relative;
-        z-index: 1;
-    }
-    .profile-name {
-        font-family: var(--font-heading);
-        font-size: 2rem;
-        color: var(--era-white);
-        font-weight: 300;
-        position: relative;
-        z-index: 1;
-    }
-    .profile-name span { color: var(--era-gold); font-weight: 600; }
-    .profile-email {
-        color: rgba(255,255,255,0.7);
-        font-size: 0.95rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Stats */
-    .profile-stats {
-        display: flex;
-        gap: 1.5rem;
+        background: var(--gold-gradient);
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
-        margin-top: 1.5rem;
-        position: relative;
-        z-index: 1;
-    }
-    .profile-stat {
-        text-align: center;
-        background: rgba(255,255,255,0.1);
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--radius-btn);
-    }
-    .profile-stat-value {
-        font-family: var(--font-heading);
-        font-size: 1.5rem;
-        color: var(--era-gold);
-        font-weight: 600;
-        line-height: 1;
-    }
-    .profile-stat-label {
-        font-size: 0.7rem;
-        color: rgba(255,255,255,0.6);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--bg-primary);
+        margin-bottom: 1.5rem;
+        border: 4px solid var(--border-color);
     }
 
-    /* Profile Sections */
     .profile-section {
-        background: var(--era-white);
-        border: 1px solid var(--era-border);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-card);
         padding: 2rem;
-        margin-bottom: 1.5rem;
-    }
-    .profile-section h5 {
-        font-family: var(--font-heading);
-        font-size: 1.25rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--era-border);
+        margin-bottom: 2rem;
     }
 
-    /* Recent Orders */
+    .profile-section h3 {
+        font-family: var(--font-heading);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+
     .recent-order-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 1rem 0;
-        border-bottom: 1px solid var(--era-border);
+        border-bottom: 1px solid var(--border-light);
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    .recent-order-item:last-child { border-bottom: none; }
+
+    .recent-order-item:last-child {
+        border-bottom: none;
+    }
 </style>
 
 <div class="profile-page">
-    <div class="container" style="max-width: 900px;">
+    <div class="container">
+        <h1 class="text-center mb-4" style="font-family: var(--font-heading);">My <span class="text-gold">Profile</span></h1>
+
         <!-- Profile Header -->
         <div class="profile-header-card">
-            <img src="{% if customer.profile_picture %}{{ customer.profile_picture.url }}{% else %}https://ui-avatars.com/api/?name={{ customer.fname }}+{{ customer.lname }}&background=C9A96E&color=fff&size=200{% endif %}" alt="{{ customer.fname }}" class="profile-avatar">
-            <h2 class="profile-name">{{ customer.fname }} <span>{{ customer.lname }}</span></h2>
-            <p class="profile-email">{{ customer.email }} | {{ customer.phone }}</p>
-
-            {% if order_stats %}
-            <div class="profile-stats">
-                <div class="profile-stat">
-                    <div class="profile-stat-value">{{ order_stats.total_orders|default:0 }}</div>
-                    <div class="profile-stat-label">Total Orders</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-value">${{ order_stats.total_spent|default:0 }}</div>
-                    <div class="profile-stat-label">Total Spent</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-value">{{ order_stats.delivered|default:0 }}</div>
-                    <div class="profile-stat-label">Delivered</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-value">{{ order_stats.pending|default:0 }}</div>
-                    <div class="profile-stat-label">Pending</div>
-                </div>
+            <div class="profile-avatar">
+                {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
             </div>
-            {% endif %}
+            <h2 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </h2>
+            <p class="text-muted mb-0">{{ request.user.email }}</p>
+            <p class="text-muted small mb-0">Member since {{ request.user.date_joined|date:"M Y" }}</p>
         </div>
 
         <div class="row g-4">
             <!-- Edit Profile -->
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <div class="profile-section">
-                    <h5><i class="bi bi-person-gear me-2 text-gold"></i>Edit Profile</h5>
-                    <form method="POST" enctype="multipart/form-data">
+                    <h3><i class="bi bi-person-gear me-2 text-gold"></i>Edit Profile</h3>
+                    
+                    <form method="POST">
                         {% csrf_token %}
-                        <input type="hidden" name="update_profile" value="1">
-
-                        <div class="mb-3">
-                            <label class="form-era-label">First Name</label>
-                            <input type="text" name="fname" class="form-era" value="{{ customer.fname }}" required>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-era-label">First Name</label>
+                                <input type="text" name="first_name" class="form-era" value="{{ request.user.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-era-label">Last Name</label>
+                                <input type="text" name="last_name" class="form-era" value="{{ request.user.last_name }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-era-label">Email</label>
+                                <input type="email" name="email" class="form-era" value="{{ request.user.email }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-era-label">Phone</label>
+                                <input type="tel" name="phone" class="form-era" value="{{ request.user.phone|default:'' }}" placeholder="+1 234 567 8900">
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-era-label">Last Name</label>
-                            <input type="text" name="lname" class="form-era" value="{{ customer.lname }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-era-label">Phone</label>
-                            <input type="tel" name="phone" class="form-era" value="{{ customer.phone }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-era-label">Profile Picture</label>
-                            <input type="file" name="profile_picture" class="form-era" accept="image/*">
-                        </div>
-                        <button type="submit" class="btn-era w-100">
-                            <i class="bi bi-check-lg me-1"></i> Update Profile
+                        <button type="submit" name="update_profile" class="btn-era w-100 mt-4">
+                            <i class="bi bi-check-circle me-2"></i>Update Profile
                         </button>
                     </form>
                 </div>
-            </div>
 
-            <!-- Change Password -->
-            <div class="col-lg-6">
+                <!-- Change Password -->
                 <div class="profile-section">
-                    <h5><i class="bi bi-lock me-2 text-gold"></i>Change Password</h5>
+                    <h3><i class="bi bi-lock me-2 text-gold"></i>Change Password</h3>
+                    
                     <form method="POST">
                         {% csrf_token %}
-                        <input type="hidden" name="change_password" value="1">
-
                         <div class="mb-3">
                             <label class="form-era-label">Current Password</label>
                             <input type="password" name="current_password" class="form-era" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-era-label">New Password</label>
-                            <input type="password" name="new_password" class="form-era" required minlength="6">
+                            <input type="password" name="new_password" class="form-era" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-era-label">Confirm New Password</label>
-                            <input type="password" name="confirm_password" class="form-era" required minlength="6">
+                            <input type="password" name="confirm_password" class="form-era" required>
                         </div>
-                        <button type="submit" class="btn-era-dark w-100">
-                            <i class="bi bi-shield-lock me-1"></i> Change Password
+                        <button type="submit" name="change_password" class="btn-era w-100">
+                            <i class="bi bi-key me-2"></i>Change Password
                         </button>
                     </form>
                 </div>
             </div>
 
             <!-- Recent Orders -->
-            <div class="col-12">
+            <div class="col-lg-5">
                 <div class="profile-section">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0"><i class="bi bi-box me-2 text-gold"></i>Recent Orders</h5>
-                        <a href="{% url 'order' %}" class="btn-era-outline btn-era-sm">View All <i class="bi bi-arrow-right ms-1"></i></a>
-                    </div>
-
+                    <h3><i class="bi bi-receipt me-2 text-gold"></i>Recent Orders</h3>
+                    
                     {% if orders %}
-                        {% for order in orders %}
-                        <div class="recent-order-item">
-                            <div>
-                                <p class="mb-0 fw-semibold">Order #{{ order.id }} - {{ order.product.name }}</p>
-                                <p class="mb-0 text-muted-era small">{{ order.date }} | Qty: {{ order.quantity }}</p>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge-era badge-status-{{ order.status|lower }}">{{ order.status }}</span>
-                                <p class="mb-0 fw-semibold text-gold mt-1">${{ order.total_price }}</p>
-                            </div>
+                    {% for order in orders %}
+                    <div class="recent-order-item">
+                        <div>
+                            <p class="mb-1 fw-semibold">Order #{{ order.id }}</p>
+                            <p class="text-muted small mb-0">{{ order.created_at|date:"M d, Y" }}</p>
                         </div>
-                        {% endfor %}
+                        <div class="text-end">
+                            <p class="mb-1 text-gold fw-semibold">${{ order.total_amount }}</p>
+                            <span class="badge-era badge-status-{{ order.status }}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <a href="{% url 'my_orders' %}" class="btn-era-outline w-100 mt-3">
+                        View All Orders <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="bi bi-inbox d-block" style="font-size: 3rem; color: var(--era-border);"></i>
-                            <p class="text-muted-era mt-2">No orders yet.</p>
-                            <a href="{% url 'home' %}" class="btn-era btn-era-sm mt-2">Start Shopping</a>
-                        </div>
+                    <div class="text-center py-4">
+                        <i class="bi bi-bag-x" style="font-size: 3rem; color: var(--border-color);"></i>
+                        <p class="text-muted mt-2 mb-0">No orders yet</p>
+                    </div>
                     {% endif %}
+                </div>
+
+                <!-- Quick Links -->
+                <div class="profile-section">
+                    <h3><i class="bi bi-link-45deg me-2 text-gold"></i>Quick Links</h3>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'home' %}" class="btn-era-outline">
+                            <i class="bi bi-shop me-2"></i>Continue Shopping
+                        </a>
+                        <a href="{% url 'wishlist' %}" class="btn-era-outline">
+                            <i class="bi bi-heart me-2"></i>My Wishlist
+                        </a>
+                        {% if request.user.is_staff %}
+                        <a href="{% url 'admin_dashboard' %}" class="btn-era-outline">
+                            <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

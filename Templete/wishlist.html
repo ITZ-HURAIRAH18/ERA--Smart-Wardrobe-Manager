@@ -1,138 +1,149 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load cart %}
 
-{% block title %}ERA - Wishlist{% endblock %}
+{% block title %}ERA - My Wishlist{% endblock %}
 
 {% block content %}
 <style>
-    .wishlist-page { padding-top: 120px; min-height: 80vh; }
+    .wishlist-page { padding-top: 120px; min-height: 80vh; padding-bottom: 60px; }
 
-    .wishlist-card {
-        background: var(--era-white);
-        border: 1px solid var(--era-border);
+    .wishlist-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-card);
         overflow: hidden;
-        transition: all var(--duration-hover) var(--ease-out);
+        transition: all 0.3s ease;
         height: 100%;
-        display: flex;
-        flex-direction: column;
     }
-    .wishlist-card:hover {
-        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-        transform: translateY(-4px);
+
+    .wishlist-item:hover {
+        border-color: rgba(201, 169, 110, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(201, 169, 110, 0.1);
     }
-    .wishlist-card .img-wrap {
+
+    .wishlist-item-img {
         position: relative;
-        height: 260px;
         overflow: hidden;
-        background: var(--era-stone);
     }
-    .wishlist-card .img-wrap img {
+
+    .wishlist-item-img img {
         width: 100%;
-        height: 100%;
+        height: 280px;
         object-fit: cover;
-        transition: transform 0.6s var(--ease-out);
+        transition: transform 0.3s ease;
     }
-    .wishlist-card:hover .img-wrap img { transform: scale(1.05); }
-    .wishlist-card .remove-btn {
+
+    .wishlist-item:hover .wishlist-item-img img {
+        transform: scale(1.05);
+    }
+
+    .wishlist-remove {
         position: absolute;
-        top: 12px;
-        right: 12px;
+        top: 10px;
+        right: 10px;
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: var(--era-white);
-        border: none;
+        background: rgba(26, 26, 26, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--border-color);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all var(--duration-hover) var(--ease-out);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        z-index: 2;
-    }
-    .wishlist-card .remove-btn:hover {
-        background: var(--era-danger);
-        color: var(--era-white);
-    }
-    .wishlist-card .card-body {
-        padding: 1.25rem;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    .wishlist-card .card-body .product-name {
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-    }
-    .wishlist-card .card-body .product-name a {
-        color: var(--era-text);
-        text-decoration: none;
-    }
-    .wishlist-card .card-body .product-name a:hover { color: var(--era-gold); }
-    .wishlist-card .card-body .actions {
-        margin-top: auto;
-        display: flex;
-        gap: 0.5rem;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
     }
 
-    /* Empty State */
-    .empty-wishlist {
-        text-align: center;
-        padding: 4rem 2rem;
+    .wishlist-remove:hover {
+        background: var(--danger);
+        border-color: var(--danger);
     }
-    .empty-wishlist i { font-size: 5rem; color: var(--era-border); margin-bottom: 1.5rem; }
+
+    .wishlist-item-body {
+        padding: 1.25rem;
+    }
+
+    .stock-badge {
+        background: var(--success);
+        color: white;
+    }
+
+    .out-of-stock-badge {
+        background: var(--danger);
+        color: white;
+    }
 </style>
 
 <div class="wishlist-page">
     <div class="container">
-        <h1 class="text-center mb-2" style="font-family: var(--font-heading);">My <span class="text-gold">Wishlist</span></h1>
-        <p class="text-center text-muted-era mb-5">Items you've saved for later</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 style="font-family: var(--font-heading);">
+                My <span class="text-gold">Wishlist</span>
+            </h1>
+            <a href="{% url 'home' %}" class="btn-era-outline">
+                <i class="bi bi-shop me-1"></i>Continue Shopping
+            </a>
+        </div>
 
         {% if wishlist_items %}
         <div class="row g-4">
             {% for item in wishlist_items %}
-            <div class="col-lg-3 col-md-4 col-6">
-                <div class="wishlist-card" data-product-id="{{ item.product.id }}">
-                    <div class="img-wrap">
-                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" loading="lazy">
-                        <button class="remove-btn" onclick="removeFromWishlist({{ item.product.id }})" title="Remove from wishlist">
-                            <i class="bi bi-x-lg"></i>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="wishlist-item">
+                    <div class="wishlist-item-img">
+                        <a href="{% url 'product_detail_new' item.product.slug %}">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                        </a>
+                        <button class="wishlist-remove" onclick="removeFromWishlist({{ item.product.id }})" title="Remove from wishlist">
+                            <i class="bi bi-heart-fill"></i>
                         </button>
                     </div>
-                    <div class="card-body">
-                        <span class="text-muted-era small text-uppercase">{{ item.product.category.name }}</span>
-                        <h6 class="product-name">
-                            <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
-                        </h6>
-                        <span class="fw-semibold text-gold fs-5">${{ item.product.price }}</span>
-                        <div class="actions">
-                            {% if item.product.stock_quantity > 0 %}
-                            <form action="{% url 'home' %}" method="POST" class="mb-0 flex-grow-1">
-                                {% csrf_token %}
-                                <input type="hidden" name="product" value="{{ item.product.id }}">
-                                <button type="submit" class="btn-era w-100 btn-era-sm">
-                                    <i class="bi bi-bag-plus me-1"></i> Add to Cart
-                                </button>
-                            </form>
+                    <div class="wishlist-item-body">
+                        <p class="text-muted small mb-1">{{ item.product.category.name|default:"Fashion" }}</p>
+                        <h5 class="mb-2" style="font-size: 1rem;">
+                            <a href="{% url 'product_detail_new' item.product.slug %}" style="color: var(--text-primary);">
+                                {{ item.product.name }}
+                            </a>
+                        </h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                {% if item.product.discount_price %}
+                                <span class="text-gold fw-bold">${{ item.product.discount_price }}</span>
+                                <small class="text-muted text-decoration-line-through ms-1">${{ item.product.price }}</small>
+                                {% else %}
+                                <span class="text-gold fw-bold">${{ item.product.price }}</span>
+                                {% endif %}
+                            </div>
+                            {% if item.product.is_in_stock %}
+                            <span class="badge stock-badge small">In Stock</span>
                             {% else %}
-                            <button class="btn-era-outline w-100 btn-era-sm" disabled>Out of Stock</button>
+                            <span class="badge out-of-stock-badge small">Out of Stock</span>
                             {% endif %}
                         </div>
+                        {% if item.product.is_in_stock %}
+                        <form method="POST" action="{% url 'add_to_cart' item.product.id %}" class="mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-era w-100 btn-era-sm">
+                                <i class="bi bi-bag-plus me-1"></i>Add to Cart
+                            </button>
+                        </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-
         {% else %}
         <!-- Empty State -->
-        <div class="empty-wishlist">
-            <i class="bi bi-heart d-block"></i>
-            <h3>Your wishlist is empty</h3>
-            <p class="text-muted-era mb-4">Start adding items you love to your wishlist!</p>
-            <a href="{% url 'home' %}" class="btn-era">Discover Products</a>
+        <div class="text-center" style="padding: 4rem 2rem;">
+            <i class="bi bi-heart" style="font-size: 5rem; color: var(--border-color);"></i>
+            <h3 class="mt-3" style="font-family: var(--font-heading);">Your Wishlist is Empty</h3>
+            <p class="text-muted mb-4">Save items you love to your wishlist and buy them later.</p>
+            <a href="{% url 'home' %}" class="btn-era btn-era-lg">
+                <i class="bi bi-shop me-2"></i>Start Shopping
+            </a>
         </div>
         {% endif %}
     </div>
@@ -142,36 +153,24 @@
 
 {% block extra_js %}
 <script>
-    function removeFromWishlist(productId) {
-        fetch(`/wishlist/remove/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const card = document.querySelector(`.wishlist-card[data-product-id="${productId}"]`);
-                if (card) {
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.9)';
-                    card.style.transition = 'all 0.3s ease';
-                    setTimeout(() => {
-                        card.remove();
-                        // Check if no items left
-                        if (document.querySelectorAll('.wishlist-card').length === 0) {
-                            location.reload();
-                        }
-                    }, 300);
-                }
-                showToast(data.message, 'success');
-            } else {
-                showToast(data.message || 'Error removing item', 'error');
-            }
-        })
-        .catch(() => showToast('Something went wrong', 'error'));
-    }
+function removeFromWishlist(productId) {
+    if (!confirm('Remove this item from your wishlist?')) return;
+
+    fetch(`/wishlist/remove/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        }
+    })
+    .catch(() => showToast('Error removing item', 'error'));
+}
 </script>
 {% endblock %}

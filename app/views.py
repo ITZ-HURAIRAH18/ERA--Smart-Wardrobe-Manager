@@ -12,19 +12,37 @@ import datetime
 import os
 
 from .models import Std, Cat, Customer, Order, Cart, CartItem, Rating, Wishlist, Coupon, Newsletter
-from middleware.auth import auth_middleware
+from .models import Category, Product, OrderNew, OrderItem, CartNew, CartItemNew, Review
+
+# Import new e-commerce views
+from .views_ecommerce import (
+    cart_view, add_to_cart, remove_from_cart, update_cart,
+    checkout_view, order_confirmation, my_orders,
+    product_detail_new, submit_review, shop_view,
+    login_view, logout_view, register_view, profile_view,
+    home_view, about_view, contact_view,
+    admin_dashboard, add_product, edit_product, delete_product, list_products,
+    add_category, edit_category, delete_category, list_categories,
+    admin_orders, order_detail_admin, admin_customers,
+    view_wishlist, add_to_wishlist, remove_from_wishlist, toggle_wishlist
+)
 
 
 # =============================================================================
 # HELPER: Session-based login required decorator
 # =============================================================================
 def login_required_custom(view_func):
-    """Decorator to check if customer is logged in via session."""
+    """Decorator to check if customer is logged in via session OR Django auth."""
     def _wrapped_view(request, *args, **kwargs):
-        if not request.session.get('customer_id'):
-            messages.error(request, 'Please login to access this page.')
-            return redirect('login')
-        return view_func(request, *args, **kwargs)
+        # Check if user is authenticated via Django auth (admin/superuser)
+        if request.user.is_authenticated:
+            return view_func(request, *args, **kwargs)
+        # Check if customer is logged in via session
+        if request.session.get('customer_id'):
+            return view_func(request, *args, **kwargs)
+        # Not logged in
+        messages.error(request, 'Please login to access this page.')
+        return redirect('login')
     return _wrapped_view
 
 
@@ -349,6 +367,21 @@ def login(request):
                 'values': {'email': email}
             })
 
+        # Try authenticating as Django User (superuser/admin)
+        from django.contrib.auth.models import User
+        try:
+            user = User.objects.get(email=email)
+            if user.check_password(password) and user.is_superuser:
+                print(f"DEBUG LOGIN: Django User (superuser) found: {user.username}")
+                django_login(request, user)
+                messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+                return redirect('admin_dashboard')  # Redirect to custom admin dashboard
+        except User.DoesNotExist:
+            print(f"DEBUG LOGIN: No Django User with email {email}")
+        except Exception as e:
+            print(f"DEBUG LOGIN: Error checking Django User: {e}")
+
+        # Try authenticating as Customer
         try:
             customer_instance = Customer.get_customer_by_email(email)
             print(f"DEBUG LOGIN: Customer found: {customer_instance}")  # Debug log
@@ -1115,21 +1148,22 @@ from .form import ProductForm
 
 
 def addpro(request):
-    """Add new product with support for file upload or URL image."""
+    """Add new product with Cloudinary image upload support."""
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
 
-            # If image_url is provided and no file was uploaded, download the image
-            image_url = form.cleaned_data.get('image_url')
-            if image_url and not request.FILES.get('image'):
-                success, message = product.download_image_from_url()
-                if success:
+            # Upload image to Cloudinary if provided
+            if request.FILES.get('image'):
+                from .cloudinary_helper import upload_image_to_cloudinary
+                upload_result = upload_image_to_cloudinary(request.FILES['image'], folder='era-products')
+                if upload_result:
+                    product.image = upload_result['url']  # Store the Cloudinary URL
                     product.save()
-                    messages.success(request, f'Product added successfully! Image downloaded from URL.')
+                    messages.success(request, 'Product added successfully! Image uploaded to Cloudinary.')
                 else:
-                    messages.error(request, f'Product saved but image download failed: {message}')
+                    messages.error(request, 'Product saved but image upload to Cloudinary failed.')
                     product.save()
             else:
                 product.save()
@@ -1163,7 +1197,7 @@ def deletepro(request, id):
 
 
 def editpro(request, id):
-    """Edit a product with support for file upload or URL image."""
+    """Edit a product with Cloudinary image upload support."""
     product = get_object_or_404(Std, id=id)
 
     if request.method == 'POST':
@@ -1171,21 +1205,17 @@ def editpro(request, id):
         if form.is_valid():
             product = form.save(commit=False)
 
-            # If image_url is provided and no file was uploaded, download the image
-            image_url = form.cleaned_data.get('image_url')
-            if image_url and not request.FILES.get('image'):
-                # Only download if the URL changed or no image exists
-                if image_url != product.image_url or not product.image:
-                    success, message = product.download_image_from_url()
-                    if success:
-                        product.save()
-                        messages.success(request, f'Product updated successfully! Image downloaded from URL.')
-                    else:
-                        messages.error(request, f'Product saved but image download failed: {message}')
-                        product.save()
-                else:
+            # Upload new image to Cloudinary if provided
+            if request.FILES.get('image'):
+                from .cloudinary_helper import upload_image_to_cloudinary
+                upload_result = upload_image_to_cloudinary(request.FILES['image'], folder='era-products')
+                if upload_result:
+                    product.image = upload_result['url']  # Store the Cloudinary URL
                     product.save()
-                    messages.success(request, 'Product updated successfully!')
+                    messages.success(request, 'Product updated successfully! New image uploaded to Cloudinary.')
+                else:
+                    messages.error(request, 'Product saved but image upload to Cloudinary failed.')
+                    product.save()
             else:
                 product.save()
                 messages.success(request, 'Product updated successfully!')

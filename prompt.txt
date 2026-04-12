@@ -1,256 +1,791 @@
-Build a dark, premium, single-page landing page for an AI-powered web design agency using React + Vite + Tailwind CSS + shadcn/ui + Framer Motion (motion/react). The page has a luxury editorial aesthetic -- black backgrounds, white text, liquid glass (glassmorphism) effects, and cinematic video backgrounds.
+I have a Django 5.1.4 e-commerce fashion website called "ERA". 
+Below are ALL the issues to fix and features to add. 
+Implement everything completely — no placeholders, no TODOs.
 
-FONTS
-Import from Google Fonts:
+=======================================================
+## TECH STACK
+=======================================================
+- Backend: Django 5.1.4, Python 3.13
+- Frontend: Bootstrap 5, custom CSS, Bootstrap Icons
+- Database: SQLite (default Django)
+- App name: `app`
+- Template folder: `Templete/` (note the spelling)
 
-https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap
-* Headings: Instrument Serif (italic) -- used via Tailwind class font-heading
-* Body: Barlow (weights 300, 400, 500, 600) -- used via Tailwind class font-body
-Tailwind config extends fontFamily:
+=======================================================
+## BUG FIXES (Fix These First)
+=======================================================
 
-heading: ["'Instrument Serif'", "serif"]
-body: ["'Barlow'", "sans-serif"]
+### BUG 1 — cart.html TemplateSyntaxError
+In cart.html line 228, this line causes error:
+  ${{ 200|add:-subtotal }}
+Django's `add` filter does not accept negative numbers or 
+variables as second argument this way.
 
-COLOR THEME (CSS custom properties, HSL format)
+FIX: Replace with a custom template tag.
+Create `app/templatetags/math_filters.py`:
 
-:root {
-  --background: 213 45% 67%;
-  --foreground: 0 0% 100%;
-  --card: 213 45% 62%;
-  --card-foreground: 0 0% 100%;
-  --primary: 0 0% 100%;
-  --primary-foreground: 213 45% 67%;
-  --secondary: 213 45% 72%;
-  --secondary-foreground: 0 0% 100%;
-  --muted: 213 35% 60%;
-  --muted-foreground: 0 0% 100% / 0.7;
-  --accent: 213 45% 72%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --border: 0 0% 100% / 0.2;
-  --input: 0 0% 100% / 0.2;
-  --ring: 0 0% 100% / 0.3;
-  --radius: 9999px;
-  --glass-bg: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.25);
-  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
-  --glass-blur: 16px;
-}
+  from django import template
+  register = template.Library()
 
-LIQUID GLASS CSS (the core visual effect)
-Two utility classes defined in index.css under @layer components:
-.liquid-glass (subtle):
+  @register.filter
+  def subtract(value, arg):
+      try:
+          return int(value) - int(arg)
+      except:
+          return 0
 
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: none;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-.liquid-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.4px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(255, 255, 255, 0) 60%,
-    rgba(255, 255, 255, 0.15) 80%,
-    rgba(255, 255, 255, 0.45) 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-.liquid-glass-strong (more prominent, used on CTA buttons):
+  @register.filter  
+  def add_shipping(subtotal):
+      return subtotal + 15 if subtotal < 200 else subtotal
 
-.liquid-glass-strong {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(50px);
-  -webkit-backdrop-filter: blur(50px);
-  border: none;
-  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-.liquid-glass-strong::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.4px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.2) 20%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(255, 255, 255, 0) 60%,
-    rgba(255, 255, 255, 0.2) 80%,
-    rgba(255, 255, 255, 0.5) 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-The ::before pseudo-element creates a gradient border effect using the mask-composite trick (thin glowing border that fades in the middle).
+Then in cart.html, replace:
+  {{ 200|add:-subtotal }}  →  {{ 200|subtract:subtotal }}
+  {{ subtotal|add:15 }}    →  {{ subtotal|add_shipping }}
 
-ASSETS & MEDIA URLS
-Hero background video (MP4, CloudFront):
+Also add {% load math_filters %} at top of cart.html.
 
-https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4
-Poster image: /images/hero_bg.jpeg (local file in public/images/)
-StartSection video (HLS via Mux):
+### BUG 2 — Navbar shows "Login" even when user is logged in
+In base.html / navbar, the Login button must be conditional:
 
-https://stream.mux.com/9JXDljEVWYwWu01PUkAemafDugK89o01BR6zqJ3aS9u00A.m3u8
-Stats section video (HLS via Mux, displayed desaturated):
-
-https://stream.mux.com/NcU3HlHeF7CUL86azTTzpy3Tlb00d6iF3BmCdFslMJYM.m3u8
-CTA/Footer section video (HLS via Mux):
-
-https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8
-Feature GIFs (imported from src/assets/):
-* feature-1.gif -- used in FeaturesChess row 1 (right side)
-* feature-2.gif -- used in FeaturesChess row 2 (left side)
-Logo icon: src/assets/logo-icon.png (12x12 Tailwind = h-12 w-12)
-
-SECTION-BY-SECTION BREAKDOWN
-1. NAVBAR (fixed, floating)
-* Fixed position: fixed top-4 left-0 right-0 z-50, horizontal padding px-8 lg:px-16, vertical py-3
-* Left: Logo image (h-12 w-12)
-* Center (desktop only, hidden md:flex): Navigation links inside a liquid-glass rounded-full px-1.5 py-1 pill container
-    * Links: "Home", "Services", "Work", "Process", "Pricing"
-    * Each link: px-3 py-2 text-sm font-medium text-foreground/90 font-body
-    * Last item: white solid button "Get Started" with ArrowUpRight icon, bg-white text-black rounded-full px-3.5 py-1.5 text-sm
-2. HERO SECTION
-* Container: relative overflow-visible, fixed height 1000px
-* Background video: <video> tag with autoPlay, loop, muted, playsInline. Positioned absolute left-0 w-full h-auto object-contain z-0 with top: 20%. Source is the CloudFront MP4 URL. Poster is /images/hero_bg.jpeg.
-* Dark overlay: absolute inset-0 bg-black/5 z-0
-* Bottom gradient fade: absolute bottom-0, height 300px, linear-gradient(to bottom, transparent, black)
-* Content (z-10, centered, paddingTop: 150px):
-    * Badge pill: liquid-glass rounded-full px-1 py-1 with inner white "New" badge (bg-white text-black rounded-full px-3 py-1 text-xs font-semibold) and text "Introducing AI-powered web design."
-    * Heading (BlurText component): "The Website Your Brand Deserves" -- text-6xl md:text-7xl lg:text-[5.5rem] font-heading italic text-foreground leading-[0.8] max-w-2xl tracking-[-4px], animated word-by-word from bottom with blur, delay 100ms
-    * Subtext (motion.p): "Stunning design. Blazing performance. Built by AI, refined by experts. This is web design, wildly reimagined." -- blur-in animation, delay 0.8s, text-sm md:text-base text-white font-body font-light leading-tight
-    * CTA buttons (motion.div, delay 1.1s):
-        * "Get Started" -- liquid-glass-strong rounded-full px-5 py-2.5 with ArrowUpRight icon
-        * "Watch the Film" -- text-only with Play icon (filled)
-    * Partners bar at bottom (mt-auto pb-8 pt-16): "Trusted by the teams behind" liquid-glass pill, then 5 partner names rendered in text-2xl md:text-3xl font-heading italic text-white with gap-12 md:gap-16: Stripe, Vercel, Linear, Notion, Figma
-3. BlurText COMPONENT (custom animated text)
-* Splits text by words or letters
-* Uses IntersectionObserver to trigger on scroll
-* Each word/letter is a <motion.span> that animates from {filter: 'blur(10px)', opacity: 0, y: 50} (when direction=bottom) through {filter: 'blur(5px)', opacity: 0.5, y: -5} to {filter: 'blur(0px)', opacity: 1, y: 0}
-* Staggered by index with configurable delay (default 200ms per element)
-* Step duration 0.35s per keyframe step
-4. START SECTION ("How It Works")
-* Full-width section with HLS video background using hls.js library
-* Video: autoPlay, loop, muted, playsInline, absolute inset-0 w-full h-full object-cover
-* Top and bottom gradient fades (200px each, black to transparent)
-* Content centered (z-10, minHeight 500px):
-    * Badge: "How It Works" in liquid-glass rounded-full px-3.5 py-1
-    * Heading: "You dream it. We ship it." -- text-4xl md:text-5xl lg:text-6xl font-heading italic tracking-tight leading-[0.9]
-    * Subtext: "Share your vision. Our AI handles the rest--wireframes, design, code, launch. All in days, not quarters." -- text-white/60 font-body font-light text-sm md:text-base
-    * CTA: "Get Started" liquid-glass-strong rounded-full px-6 py-3
-5. FEATURES CHESS (alternating rows)
-* Section header: "Capabilities" badge + "Pro features. Zero complexity." heading
-* Row 1 (flex, content left / image right):
-    * Title: "Designed to convert. Built to perform."
-    * Body: "Every pixel is intentional. Our AI studies what works across thousands of top sites--then builds yours to outperform them all."
-    * Button: "Learn more" liquid-glass-strong
-    * Gif: https://motionsites.ai/assets/hero-finlytic-preview-CV9g0FHP.gif download and place inside liquid-glass rounded-2xl overflow-hidden
-* Row 2 (flex-row-reverse, content right / image left):
-    * Title: "It gets smarter. Automatically."
-    * Body: "Your site evolves on its own. AI monitors every click, scroll, and conversion--then optimizes in real time. No manual updates. Ever."
-    * Button: "See how it works" liquid-glass-strong
-    * gif: https://motionsites.ai/assets/hero-wealth-preview-B70idl_u.gif download and place inside liquid-glass rounded-2xl overflow-hidden
-6. FEATURES GRID ("Why Us")
-* Section header: "Why Us" badge + "The difference is everything." heading
-* 4-column grid (grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6), each card is liquid-glass rounded-2xl p-6:
-    1. Icon: Zap -- "Days, Not Months" -- "Concept to launch at a pace that redefines fast. Because waiting isn't a strategy."
-    2. Icon: Palette -- "Obsessively Crafted" -- "Every detail considered. Every element refined. Design so precise, it feels inevitable."
-    3. Icon: BarChart3 -- "Built to Convert" -- "Layouts informed by data. Decisions backed by performance. Results you can measure."
-    4. Icon: Shield -- "Secure by Default" -- "Enterprise-grade protection comes standard. SSL, DDoS mitigation, compliance. All included."
-    * Each icon sits in a liquid-glass-strong rounded-full w-10 h-10 circle
-7. STATS SECTION
-* HLS video background (Mux URL), displayed with filter: saturate(0) (desaturated/B&W)
-* Top and bottom gradient fades (200px each)
-* Content: liquid-glass rounded-3xl p-12 md:p-16 card with 4-column grid:
-    * "200+" / "Sites launched"
-    * "98%" / "Client satisfaction"
-    * "3.2x" / "More conversions"
-    * "5 days" / "Average delivery"
-    * Values: text-4xl md:text-5xl lg:text-6xl font-heading italic
-    * Labels: text-white/60 font-body font-light text-sm
-8. TESTIMONIALS
-* Section header: "What They Say" badge + "Don't take our word for it." heading
-* 3-column grid (md:grid-cols-3 gap-6), each card is liquid-glass rounded-2xl p-8:
-    1. "A complete rebuild in five days. The result outperformed everything we'd spent months building before." -- Sarah Chen, CEO, Luminary
-    2. "Conversions up 4x. That's not a typo. The design just works differently when it's built on real data." -- Marcus Webb, Head of Growth, Arcline
-    3. "They didn't just design our site. They defined our brand. World-class doesn't begin to cover it." -- Elena Voss, Brand Director, Helix
-    * Quote: text-white/80 font-body font-light text-sm italic
-    * Name: text-white font-body font-medium text-sm
-    * Role: text-white/50 font-body font-light text-xs
-9. CTA + FOOTER
-* HLS video background (Mux URL)
-* Top and bottom gradient fades (200px each)
-* Content (z-10, centered):
-    * Heading: "Your next website starts here." -- text-5xl md:text-6xl lg:text-7xl font-heading italic leading-[0.85]
-    * Subtext: "Book a free strategy call. See what AI-powered design can do. No commitment, no pressure. Just possibilities."
-    * Two buttons:
-        * "Book a Call" -- liquid-glass-strong rounded-full px-6 py-3
-        * "View Pricing" -- bg-white text-black rounded-full px-6 py-3
-    * Footer bar (mt-32 pt-8 border-t border-white/10):
-        * Left: "(c) 2026 Studio. All rights reserved." text-white/40 text-xs
-        * Right: "Privacy", "Terms", "Contact" links text-white/40 text-xs
-
-KEY DEPENDENCIES
-
-{
-  "motion": "^12.35.0",
-  "hls.js": "^1.6.15",
-  "lucide-react": "^0.462.0",
-  "react-router-dom": "^6.30.1"
-}
-Icons used from lucide-react: ArrowUpRight, Play, Zap, Palette, BarChart3, Shield
-
-OVERALL PAGE STRUCTURE
-
-<div bg-black>
-  <div z-10>
-    <Navbar />           -- fixed floating nav
-    <Hero />             -- 1000px tall, CloudFront MP4 video bg
-    <div bg-black>
-      <StartSection />   -- HLS video bg, "How It Works"
-      <FeaturesChess />  -- alternating text/gif rows
-      <FeaturesGrid />   -- 4-card grid
-      <Stats />          -- HLS video bg (desaturated), stats card
-      <Testimonials />   -- 3-card grid
-      <CtaFooter />      -- HLS video bg, CTA + footer
+  {% if user.is_authenticated %}
+    <!-- Show user dropdown with: My Orders, Profile, Logout -->
+    <div class="dropdown">
+      <button class="btn-nav-user dropdown-toggle">
+        👤 {{ user.first_name|default:user.username }}
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="{% url 'my_orders' %}">My Orders</a></li>
+        <li><a href="{% url 'profile' %}">Profile</a></li>
+        <li><hr></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+      </ul>
     </div>
-  </div>
-</div>
+  {% else %}
+    <a href="{% url 'login' %}">Login</a>
+  {% endif %}
 
-ANIMATION PATTERNS
-1. BlurText (heading): Word-by-word stagger from bottom with gaussian blur dissolve, IntersectionObserver triggered
-2. Hero subtext: motion.p with filter: blur(10px) -> blur(0px), opacity: 0 -> 1, y: 20 -> 0, delay 0.8s, duration 0.6s
-3. Hero CTA buttons: Same blur-in pattern, delay 1.1s
-4. All video backgrounds: autoPlay, loop, muted, playsInline with top/bottom black gradient fades (200px typically, 300px on hero bottom)
+### BUG 3 — Login page not scrollable
+Add to login page CSS:
+  body { overflow-y: auto !important; min-height: 100vh; }
+  .login-container { min-height: 100vh; overflow: visible; }
 
-DESIGN PATTERNS USED THROUGHOUT
-* Every section badge: liquid-glass rounded-full px-3.5 py-1 text-xs font-medium text-white font-body
-* Every section heading: text-4xl md:text-5xl lg:text-6xl font-heading italic text-white tracking-tight leading-[0.9]
-* Every body text: text-white/60 or text-white/70, font-body font-light text-sm md:text-base
-* Primary CTA: liquid-glass-strong rounded-full with ArrowUpRight icon
-* Secondary CTA: bg-white text-black rounded-full
-* Card containers: liquid-glass rounded-2xl
-* Video overlay fades: always linear-gradient(to bottom/top, black, transparent) with pointer-events-none
+=======================================================
+## NAVBAR — Professional Dynamic Navbar
+=======================================================
+
+Create ONE base navbar used on ALL pages.
+The navbar must change based on whether user is admin or not.
+
+### For guests (not logged in):
+  ERA Logo | Home | Shop | About | Contact | 🛒 Cart | Login
+
+### For logged-in regular users:
+  ERA Logo | Home | Shop | Categories▼ | About | Contact | 
+  🛒 Cart (count badge) | 👤 Username▼ (My Orders, Profile, Logout)
+
+### For logged-in Admin (user.is_staff or user.is_superuser):
+  ERA Logo | Home | Shop | Categories▼ | About | Contact |
+  Admin▼ (dropdown with ALL admin links below) | 🛒 | 👤
+
+Admin dropdown must include:
+  - Dashboard
+  - Add Product
+  - Manage Products (list)
+  - Add Category
+  - Manage Categories (list)
+  - View All Orders
+  - View All Customers
+  - Revenue Reports
+
+Categories dropdown must dynamically load all Category objects:
+  {% for cat in all_categories %}
+    <li><a href="{% url 'shop' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+  {% endfor %}
+
+Use a context_processor to inject `all_categories` globally:
+  # app/context_processors.py
+  from .models import Category
+  def categories(request):
+      return {'all_categories': Category.objects.all()}
+  
+  # Add to settings.py TEMPLATES context_processors:
+  'app.context_processors.categories'
+
+=======================================================
+## MODELS — Ensure these exist in models.py
+=======================================================
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='categories/', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self): return self.name
+    def get_absolute_url(self): 
+        return f"/shopping/?category={self.slug}"
+
+class Product(models.Model):
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    image = models.ImageField(upload_to='products/')
+    stock = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    is_new = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def get_discount_percentage(self):
+        if self.discount_price:
+            return int((1 - self.discount_price/self.price) * 100)
+        return 0
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'), 
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    shipping_address = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    note = models.TextField(blank=True)
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    
+    def get_total(self):
+        price = self.product.discount_price or self.product.price
+        return price * self.quantity
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=[(i,i) for i in range(1,6)])
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+=======================================================
+## VIEWS — All Required Views
+=======================================================
+
+### Cart Views (views.py):
+@login_required
+def cart_view(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    items = cart.items.select_related('product').all()
+    subtotal = sum(item.get_total() for item in items)
+    shipping = 0 if subtotal >= 200 else 15
+    total = subtotal + shipping
+    return render(request, 'cart.html', {
+        'items': items,
+        'subtotal': subtotal,
+        'shipping': shipping,
+        'total': total,
+        'free_delivery_remaining': max(0, 200 - float(subtotal))
+    })
+
+@login_required  
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    if not created:
+        item.quantity += 1
+        item.save()
+    messages.success(request, f'{product.name} added to cart!')
+    return redirect(request.META.get('HTTP_REFERER', 'shopping'))
+
+@login_required
+def remove_from_cart(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    item.delete()
+    return redirect('cart')
+
+@login_required
+def update_cart(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    qty = int(request.POST.get('quantity', 1))
+    if qty > 0:
+        item.quantity = qty
+        item.save()
+    else:
+        item.delete()
+    return redirect('cart')
+
+### Checkout View:
+@login_required
+def checkout_view(request):
+    cart = get_object_or_404(Cart, user=request.user)
+    items = cart.items.select_related('product').all()
+    if not items:
+        messages.warning(request, 'Your cart is empty!')
+        return redirect('cart')
+    subtotal = sum(item.get_total() for item in items)
+    shipping = 0 if subtotal >= 200 else 15
+    total = subtotal + shipping
+    
+    if request.method == 'POST':
+        # Create order from form data
+        address = request.POST.get('address')
+        order = Order.objects.create(
+            user=request.user,
+            total_amount=total,
+            shipping_address=address
+        )
+        for item in items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.discount_price or item.product.price
+            )
+        cart.items.all().delete()
+        messages.success(request, f'Order #{order.id} placed successfully!')
+        return redirect('order_confirmation', order_id=order.id)
+    
+    return render(request, 'checkout.html', {
+        'items': items, 
+        'subtotal': subtotal,
+        'shipping': shipping, 
+        'total': total
+    })
+
+### Admin Views (all protected with @staff_member_required):
+- admin_dashboard: stats (total orders, revenue, products, customers)
+- add_product: ModelForm for Product
+- edit_product: edit existing product
+- delete_product: delete product
+- list_products: paginated product list with search
+- add_category: ModelForm for Category  
+- edit_category: edit existing category
+- delete_category: delete category
+- list_categories: list all categories
+- admin_orders: all orders with filter by status
+- order_detail_admin: single order with status update
+- admin_customers: all registered users
+
+=======================================================
+## URL PATTERNS (urls.py)
+=======================================================
+
+urlpatterns = [
+    path('', home, name='home'),
+    path('shopping/', shop_view, name='shopping'),
+    path('product/<slug:slug>/', product_detail, name='product_detail'),
+    path('cart/', cart_view, name='cart'),
+    path('cart/add/<int:product_id>/', add_to_cart, name='add_to_cart'),
+    path('cart/remove/<int:item_id>/', remove_from_cart, name='remove_from_cart'),
+    path('cart/update/<int:item_id>/', update_cart, name='update_cart'),
+    path('checkout/', checkout_view, name='checkout'),
+    path('order-confirmation/<int:order_id>/', order_confirmation, name='order_confirmation'),
+    path('my-orders/', my_orders, name='my_orders'),
+    path('login/', login_view, name='login'),
+    path('register/', register_view, name='register'),
+    path('logout/', logout_view, name='logout'),
+    path('profile/', profile_view, name='profile'),
+    path('contact/', contact_view, name='contact'),
+    path('about/', about_view, name='about'),
+    
+    # Admin URLs
+    path('admin-dashboard/', admin_dashboard, name='admin_dashboard'),
+    path('admin/products/', list_products, name='list_products'),
+    path('admin/products/add/', add_product, name='add_product'),
+    path('admin/products/edit/<int:pk>/', edit_product, name='edit_product'),
+    path('admin/products/delete/<int:pk>/', delete_product, name='delete_product'),
+    path('admin/categories/', list_categories, name='list_categories'),
+    path('admin/categories/add/', add_category, name='add_category'),
+    path('admin/categories/edit/<int:pk>/', edit_category, name='edit_category'),
+    path('admin/categories/delete/<int:pk>/', delete_category, name='delete_category'),
+    path('admin/orders/', admin_orders, name='admin_orders'),
+    path('admin/orders/<int:order_id>/', order_detail_admin, name='order_detail_admin'),
+    path('admin/customers/', admin_customers, name='admin_customers'),
+]
+
+=======================================================
+## TEMPLATES — Professional UI Design
+=======================================================
+
+### Color Palette (CSS Variables):
+:root {
+  --black: #0a0a0a;
+  --dark: #111111;
+  --dark-2: #1a1a1a;
+  --dark-3: #222222;
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dark: #A8863A;
+  --white: #FFFFFF;
+  --gray: #888888;
+  --gray-light: #cccccc;
+  --success: #28a745;
+  --danger: #dc3545;
+  --radius: 12px;
+  --radius-btn: 50px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --transition: all 0.3s ease;
+}
+
+### Typography:
+- Headings: 'Cormorant Garamond' or 'Playfair Display' (serif, italic for hero)
+- Body: 'Inter' or 'DM Sans' (clean, modern)
+- Import from Google Fonts
+
+### Button Styles:
+.btn-era {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--black);
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 14px 32px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-era:hover {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(201,168,76,0.4);
+  color: var(--black);
+}
+.btn-era-outline {
+  background: transparent;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  border-radius: var(--radius-btn);
+  padding: 12px 30px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.btn-era-outline:hover {
+  background: var(--gold);
+  color: var(--black);
+  transform: translateY(-2px);
+}
+
+### Product Card (fixes image cropping):
+.product-card {
+  background: var(--dark-2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid rgba(201,168,76,0.1);
+  transition: var(--transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.product-card:hover {
+  border-color: rgba(201,168,76,0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(201,168,76,0.15);
+}
+.product-card-img {
+  width: 100%;
+  height: 280px;           /* Fixed height */
+  object-fit: cover;       /* Crop to fill */
+  object-position: top;    /* Show top of image (face/upper body) */
+  display: block;
+}
+.product-card-body {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.product-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-price {
+  color: var(--gold);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.product-price-old {
+  color: var(--gray);
+  text-decoration: line-through;
+  font-size: 0.85rem;
+}
+.product-card-footer {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+### Shop Page with Visible Filters:
+The filter sidebar must be clearly visible, not blending into background.
+
+.filter-sidebar {
+  background: var(--dark-2);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: sticky;
+  top: 20px;
+}
+.filter-title {
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--gray-light);
+  transition: var(--transition);
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+.filter-option:hover, .filter-option.active {
+  background: rgba(201,168,76,0.1);
+  border-color: rgba(201,168,76,0.3);
+  color: var(--gold);
+}
+.filter-input {
+  background: var(--dark-3);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 8px;
+  color: var(--white);
+  padding: 10px 14px;
+  width: 100%;
+  transition: var(--transition);
+}
+.filter-input:focus {
+  border-color: var(--gold);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+}
+
+=======================================================
+## PAGE-BY-PAGE REQUIREMENTS
+=======================================================
+
+### cart.html — Full Working Cart:
+- Show all cart items with: image, name, category, price, qty controls (+/-), remove button
+- Quantity can be updated inline with AJAX or form submit
+- Order summary: subtotal, shipping ($15 or FREE if ≥$200), total
+- Progress bar showing how much more to spend for free shipping
+- Empty cart state with "Continue Shopping" button
+- Fix template tag bug (see BUG 1 above)
+- {% load math_filters %} at top
+
+### checkout.html — Full Working Checkout:
+Step 1: Shipping Address Form
+  - Full Name, Email, Phone
+  - Address Line 1, Address Line 2
+  - City, State, ZIP, Country
+Step 2: Order Summary (sidebar)
+  - List all items
+  - Subtotal, shipping, total
+Step 3: Payment (UI only, no real payment):
+  - "Pay on Delivery" option
+  - Credit Card form (visual, not processed)
+Place Order button → creates Order in DB → redirect to confirmation
+
+### order_confirmation.html:
+- Order number, date, estimated delivery
+- List of ordered items
+- Shipping address
+- "Continue Shopping" + "Track Order" buttons
+
+### my_orders.html:
+- Table of all user's orders
+- Each row: Order #, Date, Items count, Total, Status badge
+- Clicking row → order detail page
+- Status badges with colors (pending=yellow, shipped=blue, delivered=green, cancelled=red)
+
+### login.html — Professional Redesign:
+- Two-column layout: left=hero image with quote, right=form
+- Must be SCROLLABLE: overflow-y: auto on all containers
+- Logo at top of form column
+- Email + Password fields with floating labels
+- Gold LOGIN button (full width)
+- "Forgot password?" link
+- "Don't have an account? Register" link
+- Remove hardcoded demo credentials from UI (security)
+
+### register.html:
+- Same two-column layout as login
+- Fields: First Name, Last Name, Email, Username, Password, Confirm Password
+- Inline validation feedback
+
+### profile.html:
+- Avatar with initials (gold circle)
+- Editable: First Name, Last Name, Email, Phone
+- Change Password section
+- Recent orders list (last 5)
+
+### admin_dashboard.html — Professional Amazon-level Admin:
+Stats Cards Row:
+  - Total Orders (with trend)
+  - Total Revenue (with trend)
+  - Total Products
+  - Total Customers
+  - Pending Orders
+  - Low Stock Items (< 5 units)
+
+Charts:
+  - Revenue by Month (last 6 months) — use Chart.js
+  - Orders by Status (Pie/Donut chart)
+  - Top 5 Best-selling Products
+
+Recent Orders Table:
+  - Order ID, Customer, Date, Items, Amount, Status, Actions
+  - Status can be updated inline via dropdown
+
+Quick Actions:
+  - Add Product, Add Category, View All Orders, View Customers
+
+### add_product.html / edit_product.html:
+Professional form with sections:
+  - Basic Info: Name, Slug (auto-generated from name via JS), Category, Description
+  - Pricing: Price, Discount Price
+  - Inventory: Stock quantity
+  - Media: Image upload with live preview
+  - Settings: Is Featured toggle, Is New toggle
+  - Submit: "Save Product" button
+
+### list_products.html (Admin):
+- Table with: Image thumbnail, Name, Category, Price, Stock, Status, Actions
+- Search bar
+- Filter by Category
+- Sort by Date/Price/Name
+- Edit + Delete buttons per row
+- Pagination (20 per page)
+- Bulk actions: Delete selected
+
+### add_category.html / edit_category.html:
+- Name, Slug (auto-generated), Description, Image upload
+- Live image preview
+
+### list_categories.html:
+- Table: Image, Name, Slug, Product Count, Actions
+- Edit + Delete per row
+
+### admin_orders.html:
+- Filter by Status (tabs: All, Pending, Processing, Shipped, Delivered, Cancelled)
+- Table: Order ID, Customer Name, Email, Date, Total, Status, View button
+- Click row → order detail
+
+### order_detail_admin.html:
+- Order info: ID, Date, Customer details
+- Items list with images, names, qty, prices
+- Shipping address
+- Order status update dropdown + Save button
+- Order timeline/history
+
+### admin_customers.html:
+- Table: Name, Email, Join Date, Total Orders, Total Spent, Actions
+- Search by name/email
+
+=======================================================
+## RESPONSIVE DESIGN
+=======================================================
+
+Mobile (< 768px):
+- Hamburger menu with slide-in drawer
+- Product grid: 1 column
+- Filter sidebar: collapsible accordion at top of page (not sidebar)
+- Cart: stacked layout (image above details)
+- Admin: tables become card lists
+
+Tablet (768px - 1024px):
+- Product grid: 2 columns
+- Filter sidebar visible
+
+Desktop (> 1024px):
+- Product grid: 3-4 columns
+- Filter sidebar always visible
+
+=======================================================
+## SETTINGS.py ADDITIONS
+=======================================================
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Add to INSTALLED_APPS:
+'django.contrib.messages',
+
+# Add to TEMPLATES context_processors:
+'django.template.context_processors.request',
+'app.context_processors.categories',
+
+# Add at bottom:
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+=======================================================
+## FORMS.py
+=======================================================
+
+Create these ModelForms:
+- ProductForm (all fields, custom widget for image preview)
+- CategoryForm (name, slug, description, image)
+- CheckoutForm (shipping address fields)
+- ProfileForm (first_name, last_name, email, phone)
+- ReviewForm (rating as star selector, comment)
+- ContactForm (name, email, subject, message)
+
+=======================================================
+## ADMIN.py
+=======================================================
+
+Register all models with professional admin config:
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name', 'category', 'price', 'stock', 'is_featured', 'created_at']
+    list_filter = ['category', 'is_featured', 'is_new']
+    search_fields = ['name', 'description']
+    prepopulated_fields = {'slug': ('name',)}
+    list_editable = ['price', 'stock', 'is_featured']
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'status', 'total_amount', 'created_at']
+    list_filter = ['status']
+    list_editable = ['status']
+
+=======================================================
+## ADDITIONAL FEATURES TO ADD
+=======================================================
+
+1. Toast Notifications:
+   - Show success/error messages as floating toasts (top-right)
+   - Auto-dismiss after 4 seconds
+   - Use Django messages framework
+
+2. Search:
+   - Live search on shop page (AJAX)
+   - Search by name, category, description
+
+3. Product Detail Page:
+   - Large image gallery
+   - Size selector (S/M/L/XL/XXL)
+   - Color selector
+   - Quantity selector
+   - Add to Cart button
+   - Star ratings display
+   - Reviews section (add review if purchased)
+   - Related products (same category, 4 items)
+
+4. Wishlist (simple):
+   - Heart icon on each product card
+   - Toggle wishlist via AJAX
+   - Wishlist page: /wishlist/
+
+5. Cart Icon Badge:
+   - Show item count on cart icon in navbar
+   - Update dynamically without page reload
+
+=======================================================
+## FILE STRUCTURE
+=======================================================
+
+ERA Project/
+├── manage.py
+├── settings.py (or config/settings.py)
+├── urls.py (main)
+├── app/
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── forms.py
+│   ├── admin.py
+│   ├── context_processors.py
+│   └── templatetags/
+│       ├── __init__.py
+│       └── math_filters.py
+├── Templete/
+│   ├── base.html (navbar + footer + messages)
+│   ├── home.html
+│   ├── shopping.html
+│   ├── product_detail.html
+│   ├── cart.html
+│   ├── checkout.html
+│   ├── order_confirmation.html
+│   ├── my_orders.html
+│   ├── login.html
+│   ├── register.html
+│   ├── profile.html
+│   ├── contact.html
+│   ├── about.html
+│   ├── wishlist.html
+│   └── admin/
+│       ├── dashboard.html
+│       ├── add_product.html
+│       ├── edit_product.html
+│       ├── list_products.html
+│       ├── add_category.html
+│       ├── edit_category.html
+│       ├── list_categories.html
+│       ├── orders.html
+│       ├── order_detail.html
+│       └── customers.html
+└── static/
+    ├── css/
+    │   └── era.css
+    └── js/
+        └── era.js
+
+=======================================================
+## IMPORTANT NOTES FOR AI
+=======================================================
+
+1. Do NOT use placeholder lorem ipsum — use real fashion-related content
+2. All admin views MUST check: if not request.user.is_staff: redirect to login
+3. Use @login_required decorator on all cart/checkout/profile views
+4. All forms must have {% csrf_token %}
+5. Images must use: object-fit: cover with fixed container height
+6. The template folder is named "Templete" (typo in original project — keep it)
+7. Run migrations after model changes: python manage.py makemigrations && python manage.py migrate
+8. Create superuser: python manage.py createsuperuser
+9. Add to main urls.py for media: 
+   from django.conf import settings
+   from django.conf.urls.static import static
+   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+10. All pages must use the same base.html template
+11. Cart count in navbar: {{ request.user.cart.items.count }} (with try/except in template)
