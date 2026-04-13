@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load math_filters %}
 
 {% block title %}ERA - Manage Products{% endblock %}
 
@@ -159,7 +160,11 @@
                     <tr class="{% if not product.is_active %}inactive{% endif %}">
                         <td>
                             <div class="product-name-cell">
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-thumb">
+                                {% if product.image|is_remote_url %}
+                                    <img src="{{ product.image }}" alt="{{ product.name }}" class="product-thumb">
+                                {% else %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-thumb">
+                                {% endif %}
                                 <div>
                                     <p class="name mb-0">{{ product.name }}</p>
                                     <p class="category mb-0">{{ product.category.name }}</p>

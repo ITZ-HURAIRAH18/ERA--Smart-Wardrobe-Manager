@@ -85,6 +85,11 @@ class NewProductForm(forms.ModelForm):
                 'class': 'form-era',
                 'min': '0'
             }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'id': 'product-image'
+            }),
             'is_featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_new': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

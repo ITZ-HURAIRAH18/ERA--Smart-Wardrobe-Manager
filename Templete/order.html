@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load math_filters %}
 {% load cart %}
 
 {% block title %}ERA - My Orders{% endblock %}
@@ -195,7 +196,11 @@
 
             <!-- Order Item -->
             <div class="order-item">
-                <img src="{{ order.product.image.url }}" alt="{{ order.product.name }}" class="order-item-img">
+                {% if order.product.image|is_remote_url %}
+                    <img src="{{ order.product.image }}" alt="{{ order.product.name }}" class="order-item-img">
+                {% else %}
+                    <img src="{{ order.product.image.url }}" alt="{{ order.product.name }}" class="order-item-img">
+                {% endif %}
                 <div class="order-item-details">
                     <p class="order-item-name mb-1">{{ order.product.name }}</p>
                     <p class="order-item-meta mb-0">

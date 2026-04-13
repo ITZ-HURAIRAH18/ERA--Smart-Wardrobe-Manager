@@ -262,7 +262,11 @@
                 <div class="product-card">
                     <div class="product-card-img-wrap">
                         <a href="{% url 'product_detail_new' product.slug %}">
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                            {% if product.image|is_remote_url %}
+                                <img src="{{ product.image }}" alt="{{ product.name }}" class="product-card-img">
+                            {% else %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                            {% endif %}
                         </a>
                         
                         <!-- Badges -->
@@ -336,7 +340,11 @@
                 <div class="product-card">
                     <div class="product-card-img-wrap">
                         <a href="{% url 'product_detail_new' product.slug %}">
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                            {% if product.image|is_remote_url %}
+                                <img src="{{ product.image }}" alt="{{ product.name }}" class="product-card-img">
+                            {% else %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                            {% endif %}
                         </a>
                         {% if product.is_new %}
                         <div class="product-badge">

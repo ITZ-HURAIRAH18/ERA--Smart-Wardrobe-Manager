@@ -79,3 +79,12 @@ def to_float(value):
         return float(value)
     except (ValueError, TypeError):
         return 0.0
+
+
+@register.filter
+def is_remote_url(value):
+    """Check if value is a remote URL (starts with http)."""
+    if value is None:
+        return False
+    value_str = str(value)
+    return value_str.startswith('http://') or value_str.startswith('https://')

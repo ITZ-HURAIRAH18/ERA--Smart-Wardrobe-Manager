@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load math_filters %}
 
 {% block title %}ERA - My Orders{% endblock %}
 
@@ -134,7 +135,11 @@
                     {% if order_items %}
                     <div class="order-items-preview">
                         {% for item in order_items|slice:":4" %}
-                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-item-thumb" title="{{ item.product.name }}">
+                        {% if item.product.image|is_remote_url %}
+                            <img src="{{ item.product.image }}" alt="{{ item.product.name }}" class="order-item-thumb" title="{{ item.product.name }}">
+                        {% else %}
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-item-thumb" title="{{ item.product.name }}">
+                        {% endif %}
                         {% endfor %}
                         {% if order_items|length > 4 %}
                         <div class="order-item-thumb d-flex align-items-center justify-content-center" style="background: var(--bg-secondary); color: var(--text-muted); font-weight: 600;">

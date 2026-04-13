@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load math_filters %}
 
 {% block title %}ERA - My Wishlist{% endblock %}
 
@@ -94,7 +95,11 @@
                 <div class="wishlist-item">
                     <div class="wishlist-item-img">
                         <a href="{% url 'product_detail_new' item.product.slug %}">
-                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% if item.product.image|is_remote_url %}
+                                <img src="{{ item.product.image }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% endif %}
                         </a>
                         <button class="wishlist-remove" onclick="removeFromWishlist({{ item.product.id }})" title="Remove from wishlist">
                             <i class="bi bi-heart-fill"></i>

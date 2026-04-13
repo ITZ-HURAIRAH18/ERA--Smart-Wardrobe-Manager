@@ -6,40 +6,40 @@
 
 {% block content %}
 <style>
-    .shop-page { padding-top: 100px; min-height: 80vh; padding-bottom: 60px; }
+    .shop-page { padding-top: 80px; min-height: 80vh; padding-bottom: 60px; }
 
     .filter-sidebar {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-card);
-        padding: 24px;
+        padding: 18px;
         position: sticky;
-        top: 100px;
-        max-height: calc(100vh - 120px);
+        top: 80px;
+        max-height: calc(100vh - 100px);
         overflow-y: auto;
     }
 
     .filter-title {
         color: var(--gold-primary);
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        margin-bottom: 16px;
-        padding-bottom: 8px;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
         border-bottom: 1px solid var(--border-color);
     }
 
     .filter-option {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        border-radius: 8px;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 6px;
         cursor: pointer;
         color: var(--text-secondary);
         transition: all 0.3s ease;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         border: 1px solid transparent;
         text-decoration: none;
     }
@@ -53,29 +53,30 @@
     .filter-input {
         background: var(--bg-secondary);
         border: 1px solid var(--border-color);
-        border-radius: 8px;
+        border-radius: 6px;
         color: var(--text-primary);
-        padding: 10px 14px;
+        padding: 8px 10px;
         width: 100%;
+        font-size: 0.85rem;
         transition: all 0.3s ease;
     }
 
     .filter-input:focus {
         border-color: var(--gold-primary);
         outline: none;
-        box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
+        box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.15);
     }
 
     .product-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem;
     }
 
     @media (max-width: 768px) {
         .product-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
         }
     }
 
@@ -103,7 +104,7 @@
 
     .product-card-img {
         width: 100%;
-        height: 320px;
+        height: 260px;
         object-fit: cover;
         object-position: top;
         display: block;
@@ -122,25 +123,25 @@
     }
 
     .product-card-body {
-        padding: 1.25rem;
+        padding: 1rem;
         flex: 1;
         display: flex;
         flex-direction: column;
     }
 
     .product-card-category {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
     .product-card-title {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 600;
         color: var(--text-primary);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -150,9 +151,21 @@
         color: var(--gold-primary);
     }
 
+    .product-card-description {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.6rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.4;
+    }
+
     .product-price {
         color: var(--gold-primary);
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 700;
     }
 
@@ -165,7 +178,7 @@
 
     .product-card-footer {
         margin-top: auto;
-        padding-top: 1rem;
+        padding-top: 0.8rem;
     }
 
     /* Mobile Filter Toggle */
@@ -234,14 +247,14 @@
             <i class="bi bi-funnel me-2"></i>Filters & Search
         </button>
 
-        <div class="row g-4">
+        <div class="row g-3">
             <!-- Filter Sidebar -->
-            <div class="col-lg-3">
+            <div class="col-lg-2 col-md-3">
                 <div class="filter-sidebar" id="filterSidebar">
                     <!-- Search -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <h5 class="filter-title">Search</h5>
-                        <form method="GET" action="{% url 'home' %}">
+                        <form method="GET" action="{% url 'shopping' %}">
                             <input type="text" name="q" class="filter-input mb-2" placeholder="Search products..." 
                                    value="{{ search_query }}" id="searchInput">
                             {% if current_category %}
@@ -260,23 +273,23 @@
                     </div>
 
                     <!-- Categories -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <h5 class="filter-title">Categories</h5>
-                        <a href="{% url 'home' %}" class="filter-option {% if not current_category %}active{% endif %}">
+                        <a href="{% url 'shopping' %}" class="filter-option {% if not current_category %}active{% endif %}">
                             <i class="bi bi-grid"></i>All Products
                         </a>
                         {% for cat in categories %}
-                        <a href="{% url 'home' %}?category={{ cat.slug }}" 
-                           class="filter-option {% if current_category == cat.slug %}active{% endif %}">
+                        <a href="{% url 'shopping' %}?category={{ cat.id }}" 
+                           class="filter-option {% if current_category == cat.id|stringformat:'s' %}active{% endif %}">
                             <i class="bi bi-tag"></i>{{ cat.name }}
                         </a>
                         {% endfor %}
                     </div>
 
                     <!-- Price Range -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <h5 class="filter-title">Price Range</h5>
-                        <form method="GET" action="{% url 'home' %}">
+                        <form method="GET" action="{% url 'shopping' %}">
                             {% if current_category %}
                             <input type="hidden" name="category" value="{{ current_category }}">
                             {% endif %}
@@ -321,21 +334,23 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="col-lg-9">
+            <div class="col-lg-10 col-md-9">
                 {% if products %}
                 <div class="product-grid">
                     {% for product in products %}
                     <div class="product-card">
                         <div class="product-card-img-wrap">
-                            <a href="{% url 'product_detail_new' product.slug %}">
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                            <a href="{% url 'product_detail_old' product.id %}">
+                                {% if product.image|is_remote_url %}
+                                    <img src="{{ product.image }}" alt="{{ product.name }}" class="product-card-img">
+                                {% else %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card-img">
+                                {% endif %}
                             </a>
                             
                             <!-- Badges -->
                             <div class="product-badge">
-                                {% if product.discount_price %}
-                                <span class="badge-era badge-era-sale">-{{ product.get_discount_percentage }}%</span>
-                                {% elif product.is_new %}
+                                {% if product.is_new %}
                                 <span class="badge-era badge-era-new">NEW</span>
                                 {% endif %}
                             </div>
@@ -344,22 +359,20 @@
                         <div class="product-card-body">
                             <p class="product-card-category">{{ product.category.name|default:"Fashion" }}</p>
                             <h5 class="product-card-title">
-                                <a href="{% url 'product_detail_new' product.slug %}">{{ product.name }}</a>
+                                <a href="{% url 'product_detail_old' product.id %}">{{ product.name }}</a>
                             </h5>
+                            {% if product.description %}
+                            <p class="product-card-description">{{ product.description }}</p>
+                            {% endif %}
                             <div class="mb-2">
-                                {% if product.discount_price %}
-                                <span class="product-price">${{ product.discount_price }}</span>
-                                <span class="product-price-old">${{ product.price }}</span>
-                                {% else %}
                                 <span class="product-price">${{ product.price }}</span>
-                                {% endif %}
                             </div>
                             <div class="product-card-footer">
                                 <form method="POST" action="{% url 'add_to_cart' product.id %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn-era w-100 {% if not product.is_in_stock %}disabled{% endif %}"
-                                            {% if not product.is_in_stock %}disabled{% endif %}>
-                                        {% if product.is_in_stock %}
+                                    <button type="submit" class="btn-era w-100 {% if product.stock_quantity <= 0 %}disabled{% endif %}"
+                                            {% if product.stock_quantity <= 0 %}disabled{% endif %}>
+                                        {% if product.stock_quantity > 0 %}
                                         <i class="bi bi-bag-plus me-1"></i>Add to Cart
                                         {% else %}
                                         <i class="bi bi-x-circle me-1"></i>Out of Stock
@@ -403,7 +416,7 @@
                     <i class="bi bi-search" style="font-size: 5rem; color: var(--border-color);"></i>
                     <h3 class="mt-3" style="font-family: var(--font-heading);">No Products Found</h3>
                     <p class="text-muted mb-4">Try adjusting your filters or search terms.</p>
-                    <a href="{% url 'home' %}" class="btn-era">
+                    <a href="{% url 'shopping' %}" class="btn-era">
                         <i class="bi bi-arrow-clockwise me-2"></i>Clear Filters
                     </a>
                 </div>

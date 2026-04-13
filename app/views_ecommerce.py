@@ -65,26 +65,57 @@ def cart_view(request):
 @login_required
 @require_POST
 def add_to_cart(request, product_id):
-    """Add product to cart."""
-    product = get_object_or_404(Product, id=product_id)
-    cart, _ = CartNew.objects.get_or_create(user=request.user)
-
-    selected_size = request.POST.get('size', '')
-    selected_color = request.POST.get('color', '')
-
-    item, created = CartItemNew.objects.get_or_create(
-        cart=cart,
-        product=product,
-        selected_size=selected_size,
-        selected_color=selected_color
-    )
-    if not created:
-        item.quantity += 1
+    """Add product to cart (supports both old Std and new Product models)."""
+    # Try to get product from new Product model first, then fallback to old Std model
+    product = None
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        # Fallback to old Std model for backward compatibility
+        product = get_object_or_404(Std, id=product_id)
+    
+    # If user is authenticated, use new CartNew system
+    if request.user.is_authenticated:
+        cart, _ = CartNew.objects.get_or_create(user=request.user)
+        
+        selected_size = request.POST.get('size', '')
+        selected_color = request.POST.get('color', '')
+        
+        # For old Std products, we need to store them in CartItemNew with generic product reference
+        # We'll use a special handling for Std products
+        if isinstance(product, Std):
+            # Store in session cart for old products (backward compatible)
+            cart_dict = request.session.get('cart', {})
+            if str(product_id) in cart_dict:
+                cart_dict[str(product_id)] += 1
+            else:
+                cart_dict[str(product_id)] = 1
+            request.session['cart'] = cart_dict
+            messages.success(request, f'{product.name} added to cart!')
+        else:
+            # Handle new Product model
+            item, created = CartItemNew.objects.get_or_create(
+                cart=cart,
+                product=product,
+                selected_size=selected_size,
+                selected_color=selected_color
+            )
+            if not created:
+                item.quantity += 1
+            else:
+                item.quantity = 1
+            item.save()
+            messages.success(request, f'{product.name} added to cart!')
     else:
-        item.quantity = 1
-    item.save()
-
-    messages.success(request, f'{product.name} added to cart!')
+        # For non-authenticated users, use session-based cart
+        cart_dict = request.session.get('cart', {})
+        if str(product_id) in cart_dict:
+            cart_dict[str(product_id)] += 1
+        else:
+            cart_dict[str(product_id)] = 1
+        request.session['cart'] = cart_dict
+        messages.success(request, f'{product.name} added to cart!')
+    
     return redirect(request.META.get('HTTP_REFERER', 'shopping'))
 
 
@@ -273,7 +304,8 @@ def submit_review(request, product_id):
 # SHOP VIEW (New Models)
 # =============================================================================
 def shop_view(request):
-    """Shop page with filtering and search for new Product model."""
+    """Shop page with filtering and search using existing products."""
+    # Use the legacy Std model where products are currently stored
     categories = Category.objects.all()
     cat_slug = request.GET.get('category')
     search_query = request.GET.get('q', '').strip()
@@ -281,16 +313,20 @@ def shop_view(request):
     max_price = request.GET.get('max_price', '').strip()
     sort_by = request.GET.get('sort', '-created_at')
 
-    products = Product.objects.all()
+    # Query from Std model (legacy) since products are there
+    products = Std.objects.filter(is_active=True)
 
     if cat_slug:
-        products = products.filter(category__slug=cat_slug)
+        try:
+            category_id = int(cat_slug)
+            products = products.filter(category_id=category_id)
+        except (ValueError, TypeError):
+            pass
 
     if search_query:
         products = products.filter(
             Q(name__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(category__name__icontains=search_query)
+            Q(description__icontains=search_query)
         )
 
     if min_price:
@@ -313,10 +349,13 @@ def shop_view(request):
     paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     products_page = paginator.get_page(page_number)
+    
+    # Get legacy Std categories for display
+    all_categories = Cat.objects.all()
 
     return render(request, 'shopping.html', {
         'products': products_page,
-        'categories': categories,
+        'categories': all_categories,
         'current_category': cat_slug,
         'search_query': search_query,
         'min_price': min_price,
@@ -533,14 +572,21 @@ def admin_dashboard(request):
 
 
 @staff_member_required
+@staff_member_required
 def add_product(request):
     """Add new product."""
     if request.method == 'POST':
         form = NewProductForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            # Ensure image is saved if provided
+            if 'image' in request.FILES:
+                product.image = request.FILES['image']
+            product.save()
             messages.success(request, 'Product added successfully!')
             return redirect('list_products')
+        else:
+            messages.error(request, 'Error adding product. Please check the form.')
     else:
         form = NewProductForm()
     return render(request, 'admin/add_product.html', {'form': form})

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load math_filters %}
 {% load cart %}
 
 {% block title %}ERA - Limitless Fashion{% endblock %}
@@ -377,7 +378,11 @@
                             <span class="badge-era badge-era-new" style="position:absolute;top:12px;left:12px;z-index:5;">NEW</span>
                             {% endif %}
                             <a href="{% url 'product_detail' product.id %}">
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                                {% if product.image|is_remote_url %}
+                                    <img src="{{ product.image }}" alt="{{ product.name }}" loading="lazy">
+                                {% else %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                                {% endif %}
                             </a>
                         </div>
                         <div class="card-body">

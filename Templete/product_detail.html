@@ -113,9 +113,17 @@
             <!-- Gallery -->
             <div class="col-lg-6">
                 <div class="product-gallery">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-main-image" id="mainImage">
+                    {% if product.image|is_remote_url %}
+                        <img src="{{ product.image }}" alt="{{ product.name }}" class="product-main-image" id="mainImage">
+                    {% else %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-main-image" id="mainImage">
+                    {% endif %}
                     <div class="product-thumbnails">
-                        <img src="{{ product.image.url }}" alt="Thumb" class="active" onclick="document.getElementById('mainImage').src=this.src">
+                        {% if product.image|is_remote_url %}
+                            <img src="{{ product.image }}" alt="Thumb" class="active" onclick="document.getElementById('mainImage').src=this.src">
+                        {% else %}
+                            <img src="{{ product.image.url }}" alt="Thumb" class="active" onclick="document.getElementById('mainImage').src=this.src">
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -92,6 +92,33 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             line-height: 1.6;
+            padding-top: 50px;
+        }
+
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(201, 169, 110, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(201, 169, 110, 0.3);
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(201, 169, 110, 0.5);
+        }
+
+        /* Firefox scrollbar */
+        * {
+            scrollbar-color: rgba(201, 169, 110, 0.3) rgba(201, 169, 110, 0.05);
+            scrollbar-width: thin;
         }
 
         /* ========================================
@@ -218,11 +245,14 @@
         .announcement-bar {
             background: var(--gold-gradient);
             color: var(--bg-primary);
-            padding: 10px 0;
+            padding: 12px 0;
             font-size: 0.85rem;
             font-weight: 600;
-            position: relative;
-            z-index: 1060;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
             text-align: center;
             transition: all var(--duration-hover) var(--ease-out);
         }
@@ -238,10 +268,11 @@
             cursor: pointer;
             padding: 0 8px;
             line-height: 1;
-            opacity: 0.7;
+            opacity: 0;
             transition: opacity var(--duration-hover) var(--ease-out);
+            display: none;
         }
-        .announcement-bar .btn-close-announce:hover { opacity: 1; }
+        .announcement-bar .btn-close-announce:hover { opacity: 0; }
         .announcement-bar.hidden { display: none; }
 
         /* ========================================
