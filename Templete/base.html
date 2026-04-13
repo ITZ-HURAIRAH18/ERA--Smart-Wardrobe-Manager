@@ -797,7 +797,7 @@
                         <a class="nav-link-era{% if request.resolver_match.url_name == 'landing' or request.resolver_match.url_name == 'home1' %} active{% endif %}" href="{% url 'landing' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link-era{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'home' %}">Shop</a>
+                        <a class="nav-link-era{% if request.resolver_match.url_name == 'shopping' %} active{% endif %}" href="{% url 'shopping' %}">Shop</a>
                     </li>
                     {% if categories_all %}
                     <li class="nav-item dropdown">
@@ -806,7 +806,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             {% for cat in categories_all %}
-                            <li><a class="dropdown-item" href="{% url 'home' %}?category={{ cat.id }}">{{ cat.name }}</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shopping' %}?category={{ cat.id }}">{{ cat.name }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
