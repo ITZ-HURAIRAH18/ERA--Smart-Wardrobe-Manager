@@ -2,20 +2,175 @@
 {% load static %}
 {% block title %}ERA - Customers{% endblock %}
 {% block content %}
-<div class="admin-list-page" style="padding-top: 120px; min-height: 80vh;">
-    <div class="container">
-        <h1 style="font-family: var(--font-heading); margin-bottom: 2rem;">Manage <span class="text-gold">Customers</span></h1>
+<style>
+    .admin-list-page { 
+        padding-top: 120px; 
+        min-height: 80vh;
+        background: var(--bg-primary);
+    }
+    .admin-list-header {
+        background: linear-gradient(135deg, var(--era-navy) 0%, var(--era-black) 100%);
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        border-bottom: 3px solid var(--era-gold);
+    }
+    .admin-list-header h1 {
+        font-family: var(--font-heading);
+        color: var(--era-white);
+        font-weight: 300;
+        font-size: 3rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+    .admin-list-header h1 span {
+        color: var(--era-gold);
+        font-weight: 700;
+    }
+    
+    .search-section {
+        background: var(--era-white);
+        border: 2px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    
+    .table-section {
+        background: var(--era-white);
+        border: 2px solid var(--era-border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    
+    .form-era {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--era-border);
+        border-radius: 8px;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    .form-era:focus {
+        outline: none;
+        border-color: var(--era-gold);
+        background: var(--bg-secondary);
+        box-shadow: 0 0 0 3px rgba(201,169,110,0.1);
+    }
+    
+    .btn-era {
+        padding: 0.85rem 2rem;
+        background: var(--era-gold);
+        color: var(--era-white);
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    .btn-era:hover {
+        background: var(--era-warning);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(201,169,110,0.3);
+    }
 
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-card); padding: 2rem;">
-            <form method="GET" class="mb-4">
-                <div class="row g-3">
-                    <div class="col-md-8"><input type="text" name="q" class="form-era" placeholder="Search by name or email..." value="{{ search_query }}"></div>
-                    <div class="col-md-4"><button type="submit" class="btn-era w-100">Search</button></div>
+    .table-era {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table-era thead th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--era-muted);
+        background: rgba(201,169,110,0.08);
+        border-bottom: 2px solid var(--era-border);
+        padding: 1.25rem 0.75rem;
+        font-weight: 700;
+        text-align: left;
+    }
+    .table-era tbody td {
+        padding: 1.25rem 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--era-border);
+        font-size: 0.95rem;
+    }
+    .table-era tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .table-era tbody tr:hover {
+        background: rgba(201,169,110,0.05);
+    }
+    
+    .text-gold { color: var(--era-gold); font-weight: 600; }
+    .text-muted { color: var(--text-muted); }
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--era-border);
+        margin-bottom: 1rem;
+    }
+    .empty-state p {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+    }
+    
+    @media (max-width: 768px) {
+        .admin-list-header { padding: 2rem 0; }
+        .admin-list-header h1 { font-size: 1.8rem; }
+        .search-section { padding: 1.5rem; }
+        .table-section { padding: 1.5rem; }
+        .table-era { font-size: 0.85rem; }
+        .table-era thead th { padding: 0.75rem; }
+        .table-era tbody td { padding: 0.75rem; }
+    }
+</style>
+
+<div class="admin-list-page">
+    <!-- Header -->
+    <div class="admin-list-header">
+        <div class="container">
+            <h1>Manage <span>Customers</span></h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <form method="GET" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="q" class="form-era" placeholder="Search by name or email..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn-era w-100">Search</button>
                 </div>
             </form>
+        </div>
 
+        <!-- Table Section -->
+        <div class="table-section">
+            {% if customers %}
             <table class="table-era">
-                <thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total Spent</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Joined</th>
+                        <th>Orders</th>
+                        <th>Total Spent</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for customer in customers %}
                     <tr>
@@ -25,11 +180,15 @@
                         <td>{{ customer.total_orders|default:0 }}</td>
                         <td class="text-gold">${{ customer.total_spent|default:0|floatformat:2 }}</td>
                     </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="text-center" style="padding:3rem;"><i class="bi bi-people" style="font-size:3rem;color:var(--border-color);"></i><p class="mt-3" style="color:var(--text-muted);">No customers found</p></td></tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>No customers found</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

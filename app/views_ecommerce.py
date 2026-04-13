@@ -31,9 +31,12 @@ def staff_member_required(view_func):
     from functools import wraps
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.is_staff:
-            messages.error(request, 'You do not have permission to access this page.')
+        if not request.user.is_authenticated:
+            messages.error(request, 'Please login to access this page.')
             return redirect('login')
+        if not request.user.is_staff:
+            messages.error(request, 'You do not have permission to access this page.')
+            return redirect('admin_dashboard')
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
@@ -690,11 +693,17 @@ def admin_customers(request):
             Q(username__icontains=search_query)
         )
 
-    # Annotate with order stats
-    customers = customers.annotate(
-        total_orders=Count('orders'),
-        total_spent=Sum('orders__total_amount')
-    )
+    # Annotate with order stats  
+    try:
+        customers = customers.annotate(
+            total_orders=Count('orders', distinct=True),
+            total_spent=Sum('orders__total_amount')
+        )
+    except:
+        # Fallback if annotation fails
+        for customer in customers:
+            customer.total_orders = customer.orders.count()
+            customer.total_spent = customer.orders.aggregate(total=Sum('total_amount'))['total'] or 0
 
     return render(request, 'admin/customers.html', {
         'customers': customers,

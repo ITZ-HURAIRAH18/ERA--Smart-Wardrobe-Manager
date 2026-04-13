@@ -867,9 +867,11 @@
                             {% if request.user.is_staff %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'list_products' %}"><i class="bi bi-box-seam me-2"></i>Manage Products</a></li>
-                            <li><a class="dropdown-item" href="{% url 'list_categories' %}"><i class="bi bi-tags me-2"></i>Manage Categories</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admin_orders' %}"><i class="bi bi-receipt me-2"></i>View Orders</a></li>
+                            <li style="padding-left: 1.5rem;"><hr class="dropdown-divider" style="margin: 0.5rem 0;"></li>
+                            <li><a class="dropdown-item" href="{% url 'addpro' %}"><i class="bi bi-plus-circle me-2"></i>Add Product</a></li>
+                            <li><a class="dropdown-item" href="{% url 'listpro' %}"><i class="bi bi-box me-2"></i>Manage Products</a></li>
+                            <li><a class="dropdown-item" href="{% url 'finalorder' %}"><i class="bi bi-receipt me-2"></i>View Orders</a></li>
+                            <li><a class="dropdown-item" href="{% url 'listcat' %}"><i class="bi bi-tags me-2"></i>Manage Categories</a></li>
                             <li><a class="dropdown-item" href="{% url 'admin_customers' %}"><i class="bi bi-people me-2"></i>View Customers</a></li>
                             {% endif %}
                             <li><hr class="dropdown-divider"></li>

@@ -50,18 +50,18 @@ urlpatterns = [
     # ========================================================================
     # ADMIN (Django User-based)
     # ========================================================================
-    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('admin/products/', views.list_products, name='list_products'),
-    path('admin/products/add/', views.add_product, name='add_product'),
-    path('admin/products/edit/<int:pk>/', views.edit_product, name='edit_product'),
-    path('admin/products/delete/<int:pk>/', views.delete_product, name='delete_product'),
-    path('admin/categories/', views.list_categories, name='list_categories'),
-    path('admin/categories/add/', views.add_category, name='add_category'),
-    path('admin/categories/edit/<int:pk>/', views.edit_category, name='edit_category'),
-    path('admin/categories/delete/<int:pk>/', views.delete_category, name='delete_category'),
-    path('admin/orders/', views.admin_orders, name='admin_orders'),
-    path('admin/orders/<int:order_id>/', views.order_detail_admin, name='order_detail_admin'),
-    path('admin/customers/', views.admin_customers, name='admin_customers'),
+    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/products/', views.list_products, name='list_products'),
+    path('dashboard/products/add/', views.add_product, name='add_product'),
+    path('dashboard/products/edit/<int:pk>/', views.edit_product, name='edit_product'),
+    path('dashboard/products/delete/<int:pk>/', views.delete_product, name='delete_product'),
+    path('dashboard/categories/', views.list_categories, name='list_categories'),
+    path('dashboard/categories/add/', views.add_category, name='add_category'),
+    path('dashboard/categories/edit/<int:pk>/', views.edit_category, name='edit_category'),
+    path('dashboard/categories/delete/<int:pk>/', views.delete_category, name='delete_category'),
+    path('dashboard/orders/', views.admin_orders, name='admin_orders'),
+    path('dashboard/orders/<int:order_id>/', views.order_detail_admin, name='order_detail_admin'),
+    path('dashboard/customers/', views.admin_customers, name='admin_customers'),
 
     # ========================================================================
     # LEGACY URLS (backward compatibility - Old session-based system)
