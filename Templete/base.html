@@ -92,7 +92,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             line-height: 1.6;
-            padding-top: 50px;
+            padding-top: 120px; /* Account for announcement bar + navbar */
         }
 
         /* Custom scrollbar styling */
@@ -254,7 +254,8 @@
             right: 0;
             z-index: 2000;
             text-align: center;
-            transition: all var(--duration-hover) var(--ease-out);
+            transition: all 0.3s ease;
+            display: block;
         }
         .announcement-bar .btn-close-announce {
             position: absolute;
@@ -287,6 +288,13 @@
             z-index: 1050;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
             border-bottom: 1px solid var(--border-color);
+            top: 50px;
+        }
+        .navbar-era.navbar-sticky {
+            top: 0 !important;
+            position: fixed !important;
+            left: 0;
+            right: 0;
         }
         .navbar-era.scrolled {
             background: rgba(26, 26, 26, 0.98) !important;
@@ -541,6 +549,7 @@
         .badge-era-out { background: var(--text-muted); color: var(--bg-primary); }
 
         .badge-status-pending { background: var(--warning); color: var(--bg-primary); }
+        .badge-status-confirmed { background: #8b5cf6; color: var(--text-primary); }
         .badge-status-processing { background: var(--info); color: var(--text-primary); }
         .badge-status-shipped { background: #f59e0b; color: var(--bg-primary); }
         .badge-status-delivered { background: var(--success); color: var(--text-primary); }
@@ -1024,44 +1033,82 @@
 
     <script>
         // ========================================
-        // ANNOUNCEMENT BAR (sessionStorage)
+        // ANNOUNCEMENT BAR & STICKY NAVBAR
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
             const announcementBar = document.getElementById('announcementBar');
-            const btnClose = document.getElementById('btnCloseAnnounce');
             const navbar = document.getElementById('mainNavbar');
+            let announcementHidden = false;
 
-            // Check sessionStorage
+            // Check sessionStorage for previously closed announcement
             if (sessionStorage.getItem('announcementClosed') === 'true') {
-                announcementBar.classList.add('hidden');
-                navbar.style.top = '0';
+                hideAnnouncement();
             }
 
-            // Close handler
+            // Set initial navbar offset based on announcement bar
+            if (announcementBar && !announcementBar.classList.contains('hidden')) {
+                const announceHeight = announcementBar.offsetHeight;
+                navbar.style.top = announceHeight + 'px';
+                // Update body padding to match
+                document.body.style.paddingTop = (announceHeight + navbar.offsetHeight) + 'px';
+            } else {
+                // Announcement is hidden, navbar at top
+                navbar.style.top = '0';
+                navbar.classList.add('navbar-sticky');
+                document.body.style.paddingTop = navbar.offsetHeight + 'px';
+            }
+
+            // Close button handler
+            const btnClose = document.getElementById('btnCloseAnnounce');
             if (btnClose) {
                 btnClose.addEventListener('click', function() {
-                    announcementBar.classList.add('hidden');
+                    hideAnnouncement();
                     sessionStorage.setItem('announcementClosed', 'true');
-                    navbar.style.top = '0';
                 });
             }
 
-            // Set initial navbar offset
-            if (announcementBar && !announcementBar.classList.contains('hidden')) {
-                navbar.style.top = announcementBar.offsetHeight + 'px';
+            function hideAnnouncement() {
+                if (announcementBar) {
+                    announcementBar.classList.add('hidden');
+                    announcementBar.style.display = 'none';
+                }
+                if (navbar) {
+                    navbar.style.top = '0';
+                    navbar.classList.add('navbar-sticky');
+                    // Update body padding to only account for navbar
+                    document.body.style.paddingTop = navbar.offsetHeight + 'px';
+                }
+                announcementHidden = true;
             }
-        });
 
-        // ========================================
-        // NAVBAR SCROLL EFFECT
-        // ========================================
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('mainNavbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+            // ========================================
+            // SCROLL BEHAVIOR: Hide announcement on scroll down
+            // Navbar becomes sticky at top: 0
+            // ========================================
+            let lastScrollTop = 0;
+            const scrollThreshold = 50; // px to scroll before hiding announcement
+
+            window.addEventListener('scroll', function() {
+                let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+                // Scrolling down past threshold - hide announcement
+                if (currentScroll > lastScrollTop && currentScroll > scrollThreshold) {
+                    if (announcementBar && !announcementBar.classList.contains('hidden') && !announcementHidden) {
+                        hideAnnouncement();
+                    }
+                }
+
+                // Navbar scrolled state for styling (background/shadow changes)
+                if (navbar) {
+                    if (currentScroll > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                }
+
+                lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+            });
         });
 
         // ========================================
@@ -1144,7 +1191,18 @@
                 cartLink.appendChild(newBadge);
             }
         }
+
+        // Initialize cart badge from server-rendered value on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const badge = document.getElementById('cartBadgeCount');
+            if (badge) {
+                const count = parseInt(badge.textContent, 10);
+                if (isNaN(count) || count <= 0) {
+                    badge.style.display = 'none';
+                } else {
+                    badge.style.display = 'flex';
+                }
+            }
+        });
     </script>
     {% block extra_js %}{% endblock %}
-</body>
-</html>

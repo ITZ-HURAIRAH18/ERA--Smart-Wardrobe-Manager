@@ -135,10 +135,22 @@
                     {% if order_items %}
                     <div class="order-items-preview">
                         {% for item in order_items|slice:":4" %}
-                        {% if item.product.image|is_remote_url %}
-                            <img src="{{ item.product.image }}" alt="{{ item.product.name }}" class="order-item-thumb" title="{{ item.product.name }}">
+                        {% if item.image %}
+                            {% if item.image|is_remote_url %}
+                                <img src="{{ item.image }}" alt="{{ item.product_name }}" class="order-item-thumb" title="{{ item.product_name }}">
+                            {% else %}
+                                <img src="{{ item.image.url }}" alt="{{ item.product_name }}" class="order-item-thumb" title="{{ item.product_name }}">
+                            {% endif %}
+                        {% elif item.product and item.product.image %}
+                            {% if item.product.image|is_remote_url %}
+                                <img src="{{ item.product.image }}" alt="{{ item.product_name }}" class="order-item-thumb" title="{{ item.product_name }}">
+                            {% else %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" class="order-item-thumb" title="{{ item.product_name }}">
+                            {% endif %}
                         {% else %}
-                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-item-thumb" title="{{ item.product.name }}">
+                            <div class="order-item-thumb d-flex align-items-center justify-content-center" style="background: var(--bg-secondary); color: var(--text-muted);">
+                                <i class="bi bi-image"></i>
+                            </div>
                         {% endif %}
                         {% endfor %}
                         {% if order_items|length > 4 %}

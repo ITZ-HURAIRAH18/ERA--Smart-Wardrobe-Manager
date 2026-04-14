@@ -6,27 +6,51 @@
 
 {% block content %}
 <style>
-    .shop-page { padding-top: 80px; min-height: 80vh; padding-bottom: 60px; }
+    .shop-page { 
+        padding-top: 50px; 
+        min-height: 80vh; 
+        padding-bottom: 60px; 
+    }
 
     .filter-sidebar {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-card);
-        padding: 18px;
+        padding: 20px;
         position: sticky;
-        top: 80px;
-        max-height: calc(100vh - 100px);
+        top: 130px;
+        max-height: calc(100vh - 150px);
         overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* Custom scrollbar for filter sidebar */
+    .filter-sidebar::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .filter-sidebar::-webkit-scrollbar-track {
+        background: rgba(201, 169, 110, 0.05);
+        border-radius: 4px;
+    }
+
+    .filter-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(201, 169, 110, 0.25);
+        border-radius: 4px;
+    }
+
+    .filter-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(201, 169, 110, 0.4);
     }
 
     .filter-title {
         color: var(--gold-primary);
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        margin-bottom: 12px;
-        padding-bottom: 6px;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
         border-bottom: 1px solid var(--border-color);
     }
 
@@ -34,7 +58,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 10px;
+        padding: 10px 12px;
         border-radius: 6px;
         cursor: pointer;
         color: var(--text-secondary);
@@ -42,6 +66,7 @@
         font-size: 0.85rem;
         border: 1px solid transparent;
         text-decoration: none;
+        margin-bottom: 6px;
     }
 
     .filter-option:hover, .filter-option.active {
@@ -55,10 +80,11 @@
         border: 1px solid var(--border-color);
         border-radius: 6px;
         color: var(--text-primary);
-        padding: 8px 10px;
+        padding: 10px 12px;
         width: 100%;
         font-size: 0.85rem;
         transition: all 0.3s ease;
+        margin-bottom: 6px;
     }
 
     .filter-input:focus {
@@ -231,6 +257,16 @@
         color: var(--bg-primary);
         font-weight: 600;
     }
+
+    /* Filter section separators */
+    .filter-sidebar > div {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 18px;
+    }
+
+    .filter-sidebar > div:last-child {
+        border-bottom: none;
+    }
 </style>
 
 <div class="shop-page">
@@ -249,10 +285,10 @@
 
         <div class="row g-3">
             <!-- Filter Sidebar -->
-            <div class="col-lg-2 col-md-3">
+            <div class="col-lg-3 col-md-4">
                 <div class="filter-sidebar" id="filterSidebar">
                     <!-- Search -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <h5 class="filter-title">Search</h5>
                         <form method="GET" action="{% url 'shopping' %}">
                             <input type="text" name="q" class="filter-input mb-2" placeholder="Search products..." 
@@ -273,7 +309,7 @@
                     </div>
 
                     <!-- Categories -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <h5 class="filter-title">Categories</h5>
                         <a href="{% url 'shopping' %}" class="filter-option {% if not current_category %}active{% endif %}">
                             <i class="bi bi-grid"></i>All Products
@@ -287,7 +323,7 @@
                     </div>
 
                     <!-- Price Range -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <h5 class="filter-title">Price Range</h5>
                         <form method="GET" action="{% url 'shopping' %}">
                             {% if current_category %}
@@ -311,7 +347,7 @@
                     </div>
 
                     <!-- Sort -->
-                    <div>
+                    <div class="mb-4">
                         <h5 class="filter-title">Sort By</h5>
                         <form method="GET" action="{% url 'home' %}">
                             {% if current_category %}
@@ -334,7 +370,7 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="col-lg-10 col-md-9">
+            <div class="col-lg-9 col-md-8">
                 {% if products %}
                 <div class="product-grid">
                     {% for product in products %}
@@ -368,17 +404,17 @@
                                 <span class="product-price">${{ product.price }}</span>
                             </div>
                             <div class="product-card-footer">
-                                <form method="POST" action="{% url 'add_to_cart' product.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-era w-100 {% if product.stock_quantity <= 0 %}disabled{% endif %}"
-                                            {% if product.stock_quantity <= 0 %}disabled{% endif %}>
-                                        {% if product.stock_quantity > 0 %}
-                                        <i class="bi bi-bag-plus me-1"></i>Add to Cart
-                                        {% else %}
-                                        <i class="bi bi-x-circle me-1"></i>Out of Stock
-                                        {% endif %}
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        class="btn-era w-100 add-to-cart-btn {% if product.stock_quantity <= 0 %}disabled{% endif %}"
+                                        data-product-id="{{ product.id }}"
+                                        data-csrf-token="{{ csrf_token }}"
+                                        {% if product.stock_quantity <= 0 %}disabled{% endif %}>
+                                    {% if product.stock_quantity > 0 %}
+                                    <i class="bi bi-bag-plus me-1"></i>Add to Cart
+                                    {% else %}
+                                    <i class="bi bi-x-circle me-1"></i>Out of Stock
+                                    {% endif %}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -434,5 +470,109 @@ function toggleFilters() {
     const sidebar = document.getElementById('filterSidebar');
     sidebar.classList.toggle('show');
 }
+
+// AJAX Add to Cart
+document.addEventListener('DOMContentLoaded', function() {
+    const cartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+    cartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (this.disabled) return;
+
+            const productId = this.dataset.productId;
+            const csrfToken = this.dataset.csrfToken || getCSRFToken();
+            const originalHTML = this.innerHTML;
+
+            // Show loading state
+            this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Adding...';
+            this.disabled = true;
+
+            // Create a form element and submit via AJAX
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/cart/add/${productId}/`;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            // Submit via fetch
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart badge
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge(data.cart_count);
+                    } else {
+                        // Fallback: manually update badge
+                        const badge = document.getElementById('cartBadgeCount');
+                        if (badge) {
+                            badge.textContent = data.cart_count;
+                            badge.style.display = data.cart_count > 0 ? 'flex' : 'none';
+                        } else if (data.cart_count > 0) {
+                            const cartLink = document.getElementById('cartLink');
+                            if (cartLink) {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'badge-count';
+                                newBadge.id = 'cartBadgeCount';
+                                newBadge.textContent = data.cart_count;
+                                cartLink.appendChild(newBadge);
+                            }
+                        }
+                    }
+
+                    // Show success toast
+                    if (typeof showToast === 'function') {
+                        showToast(data.message || 'Added to cart!', 'success');
+                    }
+
+                    // Update button to success state
+                    this.innerHTML = '<i class="bi bi-check-circle me-1"></i>Added!';
+                    this.classList.remove('btn-era-outline');
+                } else {
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                    if (typeof showToast === 'function') {
+                        showToast('Failed to add to cart', 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+                if (typeof showToast === 'function') {
+                    showToast('An error occurred. Please try again.', 'error');
+                }
+            });
+
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+            }, 2000);
+        });
+    });
+
+    // CSRF Token helper
+    function getCSRFToken() {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfInput ? csrfInput.value : '';
+    }
+});
 </script>
 {% endblock %}

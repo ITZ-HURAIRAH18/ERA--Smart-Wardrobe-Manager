@@ -10,6 +10,7 @@
         <ul class="nav nav-pills mb-4 gap-2">
             <li class="nav-item"><a href="?status=" class="btn-era-outline btn-era-sm {% if not status_filter %}active{% endif %}">All</a></li>
             <li class="nav-item"><a href="?status=pending" class="btn-era-outline btn-era-sm {% if status_filter == 'pending' %}active{% endif %}">Pending</a></li>
+            <li class="nav-item"><a href="?status=confirmed" class="btn-era-outline btn-era-sm {% if status_filter == 'confirmed' %}active{% endif %}">Confirmed</a></li>
             <li class="nav-item"><a href="?status=processing" class="btn-era-outline btn-era-sm {% if status_filter == 'processing' %}active{% endif %}">Processing</a></li>
             <li class="nav-item"><a href="?status=shipped" class="btn-era-outline btn-era-sm {% if status_filter == 'shipped' %}active{% endif %}">Shipped</a></li>
             <li class="nav-item"><a href="?status=delivered" class="btn-era-outline btn-era-sm {% if status_filter == 'delivered' %}active{% endif %}">Delivered</a></li>

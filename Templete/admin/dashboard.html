@@ -137,6 +137,13 @@
                     </div>
                     <h3>{{ total_products }}</h3>
                     <p>Total Products</p>
+                    {% if new_products_count or legacy_products_count %}
+                    <small style="color: var(--text-muted); font-size: 0.75rem;">
+                        {% if new_products_count %}{{ new_products_count }} new{% endif %}
+                        {% if new_products_count and legacy_products_count %} · {% endif %}
+                        {% if legacy_products_count %}{{ legacy_products_count }} legacy{% endif %}
+                    </small>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">

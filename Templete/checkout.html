@@ -207,15 +207,15 @@
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-era-label">Card Number</label>
-                                    <input type="text" class="form-era" placeholder="1234 5678 9012 3456">
+                                    <input type="text" class="form-era" name="card_number" placeholder="1234 5678 9012 3456">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-era-label">Expiry Date</label>
-                                    <input type="text" class="form-era" placeholder="MM/YY">
+                                    <input type="text" class="form-era" name="card_expiry" placeholder="MM/YY">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-era-label">CVV</label>
-                                    <input type="text" class="form-era" placeholder="123">
+                                    <input type="text" class="form-era" name="card_cvv" placeholder="123">
                                 </div>
                             </div>
                         </div>
@@ -237,10 +237,16 @@
                         <div class="mb-3">
                             {% for item in items %}
                             <div class="order-summary-item">
-                                {% if item.product.image|is_remote_url %}
-                                    <img src="{{ item.product.image }}" alt="{{ item.product.name }}" class="order-summary-img">
+                                {% if item.product and item.product.image %}
+                                    {% if item.product.image|is_remote_url %}
+                                        <img src="{{ item.product.image }}" alt="{{ item.product.name }}" class="order-summary-img">
+                                    {% else %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-summary-img">
+                                    {% endif %}
                                 {% else %}
-                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-summary-img">
+                                    <div class="order-summary-img d-flex align-items-center justify-content-center" style="background: var(--bg-secondary); color: var(--text-muted);">
+                                        <i class="bi bi-image" style="font-size: 2rem;"></i>
+                                    </div>
                                 {% endif %}
                                 <div class="flex-grow-1">
                                     <p class="mb-1 fw-semibold">{{ item.product.name }}</p>

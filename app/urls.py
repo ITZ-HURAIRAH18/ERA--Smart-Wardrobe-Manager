@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_ecommerce
 
 urlpatterns = [
     # ========================================================================
@@ -48,20 +49,20 @@ urlpatterns = [
     path('review/submit/<int:product_id>/', views.submit_review, name='submit_review'),
 
     # ========================================================================
-    # ADMIN (Django User-based)
+    # ADMIN (Django User-based) - Uses new OrderNew model
     # ========================================================================
-    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('dashboard/products/', views.list_products, name='list_products'),
-    path('dashboard/products/add/', views.add_product, name='add_product'),
-    path('dashboard/products/edit/<int:pk>/', views.edit_product, name='edit_product'),
-    path('dashboard/products/delete/<int:pk>/', views.delete_product, name='delete_product'),
-    path('dashboard/categories/', views.list_categories, name='list_categories'),
-    path('dashboard/categories/add/', views.add_category, name='add_category'),
-    path('dashboard/categories/edit/<int:pk>/', views.edit_category, name='edit_category'),
-    path('dashboard/categories/delete/<int:pk>/', views.delete_category, name='delete_category'),
-    path('dashboard/orders/', views.admin_orders, name='admin_orders'),
-    path('dashboard/orders/<int:order_id>/', views.order_detail_admin, name='order_detail_admin'),
-    path('dashboard/customers/', views.admin_customers, name='admin_customers'),
+    path('dashboard/', views_ecommerce.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/products/', views_ecommerce.list_products, name='list_products'),
+    path('dashboard/products/add/', views_ecommerce.add_product, name='add_product'),
+    path('dashboard/products/edit/<int:pk>/', views_ecommerce.edit_product, name='edit_product'),
+    path('dashboard/products/delete/<int:pk>/', views_ecommerce.delete_product, name='delete_product'),
+    path('dashboard/categories/', views_ecommerce.list_categories, name='list_categories'),
+    path('dashboard/categories/add/', views_ecommerce.add_category, name='add_category'),
+    path('dashboard/categories/edit/<int:pk>/', views_ecommerce.edit_category, name='edit_category'),
+    path('dashboard/categories/delete/<int:pk>/', views_ecommerce.delete_category, name='delete_category'),
+    path('dashboard/orders/', views_ecommerce.admin_orders, name='admin_orders'),
+    path('dashboard/orders/<int:order_id>/', views_ecommerce.order_detail_admin, name='order_detail_admin'),
+    path('dashboard/customers/', views_ecommerce.admin_customers, name='admin_customers'),
 
     # ========================================================================
     # LEGACY URLS (backward compatibility - Old session-based system)

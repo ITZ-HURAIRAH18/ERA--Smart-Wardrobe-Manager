@@ -4,31 +4,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // ========================================
-    // NAVBAR SCROLL EFFECT
-    // ========================================
-    const navbar = document.getElementById('mainNavbar');
-    if (navbar) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-    }
-
-    // ========================================
-    // ANNOUNCEMENT BAR CLOSE
-    // ========================================
-    const btnCloseAnnounce = document.getElementById('btnCloseAnnounce');
-    const announcementBar = document.getElementById('announcementBar');
-    if (btnCloseAnnounce && announcementBar) {
-        btnCloseAnnounce.addEventListener('click', function() {
-            announcementBar.classList.add('hidden');
-        });
-    }
 
     // ========================================
     // TOAST NOTIFICATIONS
@@ -76,22 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Make showToast globally available
     window.showToast = showToast;
-
-    // ========================================
-    // CART BADGE UPDATE
-    // ========================================
-    function updateCartBadge(count) {
-        const badge = document.getElementById('cartBadgeCount');
-        if (badge) {
-            if (count > 0) {
-                badge.textContent = count;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-    }
-    window.updateCartBadge = updateCartBadge;
 
     // ========================================
     // WISHLIST TOGGLE

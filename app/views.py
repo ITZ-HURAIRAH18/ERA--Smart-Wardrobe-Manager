@@ -481,20 +481,29 @@ def cart(request):
 
 @login_required_custom
 def update_cart_item(request):
-    """AJAX POST to update cart item quantity without page reload."""
+    """POST to update cart item quantity (supports both AJAX and form submission)."""
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
         quantity = request.POST.get('quantity')
 
         if not product_id or not quantity:
-            return JsonResponse({'status': 'error', 'message': 'Missing parameters.'})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Missing parameters.'})
+            messages.error(request, 'Invalid request.')
+            return redirect('cart')
 
         try:
             quantity = int(quantity)
             if quantity < 1:
-                return JsonResponse({'status': 'error', 'message': 'Quantity must be at least 1.'})
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'status': 'error', 'message': 'Quantity must be at least 1.'})
+                messages.error(request, 'Quantity must be at least 1.')
+                return redirect('cart')
         except (ValueError, TypeError):
-            return JsonResponse({'status': 'error', 'message': 'Invalid quantity.'})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Invalid quantity.'})
+            messages.error(request, 'Invalid quantity.')
+            return redirect('cart')
 
         cart = request.session.get('cart', {})
         if str(product_id) in cart:
@@ -516,26 +525,38 @@ def update_cart_item(request):
                 except Std.DoesNotExist:
                     pass
 
-            return JsonResponse({
-                'status': 'success',
-                'item_total': item_total,
-                'cart_total': cart_total,
-                'cart_count': sum(cart.values())
-            })
+            # AJAX response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success',
+                    'item_total': item_total,
+                    'cart_total': cart_total,
+                    'cart_count': sum(cart.values())
+                })
+            
+            # Form submission - redirect back to cart
+            messages.success(request, 'Cart updated successfully.')
+            return redirect('cart')
         else:
-            return JsonResponse({'status': 'error', 'message': 'Item not in cart.'})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Item not in cart.'})
+            messages.error(request, 'Item not found in cart.')
+            return redirect('cart')
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+    return redirect('cart')
 
 
 @login_required_custom
 def remove_cart_item(request):
-    """AJAX POST to remove item from cart."""
+    """POST to remove item from cart (supports both AJAX and form submission)."""
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
 
         if not product_id:
-            return JsonResponse({'status': 'error', 'message': 'Missing product ID.'})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Missing product ID.'})
+            messages.error(request, 'Invalid request.')
+            return redirect('cart')
 
         cart = request.session.get('cart', {})
         if str(product_id) in cart:
@@ -551,15 +572,24 @@ def remove_cart_item(request):
                 except Std.DoesNotExist:
                     pass
 
-            return JsonResponse({
-                'status': 'success',
-                'cart_total': cart_total,
-                'cart_count': sum(cart.values())
-            })
+            # AJAX response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success',
+                    'cart_total': cart_total,
+                    'cart_count': sum(cart.values())
+                })
+            
+            # Form submission - redirect back to cart
+            messages.success(request, 'Item removed from cart.')
+            return redirect('cart')
         else:
-            return JsonResponse({'status': 'error', 'message': 'Item not in cart.'})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Item not in cart.'})
+            messages.error(request, 'Item not found in cart.')
+            return redirect('cart')
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+    return redirect('cart')
 
 
 # =============================================================================
@@ -1239,15 +1269,30 @@ def editpro(request, id):
 # ORDER MANAGEMENT (Admin)
 # =============================================================================
 def finalorder(request):
-    """Admin order list."""
-    orders = Order.objects.select_related('customer', 'product').all().order_by('-date')
-
+    """Admin order list - displays orders from both legacy Order and new OrderNew models."""
+    # Get orders from legacy Order model (session-based system)
+    legacy_orders = Order.objects.select_related('customer', 'product').all().order_by('-date')
+    
+    # Get orders from new OrderNew model (Django User-based system)
+    new_orders = OrderNew.objects.select_related('user').prefetch_related('items').all().order_by('-created_at')
+    
     # Allow filtering
     status_filter = request.GET.get('status')
     if status_filter:
-        orders = orders.filter(status=status_filter)
+        legacy_orders = legacy_orders.filter(status=status_filter)
+        # OrderNew uses lowercase status choices
+        new_orders = new_orders.filter(status=status_filter.lower())
+    
+    # Combine both querysets into a unified list for display
+    # We'll pass both to the template and handle display there
+    context = {
+        'orders': legacy_orders,
+        'new_orders': new_orders,
+        'has_legacy_orders': legacy_orders.exists(),
+        'has_new_orders': new_orders.exists(),
+    }
 
-    return render(request, 'finalorder.html', {'orders': orders})
+    return render(request, 'finalorder.html', context)
 
 
 from .form import OrderForm

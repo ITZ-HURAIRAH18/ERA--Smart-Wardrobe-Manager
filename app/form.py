@@ -158,6 +158,20 @@ class CheckoutForm(forms.Form):
         max_length=100,
         widget=forms.TextInput(attrs={'class': 'form-era', 'placeholder': 'United States'})
     )
+    payment_method = forms.ChoiceField(
+        choices=[('cod', 'Pay on Delivery'), ('card', 'Credit/Debit Card')],
+        initial='cod',
+        widget=forms.RadioSelect(attrs={'class': 'form-era'})
+    )
+    note = forms.CharField(
+        required=False,
+        max_length=500,
+        widget=forms.Textarea(attrs={
+            'class': 'form-era',
+            'rows': 3,
+            'placeholder': 'Any special instructions for your order...'
+        })
+    )
 
 
 class ProfileForm(forms.ModelForm):

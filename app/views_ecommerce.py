@@ -46,26 +46,88 @@ def staff_member_required(view_func):
 # =============================================================================
 @login_required
 def cart_view(request):
-    """Display cart with Django User-based cart."""
-    cart, _ = CartNew.objects.get_or_create(user=request.user)
-    items = cart.items.select_related('product').all()
-    subtotal = sum(item.get_total() for item in items)
+    """Display cart with unified cart system (supports both CartNew and session-based carts)."""
+    items = []
+    subtotal = 0
+    cart_type = 'database'
+
+    # Check for session-based cart items (old Std products)
+    session_cart = request.session.get('cart', {})
+    
+    if session_cart:
+        # Get products from session cart
+        product_ids = list(session_cart.keys())
+        products = Std.get_product_by_id(product_ids)
+        
+        # Build cart items from session
+        for product in products:
+            qty = session_cart.get(str(product.id), 0)
+            if qty > 0:
+                line_total = product.price * qty
+                subtotal += line_total
+                items.append({
+                    'product': product,
+                    'quantity': qty,
+                    'line_total': line_total,
+                    'get_total': line_total,
+                    'id': product.id,
+                    'selected_size': '',
+                    'selected_color': '',
+                })
+        cart_type = 'session'
+    
+    # If user is authenticated and has CartNew items, merge them
+    if request.user.is_authenticated:
+        try:
+            cart_new = CartNew.objects.get(user=request.user)
+            new_items = cart_new.items.select_related('product').all()
+            
+            for item in new_items:
+                line_total = item.get_total()
+                subtotal += line_total
+                items.append({
+                    'product': item.product,
+                    'quantity': item.quantity,
+                    'line_total': line_total,
+                    'get_total': item.get_total,
+                    'id': item.id,
+                    'selected_size': item.selected_size,
+                    'selected_color': item.selected_color,
+                    'cart_item_id': item.id,  # For CartNew operations
+                })
+            
+            if new_items:
+                cart_type = 'mixed' if session_cart else 'database'
+        except CartNew.DoesNotExist:
+            pass
+
+    # Calculate shipping and total
     shipping = 0 if subtotal >= 200 else 15
     total = subtotal + shipping
+
+    # Calculate total cart count for template
+    total_cart_count = sum(session_cart.values()) if session_cart else 0
+    if request.user.is_authenticated:
+        try:
+            cart_new = CartNew.objects.get(user=request.user)
+            total_cart_count += cart_new.items_count()
+        except CartNew.DoesNotExist:
+            pass
 
     return render(request, 'cart.html', {
         'items': items,
         'subtotal': subtotal,
         'shipping': shipping,
         'total': total,
-        'free_delivery_remaining': max(0, 200 - float(subtotal))
+        'free_delivery_remaining': max(0, 200 - float(subtotal)),
+        'cart_type': cart_type,
+        'cart_count': total_cart_count,
     })
 
 
-@login_required
 @require_POST
 def add_to_cart(request, product_id):
-    """Add product to cart (supports both old Std and new Product models)."""
+    """Add product to cart (supports both old Std and new Product models and AJAX)."""
     # Try to get product from new Product model first, then fallback to old Std model
     product = None
     try:
@@ -73,6 +135,8 @@ def add_to_cart(request, product_id):
     except Product.DoesNotExist:
         # Fallback to old Std model for backward compatibility
         product = get_object_or_404(Std, id=product_id)
+    
+    cart_count = 0
     
     # If user is authenticated, use new CartNew system
     if request.user.is_authenticated:
@@ -91,7 +155,7 @@ def add_to_cart(request, product_id):
             else:
                 cart_dict[str(product_id)] = 1
             request.session['cart'] = cart_dict
-            messages.success(request, f'{product.name} added to cart!')
+            cart_count = sum(cart_dict.values())
         else:
             # Handle new Product model
             item, created = CartItemNew.objects.get_or_create(
@@ -105,7 +169,9 @@ def add_to_cart(request, product_id):
             else:
                 item.quantity = 1
             item.save()
-            messages.success(request, f'{product.name} added to cart!')
+            cart_count = cart.items_count()
+        
+        messages.success(request, f'{product.name} added to cart!')
     else:
         # For non-authenticated users, use session-based cart
         cart_dict = request.session.get('cart', {})
@@ -114,8 +180,18 @@ def add_to_cart(request, product_id):
         else:
             cart_dict[str(product_id)] = 1
         request.session['cart'] = cart_dict
+        cart_count = sum(cart_dict.values())
         messages.success(request, f'{product.name} added to cart!')
     
+    # Return JSON for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f'{product.name} added to cart!',
+            'cart_count': cart_count
+        })
+    
+    # Regular redirect for form submissions
     return redirect(request.META.get('HTTP_REFERER', 'shopping'))
 
 
@@ -150,14 +226,69 @@ def update_cart(request, item_id):
 # =============================================================================
 @login_required
 def checkout_view(request):
-    """Checkout with shipping address and order creation."""
-    cart = get_object_or_404(CartNew, user=request.user)
-    items = cart.items.select_related('product').all()
+    """Checkout with shipping address and order creation.
+    Supports both session-based cart (old Std products) and database cart (CartNew items).
+    """
+    items = []
+    subtotal = 0
+    cart_type = 'session'  # Track which cart type we're using
+
+    # First, check for session-based cart items (old Std products)
+    session_cart = request.session.get('cart', {})
+
+    if session_cart:
+        # Get products from session cart
+        product_ids = list(session_cart.keys())
+        products = Std.get_product_by_id(product_ids)
+
+        # Build cart items from session
+        for product in products:
+            qty = session_cart.get(str(product.id), 0)
+            if qty > 0:
+                line_total = product.price * qty
+                subtotal += line_total
+                items.append({
+                    'product': product,
+                    'quantity': qty,
+                    'line_total': line_total,
+                    'get_total': line_total,
+                    'id': product.id,
+                    'selected_size': '',
+                    'selected_color': '',
+                })
+        cart_type = 'session'
+
+    # If user is authenticated and has CartNew items, merge them
+    if request.user.is_authenticated:
+        try:
+            cart_new = CartNew.objects.get(user=request.user)
+            new_items = cart_new.items.select_related('product').all()
+
+            for item in new_items:
+                line_total = item.get_total()
+                subtotal += line_total
+                items.append({
+                    'product': item.product,
+                    'quantity': item.quantity,
+                    'line_total': line_total,
+                    'get_total': item.get_total,
+                    'id': item.id,
+                    'selected_size': item.selected_size,
+                    'selected_color': item.selected_color,
+                    'cart_item_id': item.id,  # For CartNew operations
+                })
+
+            if new_items:
+                cart_type = 'mixed' if session_cart else 'database'
+        except CartNew.DoesNotExist:
+            pass
+
+    # If no items found, show warning and redirect to cart
     if not items:
         messages.warning(request, 'Your cart is empty!')
         return redirect('cart')
 
-    subtotal = sum(item.get_total() for item in items)
+    # Calculate shipping and total
     shipping = 0 if subtotal >= 200 else 15
     total = subtotal + shipping
 
@@ -173,32 +304,70 @@ def checkout_view(request):
             tracking_number = f"ERA{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
             estimated_delivery = timezone.now().date() + datetime.timedelta(days=7)
 
+            # Save payment_method and note from form
+            payment_method = form.cleaned_data['payment_method']
+            order_note = form.cleaned_data['note'] or ''
+
             order = OrderNew.objects.create(
                 user=request.user,
                 total_amount=total,
                 shipping_address=address,
                 tracking_number=tracking_number,
-                estimated_delivery=estimated_delivery
+                estimated_delivery=estimated_delivery,
+                payment_method=payment_method,
+                note=order_note,
             )
 
             for item in items:
+                product = item['product']
+
+                # Handle both Std (legacy) and Product (new) model instances
+                if isinstance(product, Std):
+                    # Legacy Std product: use price directly, no discount_price
+                    price = product.price
+                    product_name = product.name
+                    product_image = None  # Legacy products don't have image snapshot
+                    # Don't try to reduce stock for legacy products
+                elif isinstance(product, Product):
+                    # New Product model: use discount_price if available
+                    price = product.discount_price or product.price
+                    product_name = product.name
+                    product_image = product.image  # Snapshot the product image
+                    # Reduce stock for new products
+                    product.stock -= item['quantity']
+                    product.save()
+                else:
+                    # Fallback for any unexpected model type
+                    price = item.get('line_total', 0) / item['quantity'] if item['quantity'] > 0 else 0
+                    product_name = str(product)
+                    product_image = None
+
                 OrderItem.objects.create(
                     order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price=item.product.discount_price or item.product.price
+                    product=product if isinstance(product, Product) else None,
+                    product_name=product_name,
+                    image=product_image,
+                    quantity=item['quantity'],
+                    price=price
                 )
-                # Reduce stock
-                item.product.stock -= item.quantity
-                item.product.save()
 
-            cart.items.all().delete()
+            # Clear carts after order placement
+            if request.user.is_authenticated:
+                try:
+                    cart_new = CartNew.objects.get(user=request.user)
+                    cart_new.items.all().delete()
+                except CartNew.DoesNotExist:
+                    pass
+
+            # Clear session cart
+            request.session['cart'] = {}
+
             messages.success(request, f'Order #{order.id} placed successfully!')
             return redirect('order_confirmation', order_id=order.id)
     else:
         form = CheckoutForm(initial={
-            'full_name': request.user.get_full_name(),
-            'email': request.user.email,
+            'full_name': request.user.get_full_name() if request.user.get_full_name() else '',
+            'email': request.user.email if request.user.email else '',
         })
 
     return render(request, 'checkout.html', {
@@ -206,7 +375,8 @@ def checkout_view(request):
         'items': items,
         'subtotal': subtotal,
         'shipping': shipping,
-        'total': total
+        'total': total,
+        'cart_type': cart_type,
     })
 
 
@@ -224,7 +394,7 @@ def order_confirmation(request, order_id):
 @login_required
 def my_orders(request):
     """User's order history."""
-    orders = OrderNew.objects.filter(user=request.user).prefetch_related('items').order_by('-created_at')
+    orders = OrderNew.objects.filter(user=request.user).prefetch_related('items__product').order_by('-created_at')
     return render(request, 'my_orders.html', {'orders': orders})
 
 
@@ -519,25 +689,37 @@ def admin_dashboard(request):
     thirty_days_ago = timezone.now().date() - datetime.timedelta(days=30)
 
     total_orders = OrderNew.objects.count()
-    total_revenue = OrderNew.objects.filter(status__in=['delivered', 'shipped']).aggregate(total=Sum('total_amount'))['total'] or 0
+    # Include all completed and in-progress orders for revenue (excluding pending and cancelled)
+    total_revenue = OrderNew.objects.filter(
+        status__in=['confirmed', 'processing', 'shipped', 'delivered']
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
     pending_orders = OrderNew.objects.filter(status='pending').count()
-    total_products = Product.objects.count()
+    
+    # Count products from BOTH models (new Product + legacy Std)
+    new_products_count = Product.objects.count()
+    legacy_products_count = Std.objects.count()
+    total_products = new_products_count + legacy_products_count
+    
     total_customers = User.objects.filter(is_active=True).count()
 
-    # Low stock items
-    low_stock = Product.objects.filter(stock__lt=5, stock__gt=0).order_by('stock')[:10]
+    # Low stock items (from both models)
+    low_stock_new = Product.objects.filter(stock__lt=5, stock__gt=0).order_by('stock')[:5]
+    low_stock_legacy = Std.objects.filter(stock_quantity__lt=5, stock_quantity__gt=0, is_active=True).order_by('stock_quantity')[:5]
+    low_stock = list(low_stock_new) + list(low_stock_legacy)
+    low_stock.sort(key=lambda x: x.stock if hasattr(x, 'stock') else x.stock_quantity)
+    low_stock = low_stock[:10]
 
     # Orders by status
     orders_by_status = OrderNew.objects.values('status').annotate(count=Count('id'))
 
-    # Revenue by month (last 6 months)
+    # Revenue by month (last 6 months) - include all revenue-generating statuses
     revenue_by_month = []
     for i in range(5, -1, -1):
         month = timezone.now() - datetime.timedelta(days=30*i)
         month_orders = OrderNew.objects.filter(
             created_at__month=month.month,
             created_at__year=month.year,
-            status__in=['delivered', 'shipped']
+            status__in=['confirmed', 'processing', 'shipped', 'delivered']
         )
         revenue = month_orders.aggregate(total=Sum('total_amount'))['total'] or 0
         revenue_by_month.append({
@@ -560,6 +742,8 @@ def admin_dashboard(request):
         'total_orders': total_orders,
         'total_revenue': total_revenue,
         'total_products': total_products,
+        'new_products_count': new_products_count,
+        'legacy_products_count': legacy_products_count,
         'total_customers': total_customers,
         'pending_orders': pending_orders,
         'low_stock': low_stock,

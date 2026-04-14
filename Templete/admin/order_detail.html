@@ -17,13 +17,25 @@
                     <h3 style="font-family: var(--font-heading); margin-bottom: 1.5rem;">Order Items</h3>
                     {% for item in items %}
                     <div style="display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-light);">
-                        {% if item.product.image|is_remote_url %}
-                            <img src="{{ item.product.image }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
+                        {% if item.image %}
+                            {% if item.image|is_remote_url %}
+                                <img src="{{ item.image }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
+                            {% else %}
+                                <img src="{{ item.image.url }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
+                            {% endif %}
+                        {% elif item.product and item.product.image %}
+                            {% if item.product.image|is_remote_url %}
+                                <img src="{{ item.product.image }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
+                            {% else %}
+                                <img src="{{ item.product.image.url }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
+                            {% endif %}
                         {% else %}
-                            <img src="{{ item.product.image.url }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;">
+                            <div style="width: 70px; height: 70px; border-radius: 8px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                                <i class="bi bi-image" style="font-size: 2rem;"></i>
+                            </div>
                         {% endif %}
                         <div class="flex-grow-1">
-                            <p style="font-weight: 600; margin: 0;">{{ item.product.name }}</p>
+                            <p style="font-weight: 600; margin: 0;">{{ item.product_name }}</p>
                             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Qty: {{ item.quantity }} × ${{ item.price }}</p>
                         </div>
                         <p style="font-weight: 600; color: var(--gold-primary); margin: 0;">${{ item.get_total }}</p>

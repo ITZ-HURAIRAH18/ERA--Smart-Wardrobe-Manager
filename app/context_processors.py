@@ -1,18 +1,19 @@
-from .models import CartItem, Customer, Cat, Category, CartNew
+from .models import CartItem, Customer, Cat, Category, CartNew, Std
 
 
 def cart_count(request):
     """Context processor to provide cart count in all templates.
     Supports both session-based and Django User-based carts.
+    Counts items from BOTH session cart and CartNew for accurate display.
     """
     count = 0
 
-    # Session-based cart count (existing)
-    cart = request.session.get('cart', {})
-    if cart:
-        count += sum(cart.values())
+    # Always check session cart first (for anonymous users and session-based items)
+    session_cart = request.session.get('cart', {})
+    if session_cart:
+        count += sum(session_cart.values())
 
-    # Django User-based cart count (new)
+    # If user is authenticated, also count CartNew items
     if request.user.is_authenticated:
         try:
             cart_new = CartNew.objects.get(user=request.user)

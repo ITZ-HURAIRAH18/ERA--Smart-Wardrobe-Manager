@@ -616,15 +616,20 @@ def checkout_view(request):
             )
 
             for item in items:
+                product = item.product
+                product_image = product.image  # Snapshot the product image
+                
                 OrderItem.objects.create(
                     order=order,
-                    product=item.product,
+                    product=product,
+                    product_name=product.name,
+                    image=product_image,
                     quantity=item.quantity,
-                    price=item.product.discount_price or item.product.price
+                    price=product.discount_price or product.price
                 )
                 # Reduce stock
-                item.product.stock -= item.quantity
-                item.product.save()
+                product.stock -= item.quantity
+                product.save()
 
             cart.items.all().delete()
             messages.success(request, f'Order #{order.id} placed successfully!')
@@ -877,10 +882,19 @@ def admin_dashboard(request):
     # Stats
     total_orders = OrderNew.objects.count()
     total_revenue = OrderNew.objects.filter(status__in=['delivered', 'shipped']).aggregate(total=Sum('total_amount'))['total'] or 0
-    total_products = Product.objects.count()
+    
+    # Count products from BOTH models (new Product + legacy Std)
+    new_products_count = Product.objects.count()
+    legacy_products_count = Std.objects.count()
+    total_products = new_products_count + legacy_products_count
+    
     total_customers = User.objects.filter(is_staff=False).count()
     pending_orders = OrderNew.objects.filter(status='pending').count()
-    low_stock = Product.objects.filter(stock__lt=5, stock__gt=0).count()
+    
+    # Low stock from both models
+    low_stock_new = Product.objects.filter(stock__lt=5, stock__gt=0).count()
+    low_stock_legacy = Std.objects.filter(stock_quantity__lt=5, stock_quantity__gt=0, is_active=True).count()
+    low_stock = low_stock_new + low_stock_legacy
 
     # Revenue trend (last 6 months)
     revenue_by_month = []
@@ -914,6 +928,8 @@ def admin_dashboard(request):
         'total_orders': total_orders,
         'total_revenue': total_revenue,
         'total_products': total_products,
+        'new_products_count': new_products_count,
+        'legacy_products_count': legacy_products_count,
         'total_customers': total_customers,
         'pending_orders': pending_orders,
         'low_stock': low_stock,

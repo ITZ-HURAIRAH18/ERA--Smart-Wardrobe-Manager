@@ -220,6 +220,13 @@
                     <div>
                         <div class="admin-stat-value">{{ total_products }}</div>
                         <div class="admin-stat-label">Products</div>
+                        {% if new_products_count or legacy_products_count %}
+                        <small style="color: var(--text-muted); font-size: 0.7rem;">
+                            {% if new_products_count %}{{ new_products_count }} new{% endif %}
+                            {% if new_products_count and legacy_products_count %} · {% endif %}
+                            {% if legacy_products_count %}{{ legacy_products_count }} legacy{% endif %}
+                        </small>
+                        {% endif %}
                     </div>
                 </div>
             </div>

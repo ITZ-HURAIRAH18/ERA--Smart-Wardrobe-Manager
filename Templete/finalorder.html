@@ -165,7 +165,7 @@
         <!-- Toolbar with Status Filters -->
         <div class="admin-orders-toolbar">
             <div>
-                <strong>{{ orders|length }}</strong> order{{ orders|length|pluralize }}
+                <strong>{% if orders %}{{ orders|length }}{% else %}0{% endif %} + {% if new_orders %}{{ new_orders|length }}{% else %}0{% endif %}</strong> total orders
             </div>
             <div class="filter-pills">
                 <a href="{% url 'finalorder' %}" class="filter-pill {% if not request.GET.status %}active{% endif %}">All</a>
@@ -178,7 +178,7 @@
         </div>
 
         <div class="admin-orders-card">
-            {% if orders %}
+            {% if has_new_orders or has_legacy_orders %}
             <table class="admin-order-table">
                 <thead>
                     <tr>
@@ -193,6 +193,38 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- New Orders (OrderNew model) -->
+                    {% for order in new_orders %}
+                    <tr>
+                        <td data-label="Order ID">#{{ order.id }}</td>
+                        <td data-label="Customer">
+                            <div class="order-customer">
+                                {{ order.user.get_full_name|default:order.user.username }}
+                                <small>{{ order.user.email }}</small>
+                            </div>
+                        </td>
+                        <td data-label="Product">
+                            {% for item in order.items.all %}
+                                {{ item.product_name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td data-label="Qty">{{ order.get_items_count }}</td>
+                        <td data-label="Total" class="fw-semibold text-gold">${{ order.total_amount }}</td>
+                        <td data-label="Date">{{ order.created_at|date:"Y-m-d" }}</td>
+                        <td data-label="Status">
+                            <span class="badge-status-{{ order.status }} badge-era">{{ order.get_status_display }}</span>
+                        </td>
+                        <td data-label="Actions">
+                            <div class="action-btns">
+                                <a href="{% url 'order_detail_admin' order.id %}" class="action-btn" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <!-- Legacy Orders (Order model) -->
                     {% for order in orders %}
                     <tr>
                         <td data-label="Order ID">#{{ order.id }}</td>
